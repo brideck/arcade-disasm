@@ -1,0 +1,106 @@
+Front:
+
+コンピューターを相手にオセロゲームをお楽しみください。
+Enjoy an Othello game against the computer.
+
+コンピューターオセロゲーム
+Computer Othello Game
+
+お店のテーブルを1,500万人の愛好者のいるオセロゲームに変えてみませんか！
+Why not turn your shop’s tables into an Othello game enjoyed by 15 million fans!
+
+
+Back:
+
+コンピューターオセロゲーム
+Computer Othello Game
+
+商標登録番号　第1227204号
+Trademark Registration No. 1227204
+
+コンピューターを相手にオセロゲームをお楽しみください。
+Enjoy an Othello game against the computer.
+
+■ 全面強化ガラスを使用
+■ Uses fully tempered glass
+水やよごれはサッと一拭き、また強化ガラスを使用していますからショックにも強く安全設計です。
+Water and dirt can be quickly wiped off, and because tempered glass is used, it is resistant to shocks and designed for safety.
+
+■ オセロゲームを採用
+■ Features the game of Othello
+1,500万人の愛好者がいるオセロゲームを採用し、見やすいモニターの美しい画面でゲーム展開が一目瞭然。
+By adopting Othello—a game with 15 million enthusiasts—the gameplay is easy to follow at a glance on a clear, beautiful monitor display.
+
+■ オセロゲームについて
+■ About the game of Othello
+1．先手、後手の順で1手ずつ打っていきます。
+1. Players take turns placing one piece at a time, starting with the first player.
+2．縦、横、斜で必ず相手の駒をはさまなければなりません。はさめない時はパスします。
+2. You must place your piece so that it outflanks at least one of your opponent’s pieces vertically, horizontally, or diagonally. If no move is possible, you must pass.
+3．相手の駒をはさむと、はさまれた駒は自分の駒になります。
+3. When you outflank your opponent’s pieces, the captured pieces become your own.
+4．勝負は盤上の駒数が多い方が勝ちとなります。
+4. The player with more pieces on the board at the end wins.
+
+■ コンピューターオセロの遊び方
+■ How to Play Computer Othello
+1．￥100を投入します。
+1. Insert ¥100.
+2．セレクトボタンを押します。
+2. Press the Select button.
+   1人用（先手・後手）
+   1 Player (first or second move)
+      コンピューターと対戦。
+      Play against the computer.
+   2人用（先手・後手）
+   2 Players (first or second move)
+      2人でプレイします。
+      Two people play together.
+3．縦・横矢印ボタンを連続して押し、マス目の位置をきめ、セットボタンを押します。（手づまりの時はパスボタンを押します）
+3. Press the vertical and horizontal arrow buttons repeatedly to choose a square, then press the Set button. (If you have no legal moves, press the Pass button.)
+4．ゲーム途中でタイムオーバーした時は、再び￥100を投入してゲームを継続するか、または判定ボタンを押します（継続しない時はゲームを終了した時に判定ボタンを押します）。自動的に勝負の結果が表示されます。
+4. If time runs out during the game, insert another ¥100 to continue, or press the Judge button. (If not continuing, press the Judge button to end the game.) The result of the game will be displayed automatically.
+
+■ ゲーム時間をデジタル表示
+■ Game time is displayed digitally
+時間調節も可能です。
+The game time can also be adjusted.
+
+■ 扱いやすい操作ボタン
+■ Easy-to-use control buttons
+ボタン方式によりゲームの進行がスムーズです。
+The button-based system allows for smooth gameplay progression.
+
+■ 心臓部にマイクロコンピューター使用
+■ Uses a microcomputer as its core
+
+■ 仕様
+■ Specifications
+寸法　（巾）800×（奥行）500×（高さ）600mm
+Dimensions: (Width) 800 × (Depth) 500 × (Height) 600 mm
+重量　37.2kg
+Weight: 37.2 kg
+使用コイン　100円硬貨
+Coin used: 100-yen coin
+ゲーム時間　100秒～900秒（調整可能）
+Game time: 100–900 seconds (adjustable)
+電源電圧　単相AC100V　50/60Hz
+Power supply: Single-phase AC 100V, 50/60 Hz
+消費電力　53W
+Power consumption: 53 W
+
+コンピューター「オセロ」（業務用）の名称は商標登録権者との独占的契約により使用許諾されています。
+The name “Computer Othello” (for commercial use) is used under license pursuant to an exclusive agreement with the trademark holder.
+
+任天堂レジャーシステム
+Nintendo Leisure System
+
+本社  東京都千代田区神田須田町1-22  TEL 03(254)1647
+Head Office  1-22 Kanda-Sudachō, Chiyoda-ku, Tokyo  TEL: 03 (254) 1647
+関西支社  京都市東山区福稲上高松町60番地  TEL 075(541)6111
+Kansai Branch  60 Fukuine-Kamitakamatsu-chō, Higashiyama-ku, Kyoto  TEL: 075 (541) 6111
+名古屋営業所  名古屋市西区菊井町29番地  TEL 052(571)1068
+Nagoya Sales Office  29 Kikui-chō, Nishi-ku, Nagoya  TEL: 052 (571) 1068
+
+S53.6
+1978.06
