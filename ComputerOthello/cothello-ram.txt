@@ -1,0 +1,35 @@
+4000-403F: DISPLAY_BOARD
+4040-407F: ANALYSIS_BOARD
+4080
+4081: IMAGE_PIXEL_VALUE (#03/#05 for pieces, #00 for blanks, #01 for fonts/board)
+4082: ■_COUNT (Decimal) for SCORE_GAME
+4083: +_COUNT (Decimal) for SCORE_GAME
+4084: BOARD_SELECTION_FOR_SCAN (#00 for Display Board, #01 for Analysis Board)
+4085
+4086: AI_FIRST_PASS_FLAG (#01 - first pass, suppress X-squares, #00 - second pass, consider all squares)
+4087
+4088: ATTRACT_MOVE_COUNT
+4089: CONSECUTIVE_PASS_COUNTER (when reaches 2, trigger Judge)
+408A: CURRENT_PIECE (3 = +, 5 = ■)
+408B: MOVE_COL (0 .. 7)
+408C: MOVE_ROW (0 .. 7)
+408D/408E: BEST_MOVE_EVAL_SCORE (16-bit signed) 
+408F: EVAL_PERSPECTIVE_FLAG? (1 = active player, 2 = opponent, but appears unused)
+4090: UNUSED? (#00 during CPU move search, but never altered or read)
+4091
+4092/4093: MOVE_ASSESSMENT_WRITE_POINTER
+4094: MOVE_ASSESSMENT_ACCUMULATOR
+4095/4096: CANDIDATE_MOVE_EVAL_SCORE (16-bit signed)
+4097: SANDWICH_SIZE? (unused after written)
+4098: PASS_REQUIRED_FLAG (#01 if player has no legal moves)
+4099-40A8: DISPLAY_BOARD_MOVE_ASSESSMENT
+40A9: CANDIDATE_MOVE_COL
+40AA: CANDIDATE_MOVE_ROW
+40AB-40BA: ANALYSIS_BOARD_MOVE_ASSESSMENT
+40BB-40F9: UNUSED / STACK
+40FA
+40FB
+40FC: DISABLE_JUDGE_FLAG (#01 suppresses Judge button handling)
+40FD: ATTRACT_MODE_SUPPRESS_SOUND (#01 suppresses move sounds)
+40FE: CPU_OPENING_MOVE_INDEX (1..4 selects from CPU_OPENING_MOVE_TABLE at $0013)
+40FF: GAME_MODE (FE = 1P Sente, FD = 1P Gote, FB = 2P Sente, F7 = 2P Gote, 7F = Service)
