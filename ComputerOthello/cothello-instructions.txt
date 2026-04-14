@@ -1,0 +1,51 @@
+コンピューターを相手に
+オセロゲームをお楽しみください。
+Enjoy a game of Othello against the computer.
+
+電源上の指示に従ってください。
+Follow the instructions on the screen.
+
+① ￥100トーン	100円硬貨を1枚入れてください。
+① ￥100 Prompt	Insert one 100-yen coin.
+
+② セレクトトーン
+② Selection Prompt
+  □□□□ゲームをセレクトボタンを押してください。
+  Press a □□□□ Select button to choose a game.
+    ・コンピューターとの対戦…1人用　先手・後手ボタン
+    ・ vs Computer — 1 Player, First/Second Move
+    ・人との対戦…………………2人用　先手・後手ボタン
+    ・ vs Human — 2 Players, First/Second Move
+③ ■■矢印ボタンを押して打つマスの位置を決めてから、
+③ Use the ■■ arrow buttons to select where to place your piece,
+  ■セットボタンを押してください。
+  then press the ■ Set button.
+     ※すみまできた場合は、さらに矢印ボタンを押してください。
+     ※ When you reach the corner, press the arrow button again.
+④ パスキートーン ■パスボタンを押してください。
+④ Pass Prompt  Press the ■ Pass button.
+⑤ コンピューターパス コンピューターがパスをしましたの
+⑤ CPU Pass     The CPU has passed,
+               で、あなたは駒を打ってください。
+               so make your move.
+⑥ ハンテイトーン ■判定ボタンを押してください。
+⑥ Judge Prompt Press the ■ Judge button.
+⑦ ￥100トーン 時間切れです。再び100円硬貨を入
+⑦ ￥100 Prompt Time is up. Insert another 100-yen coin
+               れてゲームを続けてください。
+               to continue the game.
+⑧ リセットトーン ■リセットボタンを押してください。
+⑧ Reset Prompt Press the ■ Reset button.
+               残り時間内プレイできます。
+               You can continue playing within the remaining time.
+100円投入口    ※途中でゲームを終了する場合は判定
+              ※ To end the game early,
+                ボタンを押してください。
+                 press the Judge button.
+
+100 yen coin slot
+      |  |
+     _|  |_
+     \    /
+      \  /
+       \/
