@@ -1,0 +1,19 @@
+コンピューターオセロサービス注意書
+Computer Othello Service Notes
+
+1．コネクタ類の脱着は必ず電源を切ってからしてください。
+1. Always turn off the power before attaching or removing any connectors.
+
+2．サービスA（コンピューターリセット用）。サービスB（プログラムチェック用）のスイッチONする時は10秒以上押し続けて後にOFFしてください。
+2. When turning ON Service A (for computer reset) or Service B (for program check), hold the switch ON for at least 10 seconds, then turn it OFF.
+
+3．音量（音の大小）の調整はコンピューターボード（COG-CPU）上にシルク印刷「ボリューム」（VR2）しています半固定抵抗を右にまわすと音が大きくなります。（注・テレビでも音量調整はできます。）
+3. To adjust the volume (loudness), use the semi-fixed resistor labeled “VOLUME” (VR2) on the computer board (COG-CPU). Turning it to the right increases the sound. (Note: Volume can also be adjusted on the TV.)
+
+4．単位料金当りのタイマー設定スイッチを「0」には絶対設定しないでください。設定範囲は100～900秒但し、最上桁のみ可変可能。
+4. Do not set the timer setting switch per unit charge to “0” under any circumstances. The setting range is 100 to 900 seconds; however, only the highest digit can be changed.
+
+5．電源条件は全負荷の状態で、AC100ボルト±10％（AC90ボルト～AC110ボルト）以内で必ず守ってください。
+5. Under full load conditions, the power supply must be maintained within AC 100V ±10% (AC 90V to AC 110V).
+特に変動の大きいところは、安定化電源を入れるようにお勧めします。
+In locations with large voltage fluctuations, the use of a stabilized power supply is recommended.
