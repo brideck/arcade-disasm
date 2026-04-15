@@ -1,0 +1,364 @@
+コンピューターオセロゲーム
+Computer Othello Game
+
+商標登録番号　1227204号
+Trademark Registration No. 1227204
+
+COG-1
+
+取扱説明書
+Operation Manual
+
+ご注意
+Caution
+
+1．CPU基板ユニットは絶対に直射日光にはあてないでください。LSI（メモリー）が不良になります。
+1. Do not under any circumstances expose the CPU board unit to direct sunlight. The LSI (memory) may become defective.
+
+2．本機に使用しておりますLSIやICはMOS型FETを基本素子とした半導体集積回路ですので、CPU基板ユニット、LED基板ユニット等基板単体の保管、持ち運び、移送の時必ず導電袋かアルミ箔に包んでください。
+2. The LSIs and ICs used in this unit are semiconductor integrated circuits based on MOS-type FETs. Therefore, when storing, handling, or transporting individual boards such as the CPU board unit or LED board unit, be sure to wrap them in a conductive bag or aluminum foil.
+
+3．強力な突発雑音（ノイズ）や電源異常等でコンピュータが動作しなくなったり、テレビ画面上の表示が乱れた場合は一度メイン電源を切ってから雑音源を除去し、再びメイン電源を投入してください。
+3. If the computer stops operating due to strong sudden noise (interference) or power abnormalities, or if the display on the television screen becomes distorted, turn off the main power once, eliminate the source of the noise, and then turn the main power back on.
+
+--
+
+目次
+Table of Contents
+
+1. 仕様                                                      2頁
+1. Specifications                                            p.2
+
+2． 機器設置
+2. Equipment Installation
+
+  2-1 設置場所の選定及び注意事項                              3頁
+  2-1 Selection of installation location and precautions     p.3
+
+  2-2 運搬、移動の時                                         4頁
+  2-2 During transport and movement                          p.4
+
+  2-3 機器のアース接続                                       4頁
+  2-3 Ground Connection of the Equipment                     p.4
+
+3. 調整箇所と調整方法
+3. Adjustment Points and Methods
+
+  3-1 CPU基板ユニット（COG-CPU）                             5頁
+  3-1 CPU Board Unit (COG-CPU)                               p.5
+
+  3-2 単位料金当りのタイマ設定スイッチ                        7頁
+  3-2 Timer setting switch per unit charge                   p.7
+
+  3-3 ディスプレイテレビ                                     8頁
+  3-3 Display TV                                             p.8
+
+4. 機器本体及びユニットの名称                                10頁
+4. Names of the Main Unit and Its Components                 p.10
+
+5. 機器接続図                                                12頁
+5. Equipment Connection Diagram                              p.12
+
+6. 機器組立図                                                13頁
+6. Equipment Assembly Diagram                                p.13
+
+7. 部品価格表                                                16頁
+7. Parts Price List                                          p.16
+
+--
+
+1． 仕様（定格）
+1. Specifications (Rated Values)
+
+  ① 使用電源             定格電圧           AC100V
+  ① Power Supply         Rated Voltage      AC 100V
+
+                         許容電圧           AC90V~AC110V
+                         Allowable Voltage  AC 90V ~ AC 110V
+
+                         周波数             50HZ/60HZ共用
+                         Frequency          50 Hz / 60 Hz (both)
+
+  ② 消費電力             50HZ/60HZ          53W
+  ② Power Consumption    50 Hz / 60 Hz      53W
+
+  ③ 外形寸法             巾800x奥行500x高さ600 (m/m)
+  ③ External Dimensions  Width 800 x Depth 500 x Height 600 (mm)
+
+  ④ ゲーム時間           可変デジタル設定方式（最大桁のみ可変可能）
+  ④ Game Time            Variable digital setting method (only the highest digit is adjustable)
+
+                         最少100秒～最大900秒（9ポイント）
+                         minimum 100 seconds ~ maximum 900 seconds (9 steps)
+
+  ⑤ 使用コインセレクター アサヒ精工900／F37型（100円1枚仕様）
+  ⑤ Coin Selector Used   Asahi Seiko 900 / F37 model (configured for single 100-yen coin)
+
+                         コインブロッカー機構付き
+                         Equipped with a coin blocker mechanism
+
+  ⑥ コイン容量           約600枚
+  ⑥ Coin Capacity        Approximately 600 coins
+
+  ⑦ 製品重量             総重量 38.7kg　デラックス（DX）
+  ⑦ Product Weight       Total weight: 38.7 kg - Deluxe (DX)
+
+                         総重量 37.2kg　スタンダード（STD）
+                         Total weight: 37.2 kg - Standard (STD)
+
+  ⑧ 電源コード           約 2.3 m
+  ⑧ Power Cord           Approximately 2.3 m
+
+    （有効長さ）
+    (Effective Length)
+
+  ⑨ 外装                 テーブル  化粧板仕上  強化ガラス付き（厚み5mm）
+  ⑨ Exterior Finish      Table: Laminate Finish with Tempered Glass (5 mm thick)
+
+  ⑩ 付属品               取扱説明書        1冊
+  ⑩ Included Accessories Operation Manual  1 copy
+
+                         コインロック      2個
+                         Coin locks        2 units
+
+                         ヒューズ          2個（3A, 0.45A）
+                         Fuses             2 units (3A, 0.45A)
+
+  ※ 仕様の一部を改良のため予告なく変更する場合がありますのでご了承ください。
+  ※ Please note that some specifications may be changed without prior notice for the purpose of improvements.
+
+--
+
+2． 機器設置
+2. Equipment Installation
+
+2-1 設置場所の選定及び注意事項
+2-1 Selection of installation location and precautions
+
+  ① 同一コンセントに負荷の大きい、電動機、クーラー等と一緒に絶対に接続しないでください。機器の電源電圧が90V以下にドロップ、110V以上に上昇すると誤動作を起こしたり、故障の原因になりますから電源の電圧や配線の容量には特に注意してください。
+  ① Do not under any circumstances connect this unit to the same outlet as high-load equipment such as electric motors or air conditioners. If the supply voltage drops below 90V or rises above 110V, the unit may malfunction or be damaged. Please pay special attention to the power supply voltage and the capacity of the wiring.
+
+  ② 電源の条件はAC100V（50／60Hz）±10％〈90V～110V〉で同一コンセントから多くの負荷を採る場合±10％以上の電圧変動が無いことが必要です。特に変動の大きいところは安定化電源（オートマティック・ボルテージ・レギュレータ）を一次側に入れてください。
+  ② The power supply conditions are AC 100V (50/60Hz) ±10% (90–110V). When drawing a large load from the same outlet, it is necessary that voltage fluctuations do not exceed ±10%. In locations where fluctuations are particularly large, please install a stabilized power supply (automatic voltage regulator) on the primary side.
+
+  ③ 電源コンセントは機器だけを出来るだけ専用でご使用ください。分岐コンセントなどを用いてのタコ足配線はしないでください。電圧が低くなって誤動作、故障の原因になります。
+  ③ As much as possible, use a dedicated power outlet for this equipment alone. Do not use branching outlets or multi-plug connections. Doing so may cause the voltage to drop, leading to malfunction or failure.
+
+  ④ 機器のプラグ付き電源コードを抜く時は、コードを引っぱって抜かないでください。
+  ④ When unplugging the unit’s power cord, do not pull on the cord itself.
+
+  ⑤ 電源コードを傷めると焼損や漏電の原因になりますので次の点にご注意ください。
+  ⑤ If the power cord is damaged, it may cause burning or electrical leakage, so please observe the following precaution:
+
+    ◦ 機器の下や重い物の下にはさんだり角ばった物に接触してコードを折り曲げないようにしてください。
+    ◦ Do not pinch the cord under the unit or under heavy objects, and avoid bending it against sharp-edged objects.
+
+  ⑥ 特に重い物や荷重が部分的にかかる物をテーブルに置かれるとテーブルガラスには強化ガラスを使用していますが破損の原因になりますのでさけてください。
+  ⑥ In particular, if heavy objects or items that apply localized pressure are placed on the table, the table glass—although made of tempered glass—may be damaged. Please avoid doing so.
+
+  ⑦ 機器のお手入れされる時は、みがき粉・粉セッケン・タワシ・ベンジン・シンナー・石油・酸・熱湯・化学ぞうきんなどは塗装面等を傷めますのでご使用にならないでください。
+  ⑦ When cleaning the unit, do not use polishing powders, powdered soap, scrubbing brushes, benzine, thinner, petroleum, acids, hot water, or chemical cleaning cloths, as they may damage painted surfaces and other finishes.
+
+  ⑧ 風通しのよいところへ据え付けてください。
+  ⑧ Install the unit in a well-ventilated location.
+
+    （通風孔をふさがない）通風孔をふさぐような説明書等の貼付等さけてください。
+    (Do not block the ventilation holes.) Avoid attaching things such as instruction sheets that would cover the ventilation openings.
+
+  ⑨ 熱気の少ないところへ据え付けてください。
+  ⑨ Install the unit in a location with minimal heat.
+
+    （暖房器具、直射日光は避ける）
+    (Avoid heating equipment and direct sunlight.)
+
+  ⑩ 湿気やホコリの少ないところへ据え付けてください。
+  ⑩ Install the unit in a location with low humidity and minimal dust.
+
+--
+
+2-2 運搬、移動の時
+2-2 During transport and movement
+
+  ① 運搬・移動させるとき
+  ① When transporting or moving the unit
+
+    運搬・移動させるときは差し込みプラグを抜き、2人以上で本体キャビネットの両サイドを持って静かに動かしてください。
+    When transporting or moving the unit, unplug the power plug, and have two or more people hold both sides of the cabinet and move it carefully.
+
+  ② 移送されるとき
+  ② When the unit is being transported
+
+    トラック等で運送されるときは付属品をテープなどで固定して厳重に荷造りし、横積みしないようにしてください。横積み運送は機械を傷め故障の原因になります。
+    When transporting the unit by truck or similar means, secure the accessories with tape and pack it carefully. Do not transport it on its side. Transporting it sideways may damage the machine and cause malfunction.
+
+    ◎ この機器は50／60Hz共用で周波数の切り換えの必要はありません。
+    ◎ This unit supports both 50Hz and 60Hz, and no frequency switching is required.
+
+2-3 機器のアース接続
+2-3 Ground Connection of the Equipment
+
+  ① 温気の多い所に据え付ける場合は、万一の感電防止のためアースを取り付けてください。
+  ① If the unit is installed in a location with high humidity, attach a ground connection to prevent electric shock in case of an accident.
+
+    アース端子（端子己表示）
+    Ground terminal (terminal indicated on unit)
+
+    イ アース線は機器のアース端子に接続してください。
+    a) Connect the ground wire to the unit’s ground terminal.
+
+    ロ アース線を接地するときは、アース棒を使用し確実に接地してください。
+    b) When grounding the wire, use a ground rod and ensure it is securely grounded.
+
+  ② 注意事項
+  ② Precautions
+
+    イ 水道管は配管の途中に塩化ビニールパイプを使用していて、アース線を接続しても接地されない場合がありますので、水道管への接続は避けてください。
+    a) Water pipes may include PVC (vinyl) piping in the middle of the plumbing, so even if you connect a ground wire to them, they may not actually be grounded. Therefore, avoid connecting the ground wire to water pipes.
+
+    ロ ガス管への接続は危険ですから絶対に避けてください。
+    b) Connecting to gas pipes is dangerous, so absolutely do not do it.
+
+--
+
+3． 調整箇所及び調整方法
+3. Adjustment Points and Methods
+
+3-1 CPU基板ユニット（コンピューターボード）
+3-1 CPU Board Unit (Computer Board)
+
+  メインスイッチ側
+  Main Switch Side
+
+  サブスイッチ側
+  Sub Switch Side
+
+  テレビ
+  TV
+
+  メイン電源ユニット
+  Main Power Unit
+  COG-MT
+
+  サブ電源ユニット
+  Sub Power Unit
+  COG-SP
+
+  CPU基板ユニット
+  CPU Board Unit
+  COG-CPU
+  （コンピューターボード）
+  (Computer Board)
+
+
+  CPU基板ユニット
+  CPU Board Unit
+
+  -5V (- C25)
+  +5V (+ C24)
+  +12V (+ C23)
+  アース (- C23)
+  Ground
+  (GND)
+
+  サービスB / サービスA
+  Service B / Service A
+
+  ボリューム VR2
+  Volume
+
+  VR1 小 <-> 大
+      small <-> large
+
+  VR3 高 <-> 低
+      high <-> low
+
+  TP2 （テストポイント）
+      (Test Point)
+
+  ① 調整
+  ① Adjustments
+
+    イ VR1       サブ・コントラスト用
+    a) VR1       For sub-contrast
+
+    ロ VR2       （ボリューム）サブ音量用　右に回しますと音が大きくなります。
+    b) VR2       (Volume) Secondary audio level - Turning it to the right increases the sound.
+
+    ハ VR3       音声用発振周波数
+    c) VR3       Oscillation frequency for audio
+
+  ② サービススイッチ  （このスイッチはメンテナンス用スイッチです）
+  ② Service Switches  (These switches are for maintenance)
+
+    イ サービスA  ; コンピューター・リセット用
+    a) Service A  ; For computer reset
+
+    ロ サービスB  ; プログラムチェック用
+    b) Service B  ; For program check
+
+    ハ どちらのスイッチもONする時は10秒以上押し続けて後にOFFしてください。
+    c) When turning either switch ON, hold it for at least 10 seconds, then turn it OFF.
+
+  ③ VR1サブコントラスト用について
+  ③ Regarding VR1 (sub-contrast)
+
+    テストポイント2（TP2）とアース（GND）との間でテスター（DCレンジ）の値がDC6.2ボルト（標準値）あります。
+    Between Test Point 2 (TP2) and ground (GND), the meter (DC range) reading should be approximately DC 6.2 volts (standard value).
+
+    半固定抵抗範囲はDC4.0～DC7.0ボルト位です。
+    The adjustable range of the variable resistor is approximately DC 4.0 to DC 7.0 volts.
+
+    右へ回しますとコントラスト大になります。
+    Turning it to the right increases contrast.
+
+  ④ VR2ボリューム・サブ音量について
+  ④ Regarding VR2 (volume / sub-audio level)
+
+    イ テレビで調整する時
+    a) When adjusting using the TV
+
+      ◦ 電源スイッチ兼音量調整（8頁図）ツマミで調整してください。ツマミを回される時に誤ってテレビの電源を切らないようにしてください。
+      ◦ Adjust using the power switch / volume control knob (see page 8 diagram). When turning the knob, be careful not to accidentally turn off the television.
+
+    ロ CPU基板ユニット（COG-CPU）で調整する時
+    b) When adjusting on the CPU board unit (COG-CPU)
+
+      ◦ VR2（ボリューム）はサブ音量用半固定抵抗です。右へ回しますと音が大きくなります。
+      ◦ VR2 (volume) is a semi-fixed resistor for sub audio level. Turning it to the right increases the sound.
+
+  ⑤ VR3音声発振周波数用について
+  ⑤ Regarding VR3 (audio oscillator frequency)
+
+    右に回しますと周波数が低くなります。調整される時は、サービスAスイッチを押して、次にサービスBスイッチを押します。（但し、10秒以上押し続けてください。）
+    Turning it to the right lowers the frequency. When adjusting, press the Service A switch, then press the Service B switch (hold each for at least 10 seconds).
+
+    音がピーピーと鳴るのを確認しながらVR3を調整棒でゆっくりと回してください。
+    While confirming that a “beep-beep” sound is being emitted, slowly adjust VR3 with an adjustment tool.
+
+  ⑥ サービススイッチについて
+  ⑥ Regarding the service switches
+
+    イ サービスA  ; コンピューターリセット用でメイン電源スイッチを一度切り、再び投入した時と同じ働きをします。
+    a) Service A  ; Used for computer reset; it performs the same function as turning the main power switch off once and then turning it back on.
+
+    ロ サービスB  ; コンピューター対コンピューターの対戦です。
+    b) Service B  ; This is a computer-versus-computer match.
+
+                    音量調整又はプログラムのチェック等に使います。勝負結果は＋４０対□２４にいつもなれば正常です。
+                    It is used for volume adjustment and program checking, etc. If the game result is always +40 to ■24, then it is normal.
+
+  ⑦ CPU基板ユニット  LED1、LED2の見方
+  ⑦ How to read LED1 and LED2 on the CPU board
+
+                                       LED1   LED2
+電源投入時                             消灯   消灯
+At power-on                            off    off
+
+¥100投入プレイ中                       点灯   消灯
+During play after ¥100 inserted        on     off
+
+タイマ切れ客待ち中                     消灯   点灯
+Timer expired, waiting for customer    off    on
+
+--
+
