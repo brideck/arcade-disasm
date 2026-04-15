@@ -48,7 +48,7 @@ Table of Contents
   3-1 CPU Board Unit (COG-CPU)                               p.5
 
   3-2 単位料金当りのタイマ設定スイッチ                        7頁
-  3-2 Timer setting switch per unit charge                   p.7
+  3-2 Timer setting switch per unit price                    p.7
 
   3-3 ディスプレイテレビ                                     8頁
   3-3 Display TV                                             p.8
@@ -359,6 +359,88 @@ During play after ¥100 inserted        on     off
 
 タイマ切れ客待ち中                     消灯   点灯
 Timer expired, waiting for customer    off    on
+
+--
+
+3-2 単位料金当りのタイマ設定スイッチ
+3-2 Timer setting switch per unit price
+
+  メインスイッチ側
+  Main Switch Side
+
+  サブスイッチ側
+  Sub Switch Side
+
+  ゲーム時間表示（アップ表示） /  秒表示
+  Game time display (count-up display) / seconds display
+
+  LED基板ユニット
+  LED board unit
+
+  タイマ設定スイッチ（デジタルスイッチ）
+  Timer setting switch (digital switch)
+
+  コインセレクター
+  Coin selector
+
+  コインボックス
+  Coin box
+
+  料金計数カウンタ（ゲームカウンタ）
+  Revenue counter (game counter)
+
+  ① タイマ設定スイッチ（デジタルスイッチ）0から9まで可変できます。
+  ① The timer setting switch (digital switch) can be set from 0 to 9.
+
+    この設定はゲーム時間3桁表示の最大桁のみ可変できます。
+    This setting only changes the highest digit of the three-digit game time display.
+
+    従って「3」に設定すれば、単位料金当りのゲームタイマは300秒までです。
+    Therefore, if it is set to “3,” the game timer per unit charge will be up to 300 seconds.
+
+    （注意） タイマ設定スイッチ（デジタルスイッチ）を0には絶対設定しないでください。誤動作の原因となります。必ず1から9までの数字で設定してください。尚、出荷時には「3」で設定してありますので、エンド・ユーザー側で変更の必要性がある場合、所定の数字に設定してください。
+    (Note) Do not set the timer setting switch (digital switch) to 0 under any circumstances. It will cause malfunction. Always set it to a number from 1 to 9. At the time of shipment, it is set to “3,” so if the end user needs to change it, set it to the desired number.
+
+  ② 単位料金当りのタイマ設定範囲
+  ② Timer setting range per unit price
+
+      １００秒～９００秒
+      100 seconds - 900 seconds
+                但し、最上桁のみ可変
+                However, only the most significant digit is adjustable
+
+  ③ ゲーム時間を無制限に設定する事は機器の仕様上できません。
+  ③ It is not possible, due to the machine’s specifications, to set the game time to unlimited.
+
+3-3 ディスプレイテレビ
+3-3 Display TV
+
+  ◎ シャープ製12P-J8R/M型　白黒テレビ
+  ◎ Sharp model 12P-J8R/M black-and-white television
+
+  （注意） このテレビはコンピューターオセロ専用となっておりますのでテレビ単体では動作しませんし、又UHF/VHFの電波を受ける事はできません。
+  (Note) This television is dedicated for Computer Othello use, so it will not operate on its own, and it cannot receive UHF/VHF broadcast signals.
+
+  12P-J8R/M 前面ツマミ
+  12P-J8R/M front knobs
+
+  P7コネクタ
+  P7 connector
+
+  12P-J8R/M 裏面ツマミ
+  12P-J8R/M rear knobs
+
+  ① 電源スイッチ兼音量調整
+  ① Power switch combined with volume control
+
+    テレビに電気を入れ音の大きさを調整するツマミです。ツマミを右にまわすと電源が入り、画と音が出ます。ツマミを右にまわすと音が大きくなります。工場出荷時に於きまして適量の音量に調整しています。もし音量調整の必要性があればＣＰＵ基板ユニット（ＣＯＧ－ＣＰＵ）上についていますボリューム（ＶＲ２）で調整してください。時計回り（右回り）の方向にまわすと音が大きくなります。
+    This is the knob used to turn on the television and adjust the sound volume. Turning the knob to the right turns on the power, and the picture and sound will appear. Turning the knob further to the right increases the sound volume. At the time of factory shipment, it is adjusted to an appropriate volume level. If further volume adjustment is necessary, please adjust it using the volume (VR2) on the CPU board unit (COG-CPU). Turning it clockwise (to the right) increases the sound.
+
+  ② コントラスト（CONTRAST）調整ツマミ
+  ② Contrast adjustment knob
+
+    映像の白と黒の調子（対比）を調整するツマミです。右へまわすとコントラストが強くなり、ギラギラした感じになります。あまりコントラストが強いと目が疲れます。
+    This is the knob used to adjust the balance (contrast) between white and black in the image. Turning it to the right increases the contrast, making the image appear more glaring/harsh. If the contrast is too strong, it can cause eye fatigue.
 
 --
 
