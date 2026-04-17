@@ -1,0 +1,2 @@
+ゲーム途中で「￥100ドーゾ」の文字が出た場合は、さらに100円を入れると、ゲームが継続できます。
+If the message “Insert ¥100” appears during the game, you can continue playing by inserting another 100 yen.
