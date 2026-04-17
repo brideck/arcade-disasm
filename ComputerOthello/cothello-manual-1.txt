@@ -1,0 +1,1092 @@
+コンピューターオセロゲーム
+Computer Othello Game
+
+商標登録番号　1227204号
+Trademark Registration No. 1227204
+
+COG-1
+
+取扱説明書
+Operation Manual
+
+ご注意
+Precautions
+
+1．CPU基板ユニットは絶対に直射日光にはあてないでください。LSI（メモリー）が不良になります。
+1. Do not under any circumstances expose the CPU board unit to direct sunlight. The LSI (memory) may become defective.
+
+2．本機に使用しておりますLSIやICはMOS型FETを基本素子とした半導体集積回路ですので、CPU基板ユニット、LED基板ユニット等基板単体の保管、持ち運び、移送の時必ず導電袋かアルミ箔に包んでください。
+2. The LSIs and ICs used in this unit are semiconductor integrated circuits based on MOS-type FETs. Therefore, when storing, handling, or transporting individual boards such as the CPU board unit or LED board unit, be sure to wrap them in a conductive bag or aluminum foil.
+
+3．強力な突発雑音（ノイズ）や電源異常等でコンピュータが動作しなくなったり、テレビ画面上の表示が乱れた場合は一度メイン電源を切ってから雑音源を除去し、再びメイン電源を投入してください。
+3. If the computer stops operating due to strong sudden noise (interference) or power abnormalities, or if the display on the television screen becomes distorted, turn off the main power once, eliminate the source of the noise, and then turn the main power back on.
+
+4. メイン電源スイッチは本体キャビネットの下部にあります。
+4. The main power switch is located at the lower part of the main cabinet.
+
+--
+
+目次
+Table of Contents
+
+1. 仕様                                                      1頁
+1. Specifications                                            p.1
+
+2． 機器設置
+2. Equipment Installation
+
+  2-1 設置場所の選定及び注意事項                              4頁
+  2-1 Selection of installation location and precautions     p.4
+
+  2-2 運搬、移動の時                                         5頁
+  2-2 During transport and movement                          p.5
+
+  2-3 機器のアース接続                                       5頁
+  2-3 Ground Connection of the Equipment                     p.5
+
+3. 調整箇所と調整方法
+3. Adjustment Points and Methods
+
+  3-1 CPU基板ユニット（COG-CPU）                             6頁
+  3-1 CPU Board Unit (COG-CPU)                               p.6
+
+  3-2 単位料金当りのタイマ設定スイッチ                        8頁
+  3-2 Timer setting switch per unit price                    p.8
+
+  3-3 ディスプレイテレビ                                     9頁
+  3-3 Display TV                                             p.9
+
+4. 機器本体及びユニットの名称                                11頁
+4. Names of the Main Unit and Its Components                 p.11
+
+5. 機器接続図                                                13頁
+5. Equipment Connection Diagram                              p.13
+
+6. 機器組立図                                                18頁
+6. Equipment Assembly Diagram                                p.18
+
+7. 部品価格表                                                21頁
+7. Parts Price List                                          p.21
+
+--
+
+1． 仕様（定格）
+1. Specifications (Rated Values)
+
+  ① 使用電源             定格電圧           AC100V
+  ① Power Supply         Rated Voltage      AC 100V
+
+                         許容電圧           AC90V~AC110V
+                         Allowable Voltage  AC 90V ~ AC 110V
+
+                         周波数             50HZ/60HZ共用
+                         Frequency          50 Hz / 60 Hz (both)
+
+  ② 消費電力             50HZ/60HZ          53W
+  ② Power Consumption    50 Hz / 60 Hz      53W
+
+  ③ 外形寸法             巾800x奥行500x高さ600 (m/m)
+  ③ External Dimensions  Width 800 x Depth 500 x Height 600 (mm)
+
+  ④ ゲーム時間           可変デジタル設定方式（最大桁のみ可変可能）
+  ④ Game Time            Variable digital setting method (only the highest digit is adjustable)
+
+                         最少100秒～最大900秒（9ポイント）
+                         minimum 100 seconds ~ maximum 900 seconds (9 steps)
+
+  ⑤ 使用コインセレクター アサヒ精工900／F37型（100円1枚仕様）
+  ⑤ Coin Selector Used   Asahi Seiko 900 / F37 model (configured for single 100-yen coin)
+
+                         コインブロッカー機構付き
+                         Equipped with a coin blocker mechanism
+
+  ⑥ コイン容量           約600枚
+  ⑥ Coin Capacity        Approximately 600 coins
+
+  ⑦ 製品重量             総重量 38.7kg          デラックス（DX）
+  ⑦ Product Weight       Total weight: 38.7 kg  Deluxe (DX)
+
+                         総重量 37.2kg          スタンダード（STD）
+                         Total weight: 37.2 kg  Standard (STD)
+
+  ⑧ 電源コード           約 2.3 m
+  ⑧ Power Cord           Approximately 2.3 m
+
+    （有効長さ）
+    (Effective Length)
+
+  ⑨ 外装                 テーブル  化粧板仕上  強化ガラス付き（厚み5mm）
+  ⑨ Exterior Finish      Table: Laminate Finish with Tempered Glass (5 mm thick)
+
+  ⑩ 付属品               取扱説明書        1冊
+  ⑩ Included Accessories Operation Manual  1 copy
+
+                         コインロック      2個
+                         Coin locks        2 units
+
+                         ヒューズ          2個（3A, 0.45A）
+                         Fuses             2 units (3A, 0.45A)
+
+  ※ 仕様の一部を改良のため予告なく変更する場合がありますのでご了承ください。
+  ※ Please note that some specifications may be changed without prior notice for the purpose of improvements.
+
+--
+
+◎ コンピュータオセロ  画面解説
+◎ Computer Othello    Screen Explanation
+
+   駒を打つマス：横
+   Square where a piece is placed: horizontal
+
+   メッセージ
+   Message
+
+   画面には表示されません（サービス用）
+   Not displayed on the screen (for service use)
+
+   駒を打つマス：縦
+   Square where a piece is placed: vertical
+
+--
+
+2． 機器設置
+2. Equipment Installation
+
+2-1 設置場所の選定及び注意事項
+2-1 Selection of installation location and precautions
+
+  ① 同一コンセントに負荷の大きい、電動機、クーラー等と一緒に絶対に接続しないでください。機器の電源電圧が90V以下にドロップ、110V以上に上昇すると誤動作を起こしたり、故障の原因になりますから電源の電圧や配線の容量には特に注意してください。
+  ① Do not under any circumstances connect this unit to the same outlet as high-load equipment such as electric motors or air conditioners. If the supply voltage drops below 90V or rises above 110V, the unit may malfunction or be damaged. Please pay special attention to the power supply voltage and the capacity of the wiring.
+
+  ② 電源の条件はAC100V（50／60Hz）±10％〈90V～110V〉で同一コンセントから多くの負荷を採る場合±10％以上の電圧変動が無いことが必要です。特に変動の大きいところは安定化電源（オートマティック・ボルテージ・レギュレータ）を一次側に入れてください。
+  ② The power supply conditions are AC 100V (50/60Hz) ±10% (90–110V). When drawing a large load from the same outlet, it is necessary that voltage fluctuations do not exceed ±10%. In locations where fluctuations are particularly large, please install a stabilized power supply (automatic voltage regulator) on the primary side.
+
+  ③ 電源コンセントは機器だけを出来るだけ専用でご使用ください。分岐コンセントなどを用いてのタコ足配線はしないでください。電圧が低くなって誤動作、故障の原因になります。
+  ③ As much as possible, use a dedicated power outlet for this equipment alone. Do not use branching outlets or multi-plug connections. Doing so may cause the voltage to drop, leading to malfunction or failure.
+
+  ④ 機器のプラグ付き電源コードを抜く時は、コードを引っぱって抜かないでください。
+  ④ When unplugging the unit’s power cord, do not pull on the cord itself.
+
+  ⑤ 電源コードを傷めると焼損や漏電の原因になりますので次の点にご注意ください。
+  ⑤ If the power cord is damaged, it may cause burning or electrical leakage, so please observe the following precaution:
+
+    ◦ 機器の下や重い物の下にはさんだり角ばった物に接触してコードを折り曲げないようにしてください。
+    ◦ Do not pinch the cord under the unit or under heavy objects, and avoid bending it against sharp-edged objects.
+
+  ⑥ 特に重い物や荷重が部分的にかかる物をテーブルに置かれるとテーブルガラスには強化ガラスを使用していますが破損の原因になりますのでさけてください。
+  ⑥ In particular, if heavy objects or items that apply localized pressure are placed on the table, the table glass—although made of tempered glass—may be damaged. Please avoid doing so.
+
+  ⑦ 機器のお手入れされる時は、みがき粉・粉セッケン・タワシ・ベンジン・シンナー・石油・酸・熱湯・化学ぞうきんなどは塗装面等を傷めますのでご使用にならないでください。
+  ⑦ When cleaning the unit, do not use polishing powders, powdered soap, scrubbing brushes, benzine, thinner, petroleum, acids, hot water, or chemical cleaning cloths, as they may damage painted surfaces and other finishes.
+
+  ⑧ 風通しのよいところへ据え付けてください。
+  ⑧ Install the unit in a well-ventilated location.
+
+    （通風孔をふさがない）通風孔をふさぐような説明書等の貼付等さけてください。
+    (Do not block the ventilation holes.) Avoid attaching things such as instruction sheets that would cover the ventilation openings.
+
+  ⑨ 熱気の少ないところへ据え付けてください。
+  ⑨ Install the unit in a location with minimal heat.
+
+    （暖房器具、直射日光は避ける）
+    (Avoid heating equipment and direct sunlight.)
+
+  ⑩ 湿気やホコリの少ないところへ据え付けてください。
+  ⑩ Install the unit in a location with low humidity and minimal dust.
+
+--
+
+2-2 運搬・移動の時
+2-2 During transport and movement
+
+  ① 運搬・移動させるとき
+  ① When transporting or moving the unit
+
+    運搬・移動させるときは差し込みプラグを抜き、2人以上で本体キャビネットの両サイドを持って静かに動かしてください。
+    When transporting or moving the unit, unplug the power plug, and have two or more people hold both sides of the cabinet and move it carefully.
+
+  ② 移送されるとき
+  ② When the unit is being transported
+
+    トラック等で運送されるときは付属品をテープなどで固定して厳重に荷造りし、横積みしないようにしてください。横積み運送は機械を傷め故障の原因になります。
+    When transporting the unit by truck or similar means, secure the accessories with tape and pack it carefully. Do not transport it on its side. Transporting it sideways may damage the machine and cause malfunction.
+
+    ◎ この機器は50／60Hz共用で周波数の切り換えの必要はありません。
+    ◎ This unit supports both 50Hz and 60Hz, and no frequency switching is required.
+
+2-3 機器のアース接続
+2-3 Ground Connection of the Equipment
+
+  ① 温気の多い所に据え付ける場合は、万一の感電防止のためアースを取り付けてください。
+  ① If the unit is installed in a location with high humidity, attach a ground connection to prevent electric shock in case of an accident.
+
+    アース端子（端子己表示）
+    Ground terminal (terminal indicated on unit)
+
+    イ アース線は機器のアース端子に接続してください。
+    a) Connect the ground wire to the unit’s ground terminal.
+
+    ロ アース線を接地するときは、アース棒を使用し確実に接地してください。
+    b) When grounding the wire, use a ground rod and ensure it is securely grounded.
+
+  ② 注意事項
+  ② Precautions
+
+    イ 水道管は配管の途中に塩化ビニールパイプを使用していて、アース線を接続しても接地されない場合がありますので、水道管への接続は避けてください。
+    a) Water pipes may include PVC (vinyl) piping in the middle of the plumbing, so even if you connect a ground wire to them, they may not actually be grounded. Therefore, avoid connecting the ground wire to water pipes.
+
+    ロ ガス管への接続は危険ですから絶対に避けてください。
+    b) Connecting to gas pipes is dangerous, so absolutely do not do it.
+
+--
+
+3． 調整箇所及び調整方法
+3. Adjustment Points and Methods
+
+3-1 CPU基板ユニット（コンピューターボード）
+3-1 CPU Board Unit (Computer Board)
+
+  メインスイッチ側
+  Main Switch Side
+
+  サブスイッチ側
+  Sub Switch Side
+
+  テレビ
+  TV
+
+  メイン電源ユニット
+  Main Power Unit
+  COG-MT
+
+  サブ電源ユニット
+  Sub Power Unit
+  COG-SP
+
+  CPU基板ユニット
+  CPU Board Unit
+  COG-CPU
+  （コンピューターボード）
+  (Computer Board)
+
+
+  CPU基板ユニット
+  CPU Board Unit
+
+  -5V (- C25)
+  +5V (+ C24)
+  +12V (+ C23)
+  アース (- C23)
+  Ground
+  (GND)
+
+  サービスB / サービスA
+  Service B / Service A
+
+  ボリューム VR2
+  Volume
+
+  VR1 小 <-> 大
+      small <-> large
+
+  VR3 高 <-> 低
+      high <-> low
+
+  TP2 （テストポイント）
+      (Test Point)
+
+  ① 調整
+  ① Adjustments
+
+    イ VR1       サブ・コントラスト用
+    a) VR1       For sub-contrast
+
+    ロ VR2       （ボリューム）サブ音量用　右に回しますと音が大きくなります。
+    b) VR2       (Volume) Secondary audio level - Turning it to the right increases the sound.
+
+    ハ VR3       音声用発振周波数
+    c) VR3       Oscillation frequency for audio
+
+  ② サービススイッチ  （このスイッチはメンテナンス用スイッチです）
+  ② Service Switches  (These switches are for maintenance)
+
+    イ サービスA  ; コンピューター・リセット用
+    a) Service A  ; For computer reset
+
+    ロ サービスB  ; プログラムチェック用
+    b) Service B  ; For program check
+
+    ハ どちらのスイッチもONする時は10秒以上押し続けて後にOFFしてください。
+    c) When turning either switch ON, hold it for at least 10 seconds, then turn it OFF.
+
+--
+
+  ③ VR1サブコントラスト用について
+  ③ Regarding VR1 (sub-contrast)
+
+    テストポイント2（TP2）とアース（GND）との間でテスター（DCレンジ）の値がDC6.2ボルト（標準値）あります。
+    Between Test Point 2 (TP2) and ground (GND), the meter (DC range) reading should be approximately DC 6.2 volts (standard value).
+
+    半固定抵抗範囲はDC4.0～DC7.0ボルト位です。
+    The adjustable range of the variable resistor is approximately DC 4.0 to DC 7.0 volts.
+
+    右へ回しますとコントラスト大になります。
+    Turning it to the right increases contrast.
+
+  ④ VR2ボリューム・サブ音量について
+  ④ Regarding VR2 (volume / sub-audio level)
+
+    イ テレビで調整する時
+    a) When adjusting using the TV
+
+      ◦ 電源スイッチ兼音量調整（8頁図）ツマミで調整してください。ツマミを回される時に誤ってテレビの電源を切らないようにしてください。
+      ◦ Adjust using the power switch / volume control knob (see page 8 diagram). When turning the knob, be careful not to accidentally turn off the television.
+
+    ロ CPU基板ユニット（COG-CPU）で調整する時
+    b) When adjusting on the CPU board unit (COG-CPU)
+
+      ◦ VR2（ボリューム）はサブ音量用半固定抵抗です。右へ回しますと音が大きくなります。
+      ◦ VR2 (volume) is a semi-fixed resistor for sub audio level. Turning it to the right increases the sound.
+
+  ⑤ VR3音声発振周波数用について
+  ⑤ Regarding VR3 (audio oscillator frequency)
+
+    右に回しますと周波数が低くなります。調整される時は、サービスAスイッチを押して、次にサービスBスイッチを押します。（但し、10秒以上押し続けてください。）
+    Turning it to the right lowers the frequency. When adjusting, press the Service A switch, then press the Service B switch (hold each for at least 10 seconds).
+
+    音がピーピーと鳴るのを確認しながらVR3を調整棒でゆっくりと回してください。
+    While confirming that a “beep-beep” sound is being emitted, slowly adjust VR3 with an adjustment tool.
+
+  ⑥ サービススイッチについて
+  ⑥ Regarding the service switches
+
+    イ サービスA  ; コンピューターリセット用でメイン電源スイッチを一度切り、再び投入した時と同じ働きをします。
+    a) Service A  ; Used for computer reset; it performs the same function as turning the main power switch off once and then turning it back on.
+
+    ロ サービスB  ; コンピューター対コンピューターの対戦です。
+    b) Service B  ; This is a computer-versus-computer match.
+
+                    音量調整又はプログラムのチェック等に使います。勝負結果は＋４０対□２４にいつもなれば正常です。
+                    It is used for volume adjustment and program checking, etc. If the game result is always +40 to ■24, then it is normal.
+
+  ⑦ CPU基板ユニット  LED1、LED2の見方
+  ⑦ How to read LED1 and LED2 on the CPU board
+
+                                       LED1   LED2
+電源投入時                             消灯   消灯
+At power-on                            off    off
+
+¥100投入プレイ中                       点灯   消灯
+During play after ¥100 inserted        on     off
+
+タイマ切れ客待ち中                     消灯   点灯
+Timer expired, waiting for customer    off    on
+
+--
+
+3-2 単位料金当りのタイマ設定スイッチ
+3-2 Timer setting switch per unit price
+
+  メインスイッチ側
+  Main Switch Side
+
+  サブスイッチ側
+  Sub Switch Side
+
+  ゲーム時間表示（アップ表示） /  秒表示
+  Game time display (count-up display) / seconds display
+
+  LED基板ユニット
+  LED board unit
+
+  タイマ設定スイッチ（デジタルスイッチ）
+  Timer setting switch (digital switch)
+
+  コインセレクター
+  Coin selector
+
+  コインボックス
+  Coin box
+
+  料金計数カウンタ（ゲームカウンタ）
+  Revenue counter (game counter)
+
+  ① タイマ設定スイッチ（デジタルスイッチ）0から9まで可変できます。
+  ① The timer setting switch (digital switch) can be set from 0 to 9.
+
+    この設定はゲーム時間3桁表示の最大桁のみ可変できます。
+    This setting only changes the highest digit of the three-digit game time display.
+
+    従って「3」に設定すれば、単位料金当りのゲームタイマは300秒までです。
+    Therefore, if it is set to “3,” the game timer per unit charge will be up to 300 seconds.
+
+    （注意） タイマ設定スイッチ（デジタルスイッチ）を0には絶対設定しないでください。誤動作の原因となります。必ず1から9までの数字で設定してください。尚、出荷時には「3」で設定してありますので、エンド・ユーザー側で変更の必要性がある場合、所定の数字に設定してください。
+    (Caution) Do not set the timer setting switch (digital switch) to 0 under any circumstances. It will cause malfunction. Always set it to a number from 1 to 9. At the time of shipment, it is set to “3,” so if the end user needs to change it, set it to the desired number.
+
+  ② 単位料金当りのタイマ設定範囲
+  ② Timer setting range per unit price
+
+      １００秒～９００秒
+      100 seconds - 900 seconds
+                但し、最上桁のみ可変
+                However, only the most significant digit is adjustable
+
+  ③ ゲーム時間を無制限に設定する事は機器の仕様上できません。
+  ③ It is not possible, due to the machine’s specifications, to set the game time to unlimited.
+
+--
+
+3-3 ディスプレイテレビ
+3-3 Display TV
+
+  ◎ シャープ製12P-J8R/M型　白黒テレビ
+  ◎ Sharp model 12P-J8R/M black-and-white television
+
+  （注意） このテレビはコンピューターオセロ専用となっておりますのでテレビ単体では動作しませんし、又UHF/VHFの電波を受ける事はできません。
+  (Caution) This television is dedicated for Computer Othello use, so it will not operate on its own, and it cannot receive UHF/VHF broadcast signals.
+
+  12P-J8R/M 前面ツマミ
+  12P-J8R/M front knobs
+
+  P7コネクタ
+  P7 connector
+
+  12P-J8R/M 裏面ツマミ
+  12P-J8R/M rear knobs
+
+  ① 電源スイッチ兼音量調整
+  ① Power switch combined with volume control
+
+    テレビに電気を入れ音の大きさを調整するツマミです。ツマミを右にまわすと電源が入り、画と音が出ます。ツマミを右にまわすと音が大きくなります。工場出荷時に於きまして適量の音量に調整しています。もし音量調整の必要性があればＣＰＵ基板ユニット（ＣＯＧ－ＣＰＵ）上についていますボリューム（ＶＲ２）で調整してください。時計回り（右回り）の方向にまわすと音が大きくなります。（参考６頁④）
+    This is the knob used to turn on the television and adjust the sound volume. Turning the knob to the right turns on the power, and the picture and sound will appear. Turning the knob further to the right increases the sound volume. At the time of factory shipment, it is adjusted to an appropriate volume level. (See page 6, item ④)
+
+  ② コントラスト（CONTRAST）調整ツマミ
+  ② Contrast adjustment knob
+
+    映像の白と黒の調子（対比）を調整するツマミです。右へまわすとコントラストが強くなり、ギラギラした感じになります。あまりコントラストが強いと目が疲れます。
+    This is the knob used to adjust the balance (contrast) between white and black in the image. Turning it to the right increases the contrast, making the image appear more glaring/harsh. If the contrast is too strong, it can cause eye fatigue.
+
+--
+
+    （注）サブ・コントラスト調整用（ＶＲ１）がＣＰＵ基板ユニット（ＣＯＧ－ＣＰＵ）についています。通常におきましては調整の必要はありません。工場出荷に於きまして調整済みです。調整の必要性がある場合は販売店の指示に従ってください。
+    (Note) The sub-contrast adjustment (VR1) is located on the CPU board unit (COG-CPU). Under normal circumstances, adjustment is not necessary. It is already adjusted at the factory. If adjustment is necessary, follow the instructions of the dealer.
+
+  ③ 輝度調整（BRIGHTNESS）
+  ③ Brightness adjustment
+
+    映像の明るさを調整するツマミです。右にまわすと画面が明るく、左にまわすと暗くなります。
+    This is the knob used to adjust the brightness of the image. Turning it to the right makes the screen brighter; turning it to the left makes it darker.
+
+  ④ 垂直同期調整（V-HOLD）
+  ④ Vertical synchronization adjustment
+
+    上下に流れる映像の動きを止めるツマミです。映像が上下に流れる時、このツマミを静かにまわし調整します。
+    This is the knob used to stop the vertical rolling of the image. When the image scrolls up and down, gently turn this knob to adjust it.
+
+  ⑤ 水平同期調整（H-HOLD）
+  ⑤ Horizontal synchronization adjustment
+
+    映像が斜線に崩れたり、上部がピクピク動いて不安定なときは、このツマミで調整します。
+    If the image becomes skewed diagonally or the top portion jitters and appears unstable, adjust it using this knob.
+
+  （注意）
+  (Caution)
+
+   電源スイッチを入れてすぐに（画像が出ていない状態で）電源スイッチを切りますとブラウン管に輝点（スポット）が残る場合がありますので、画像が出るまで電源スイッチを切らないようにしてください。
+   If you turn on the power and then immediately turn it off (before an image appears), a bright spot may remain on the CRT. Therefore, do not turn off the power switch until the image appears.
+
+  （補足事項）
+  (Supplemental Information)
+
+  １．料金切れになりますと前の状態をホールドされ、「￥１００トーゾ」のメッセージが約１分間点滅します。１分経過後は原点の客待ち状態になります。
+  1. When the credit/time runs out, the previous state is held, and the message “¥100 (insert coin)” blinks for approximately 1 minute. After 1 minute has elapsed, the system returns to the initial waiting (attract) state.
+
+  ２．１人用対コンピューターゲームのみに判定した結果、人間が勝利しますと電子音が鳴ります。
+  2. Only in the one-player (vs. computer) game, when the result is determined and the human wins, an electronic sound will play.
+
+--
+
+4. 機器本体及びユニットの名称
+4. Names of the Main Unit and Its Components
+
+   テーブル
+   Table
+
+   デジタルスイッチ（タイマ設定スイッチ）
+   Digital switch (Timer setting switch)
+
+   コインロック錠
+   Coin lock
+
+   スイッチカバー
+   Switch cover
+
+   本体キャビネット
+   Main cabinet
+
+   ゲームカウンター
+   Game counter
+
+   コインボックス
+   Coin box
+
+
+   テーブル強化ガラス（800×500×5t）
+   Tempered table glass (800 × 500 × 5 mm)
+
+   サブ・スイッチ
+   Sub switch
+
+   オセロシール
+   Othello sticker
+
+   遊び方シール
+   How-to-play sticker
+
+   メイン・スイッチ
+   Main switch
+
+   テーブルガラス止め金具
+   Table glass retaining hardware
+
+   プラグ付電源コード
+   Power cord with plug
+
+   アース端子
+   Ground terminal
+
+   脚部
+   Leg section
+
+   コインセレクター
+   Coin selector
+
+
+   ディスプレイ・テレビ
+   Display TV
+
+   メイン電源ユニット
+   Main power supply unit
+
+   CPU基板ユニット
+   CPU board unit
+
+   サブ電源ユニット
+   Sub power supply unit
+
+
+   メイン電源ユニット
+   Main power supply unit
+
+   ヒューズボックス（3A）
+   Fuse box (3A)
+
+   テレビ用コンセント
+   Outlet for TV
+
+   サブ電源用コンセント
+   Outlet for sub power supply unit
+
+   ACコンセント
+   AC outlet
+
+   メイン電源スイッチ
+   Main power switch
+
+   P3ハーネス
+   P3 harness
+
+
+   サブ電源ユニット
+   Sub power supply unit
+
+   P8（2極）コネクタ
+   P8 (2-pin) connector
+
+   P9（3極）コネクタ
+   P9 (3-pin) connector
+
+   P2ハーネス
+   P2 harness
+
+   サブ電源用ハーネス
+   Sub power harness
+
+--
+
+   コイン・ボックス
+   Coin box
+
+
+   コインセレクター
+   Coin selector
+
+
+   コインブロッカー
+   Coin blocker
+
+   P9ハーネス
+   P9 harness
+
+
+   ゲームカウンタ
+   Game counter
+
+   P8ハーネス
+   P8 harness
+
+
+   メインスイッチ銘板
+   Main switch nameplate
+
+   メインキーボードスイッチ
+   Main keyboard switch
+
+   P4ハーネス
+   P4 harness
+
+
+   サブスイッチ銘板
+   Sub switch nameplate
+
+   サブキーボードスイッチ
+   Sub keyboard switch
+
+   P5ハーネス
+   P5 harness
+
+
+   コインスイッチ
+   Coin switch
+
+   P1ハーネス
+   P1 harness
+
+
+   LED基板ユニット
+   LED board unit
+
+   デジタルスイッチ取付金具
+   Digital switch mounting bracket
+
+   デジタルスイッチ
+   Digital switch
+
+   P6ハーネス
+   P6 harness
+
+--
+
+5. 機器接続図
+5. Equipment Connection Diagram
+
+   CPU基板ユニット (COG-CPU)
+   CPU board unit (COG-CPU)
+
+   サブ電源ユニット (COG-SP)
+   Sub power unit (COG-SP)
+   P2
+
+   ゲームカウンター
+   Game counter
+   P8
+
+   コインセレクタ
+   Coin selector
+
+   コインスイッチ
+   Coin switch
+   P1
+
+   コインブロッカー
+   Coin blocker
+   P9
+
+   メイン電源ユニット (COG-MT)
+   Main power unit (COG-MT)
+   P3
+
+   メインキーボードスイッチ (COG-MK)
+   Main keyboard switch (COG-MK)
+   P4
+
+   サブキーボードスイッチ (COG-SK)
+   Sub keyboard switch (COG-SK)
+   P5
+
+   LED基板ユニット (COG-LED)
+   LED board unit (COG-LED)
+   P6
+
+   デジタルスイッチ (タイマ設定スイッチ)
+   Digital switch (Timer setting switch)
+
+   ディスプレイテレビ (COG-TV)
+   Display TV (COG-TV)
+   P7
+
+--
+
+◎ コンピューター・オセロ用
+◎ For Computer Othello
+
+       ◦ コネクターハーネス
+       ◦ Connector Harness
+
+  No.    用途               線番           色       信号名            備考
+  No.    Purpose            Wire number    Color    Signal name        Remarks
+
+  P1     コインスイッチ       1             茶      リレー接点
+         Coin switch                       brown    relay contact     
+                              2             赤      +5V
+                                           red      +5V
+
+  P2     サブ電源ユニット     1             橙       GND (UNREG)
+         Sub power unit                    orange
+                              2             黄      24V (UNREG)
+                                           yellow
+
+  P3     メイン電源ユニット   1             茶       GND
+         Main power unit                   brown
+                              2             赤      GND
+                                           red
+                              3             橙      -5V
+                                           orange
+                              4             黄      +5V
+                                           yellow
+                              5             緑      +12V
+                                           green
+                              6             青      24V (UNREG)
+                                           blue
+                              7             緑      GND (UNREG)
+                                           green
+
+  P4     メインキーボード     1             茶      コンピュータ後手    1人用
+         Main keyboard                     brown    Computer Gote      for 1 person
+                              2             赤      コンピュータ先手    1人用
+                                           red      Computer Sente     for 1 person
+                              3             橙      相手後手           2人用
+                                           orange   Opponent Gote      for 2 people
+                              4             黄      相手先手           2人用
+                                           yellow   Opponent Sente     for 2 people
+                              5             緑      カーソル ↓
+                                           green    Cursor ↓
+                              6             青      カーソル →
+                                           blue     Cursor →
+                              7             紫      セット
+                                           purple   Set
+                              8             灰      パス
+                                           gray     Pass
+                              9             白      リセット
+                                           white    Reset
+                              10            黒      判定
+                                           black    Judge
+                              11            茶      COM
+                                           brown
+
+--
+
+  P5     サブキーボード       1             茶      カーソル ↓
+         Sub keyboard                      brown    Cursor ↓
+                              2             赤      カーソル →
+                                           red      Cursor →
+                              3             橙      セット
+                                           orange   Set
+                              4             黄      パス
+                                           yellow   Pass
+                              5             緑      COM
+                                           green
+
+  P6     LED基板ユニット      1             茶      ストップ           SP
+         LED board unit                    brown    Stop
+                              2             赤      コントロール       CL
+                                           red      Control
+                              3             橙      スタート           ST
+                                           orange   Start
+                              4             黄      リセット           RS
+                                           yellow   Reset
+                              5             緑      GND
+                                           green
+                              6             青      +5V
+                                           blue
+                              7             紫      カウント           CU OUT
+                                           purple   Count
+                              8             灰      カウント           CU IN
+                                           gray     Count
+
+  P7     ディスプレイテレビ   1             茶      音声               心線
+         Display TV                       brown     Audio              Core wire
+                              2             茶      GND
+                                          brown
+                              3             白      映像               心線
+                                          white     Video              Core wire
+                              4             白      GND
+                                          white
+
+  P8     ゲームカウンター     1             茶      GND (UNREG)
+         Game counter                     brown
+                              2             赤      24V (UNREG)
+                                          red
+
+  P9     コインブロッカー     1             茶      GND (UNREG)
+         Coin blocker                     brown
+                              2             赤      24V (UNREG)
+                                          red
+
+--
+
+6. 機器組立図
+6. Equipment Assembly Diagram
+
+◎ 部品表
+◎ Parts List
+
+部品No.    部品名称
+Part No.   Part Name
+
+01         テーブル
+01         Table
+
+02         ブラウン管アクリル
+02         CRT acrylic
+
+03         LEDアクリル
+03         LED acrylic
+
+04         テーブルガラス
+04         Table glass
+
+05         テーブルガラス止め金具
+05         Table glass retaining bracket
+
+06         本体キャビネット
+06         Main cabinet
+
+07         テレビ固定アングル
+07         TV angle bracket
+
+08         スイッチカバー
+08         Switch cover
+
+09         コインボックス
+09         Coin box
+
+10         コインロック錠
+10         Coin lock
+
+11         コインセレクター
+11         Coin selector
+
+12         脚部
+12         Leg
+
+13         デジタルスイッチ取付金具
+13         Digital switch mounting bracket
+
+14         メインスイッチ銘板
+14         Main switch nameplate
+
+15         サブスイッチ銘板
+15         Sub switch nameplate
+
+16-1       オセロシール
+16-1       Othello sticker
+
+16-2       遊び方シール
+16-2       How-to-play sticker
+
+16-3       電取シール
+16-3       Electrical sticker
+
+16-4       丸型シール
+16-4       Round sticker
+
+16-5       メンテ用シール
+16-5       Maintenance sticker
+
+16-6       音量ツマミシール
+16-6       Volume knob sticker
+
+16-7       ３００秒シール
+16-7       "300 seconds" sticker
+
+16-8       ￥１００シール
+16-8       "¥100" sticker
+
+17         定格表示板
+17         Rating plate
+
+18         テレビ押サエスポンジ
+18         TV retaining sponge
+
+19         コインボックス押サエスポンジ
+19         Coin box retaining sponge
+
+51         ディスプレイテレビ
+51         Display TV
+
+52         CPU基板ユニット
+52         CPU board unit
+
+53         LED基板ユニット
+53         LED board unit
+
+54         メインキーボードスイッチ
+54         Main keyboard switch
+
+55         サブキーボードスイッチ
+55         Sub keyboard switch
+
+56         メイン電源ユニット
+56         Main power supply unit
+
+57         サブ電源ユニット
+57         Sub power supply unit
+
+58         コインスイッチ
+58         Coin switch
+
+59         コインブロッカー
+59         Coin blocker
+
+60         ゲームカウンター
+60         Game counter
+
+61         デジタルスイッチ
+61         Digital switch
+
+62         CPU基板取付サポート
+62         CPU board mounting support
+
+63         コードブッシング
+63         Cord bushing
+
+64         スパイラルチューブ
+64         Spiral tube
+
+65         コード保護エッジ
+65         Cord protection edge
+
+66         コード結束バンド
+66         Cable tie
+
+67         アース用端子
+67         Ground terminal
+
+68         ヒューズ
+68         Fuse
+
+H-1        電源コードハーネス
+H-1        Power cord harness
+
+H-2        コインブロッカーハーネス（P9ハーネス）
+H-2        Coin blocker harness (P9 harness)
+
+H-3        コインスイッチハーネス（P1ハーネス）
+H-3        Coin switch harness (P1 harness)
+
+H-4        メイン電源出力ハーネス（P3ハーネス）
+H-4        Main power output harness (P3 harness)
+
+H-6        サブ電源入力ハーネス
+H-6        Sub power input harness
+
+H-7        サブ電源信号ハーネス（P2ハーネス）
+H-7        Sub power signal harness (P2 harness)
+
+H-8        テレビハーネス（P7ハーネス）
+H-8        TV harness (P7 harness)
+
+H-9        LED基板ハーネス（P6ハーネス）
+H-9        LED board harness (P6 harness)
+
+H-10       メインキーボードハーネス（P4ハーネス）
+H-10       Main keyboard harness (P4 harness)
+
+H-11       サブキーボードハーネス（P5ハーネス）
+H-11       Sub keyboard harness (P5 harness)
+
+H-12       ゲームカウンターハーネス（P8ハーネス）
+H-12       Game counter harness (P8 harness)
+
+--
+
+7. 部品価格表
+7. Parts Price List
+
+部品 No.    部品名称                       単価（円）          備考
+Part No.    Part Name                      Unit Price (Yen)   Notes
+
+   04       テーブルガラス
+   04       Table glass                    ¥5,200
+
+   05       テーブルガラス止メ金具
+   05       Table glass retaining bracket  ¥240
+
+   10       コインロック錠
+   10       Coin lock                      ¥1,150
+
+   14       メインスイッチ銘板
+   14       Main switch nameplate          ¥1,450
+
+   15       サブスイッチ銘板
+   15       Sub switch nameplate           ¥1,450
+
+   51       ディスプレイテレビ                                 修理可能
+   51       Display TV                     ¥31,800            Repairable
+
+   52       CPU基板ユニット                                    修理可能
+   52       CPU board unit                 ¥95,000            Repairable
+
+   53       LED基板ユニット                                    修理可能
+   53       LED board unit                 ¥20,000            Repairable
+
+   54       メインキーボードスイッチ
+   54       Main keyboard switch           ¥2,500
+
+   55       サブキーボードスイッチ
+   55       Sub keyboard switch            ¥1,550
+
+   56       メイン電源ユニット                                 修理可能
+   56       Main power supply unit         ¥30,000            Repairable
+
+   57       サブ電源ユニット                                   修理可能
+   57       Sub power supply unit          ¥6,800             Repairable
+
+   58       コインスイッチ
+   58       Coin switch                    ¥900
+
+   59       コインブロッカー
+   59       Coin blocker                   ¥1,100
+
+   61       デジタルスイッチ
+   61       Digital switch                 ¥750
+
+   ○ 価格を変更する事があります。      S53.6
+   ○ Prices are subject to change.    June 1978
+
+   ○ ご使用前に、この「取扱説明書」をよくお読みください。
+   ○ Before use, please read this “operation manual” carefully.
+
+     なお、この「取扱説明書」は大切に保管してください。
+     Also, please keep this "operation manual" in a safe place.
+
+   ○ サービスは、お買い上げの販売店へお問い合わせ願います。
+   ○ For service, please contact the dealer from whom you purchased the unit.
+
+--
+
+        任天堂レジャーシステム
+        Nintendo Leisure System
+
+        本社                  東京都千代田区神田須田町1-22
+        Head Office           1-22 Kanda-Sudachō, Chiyoda-ku, Tokyo
+                              TEL　03（254）1647
+
+        関西支社              京都市東山区福稲上高松町60番地
+        Kansai Branch Office  60 Fukinoue-Takamatsuchō, Higashiyama-ku, Kyoto
+                              TEL　075（541）6111
+
+        名古屋営業所          名古屋市西区菊井町29番地
+        Nagoya Sales Office   29 Kikuichō, Nishi-ku, Nagoya
+                              TEL　052（571）1068
