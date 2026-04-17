@@ -485,14 +485,14 @@ Timer expired, waiting for customer    off    on
    コインロック錠
    Coin lock
 
-   チカバー
-   Cover
+   スイッチカバー
+   Switch cover
 
-   キャビネット
-   Cabinet
+   本体キャビネット
+   Main cabinet
 
-   カウンター
-   Counter
+   ゲームカウンター
+   Game counter
 
    コインボックス
    Coin box
