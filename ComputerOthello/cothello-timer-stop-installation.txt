@@ -1,0 +1,142 @@
+コンピューター・オセロ   タイマーストップ機能取付説明書
+Computer Othello         Timer Stop Function Installation Manual
+
+A. 構成部品
+A. Components
+
+   ① E仕様・CPU基板
+   ① E-spec CPU board
+
+   ② TS基板組立品
+   ② TS board assembly
+
+   ③ 遊び方ラベル
+   ③ How-to-play label
+
+   ④ 400秒/100円
+   ④ 400 seconds / 100 yen
+
+   ⑤ ゲームランクについて
+   ⑤ About game ranks
+
+   ⑥ ゲーム料金説明ラベル
+   ⑥ Game pricing information label
+
+   ⑦ ゲームセレクトラベル
+   ⑦ Game select label
+
+B. タイマーストップ（T.S.）機能の説明
+B. Explanation of the Timer Stop (T.S.) Function
+
+   イ このタイマーストップ機能を付加することにより、ゲーム中に於てコンピューターが考えている時間はゲーム料金に含まれないように出来る。（T.S.基板の切換スイッチのON〜OFFにより解除も可能となる）
+   a) By adding this timer stop function, the time during gameplay when the computer is thinking can be excluded from the charged game time. (It can also be disabled via the ON/OFF switch on the T.S. board.)
+
+   ロ 組合せによる内容の変化
+   b) Changes in behavior depending on combinations
+
+      CPU         CPU基板「旧」仕様                            CPU基板「E」仕様
+      CPU         CPU board "old" spec                         CPU board "E" spec
+
+      TSP         TSP取付なし        TSP-SW OFF   TSP-SW ON    TSP取付なし        TSP-SW OFF   TSP-SW ON
+      TSP         No TSP Installed   TSP-SW OFF   TSP-SW ON    No TSP Installed   TSP-SW OFF   TSP-SW ON
+
+      EP-ROM
+      A,C,D             ○                ○            △              ×               ○            △
+      E                 ○                ○            △              ×               ○         (TS有効)
+                                                                                              (TS Enabled)
+
+         ○ ---- オセロとして正常に動作（但しタイマーストップ機能なし）
+         ○ ---- Operates normally as Othello (but without timer-stop function)
+
+         △ ---- オセロとして正常になったり異常になったりする（TS機能あり）
+         △ ---- Sometimes operates normally, sometimes abnormally as Othello (TS function present)
+
+         x ---- オセロとして異常動作する（常にタイマー）
+         x ---- Operates abnormally as Othello (timer runs continuously)
+
+    (TS有効) -- タイマーストップ機能が付加され正常に動作する。
+(TS Enabled) -- Timer-stop function is added and operates normally.
+
+--
+
+C. 接続原理図
+C. Connection Schematic
+
+   追加基板
+   Additional board
+
+   タイマーストップ基板
+   Timer stop board
+
+   メインキーボードスイッチ
+   Main keyboard switch
+   12P -> P4
+
+   LED基板
+   LED board
+   8P -> P6
+
+D. 取付順序及び方法
+D. Installation order and method
+
+   ① プラグを電源コンセントより必ず抜いて作業下さい。
+   ① Be sure to unplug the power plug from the outlet before performing this work.
+
+   ② ＋ドライバーで左図の部分の固定ビス２本を予め取る。
+   ② Using a Phillips screwdriver, remove the two mounting screws in the area shown in the diagram.
+
+   ③ CPU基板の P6、P4 各コネクターを抜く。
+   ③ Disconnect the P6 and P4 connectors from the CPU board.
+
+   ④ コード束のバインダー（結束バンド）を解く。
+   ④ Undo the wire bundle binder (cable tie).
+
+   ⑤ タイマーストップ基板組立品を左図の要領で②のビス２本を使って共締めする。（なるべくTVよりに取付ける）
+   ⑤ Mount the Timer Stop board assembly as shown in the diagram, using the two screws from step ② to fasten it together. (Install it as close to the TV as possible.)
+
+   ⑥ P6・P4 各コネクターを CPU基板及びタイマーストップ基板に接続する。
+   ⑥ Connect the P6 and P4 connectors to the CPU board and the Timer Stop board.
+
+   ⑦ コード束を再度結束バンドにて結束（バインド）固定する。
+   ⑦ Re-bundle the wiring using the cable ties (bind them again to secure).
+
+   ⑧ 機能点検後、各種ラベル類を次頁説明書に従って貼付する。
+   ⑧ After checking the functionality, apply the various labels according to the instructions on the following page.
+
+   ⑨ タイマーストップ基板の ON↔OFF を確認する。
+   ⑨ Confirm the ON/OFF operation of the Timer Stop board.
+
+--
+
+E. ラベル類の貼る場所および方法
+E. Locations and methods for applying labels
+
+   ① ゲームランクおよびゲームセレクトラベル
+   ① Game rank and game select labels
+
+     ※ ラベルを台紙からはがして貼りつけてください。
+     ※ Peel the labels from the backing and apply them.
+
+        ゲームランク / ゲームセレクト
+        Game Rank / Game Select
+
+   ② 遊び方ラベルおよびゲームランクについてラベル
+   ② “How to Play” label and “About Game Rank” label
+
+     ※ ガラスを少し浮かしてガラスとテーブルとの間に挿入してください
+     ※ Slightly lift the glass and insert them between the glass and the table.
+
+        遊び方ラベル
+        "How-to-play" label
+
+        ゲームランクについてラベル
+        "About Game Rank" label
+
+        ゲーム料金説明ラベル
+        Game pricing explanation label
+
+   ③　400秒／100円
+   ③　400 seconds / 100 yen
+
+      左記のラベルは旧表示ラベルの上に重ねて貼付するか、デジタルタイマーの近くに貼付下さい。（旧表示ラベルは剥離の事）
+      The above label should be applied over the existing display label, or near the digital timer. (If necessary, remove the old label.)
