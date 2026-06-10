@@ -550,7 +550,7 @@
 ; WAIT_05_COIN_CLEAR
 ; Waits for coin slot state #05 to clear before proceeding.
 ; Based on code behavior, this may indicate that a game is active
-; and/or that the coin blocked is engaged.
+; and/or that the coin blocker is engaged.
 02E9: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
 02EC: E6 07       ANI #07
 02EE: FE 05       CPI #05
@@ -2119,7 +2119,7 @@
 ; Writes a command sequence to the sound hardware at $8000.
 ; The ROM selects the pitch, and tone duration appears to be
 ; controlled by the hardware, but each call begins by clearing
-; the sounds state, so rapid successive calls can cut off
+; the sound state, so rapid successive calls can cut off
 ; earlier tones.
 090F: 21 00 80    LXI H, $8000
 0912: 36 00       MVI M, #00       ; CLEAR_SOUND_STATE
