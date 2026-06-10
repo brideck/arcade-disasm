@@ -1,27 +1,27 @@
 ; RESET
 0000: F3          DI
-0001: C3 79 00    JMP $0079       ; STARTUP
+0001: C3 79 00    JMP $0079        ; STARTUP
 
-; PLUS_PIECE
-0004: 00                          ; ----------
-0005: 20                          ; ----xx----
-0006: 70                          ; --xxxxxx--
-0007: 20                          ; ----xx----
-0008: 00                          ; ----------
+; PLUS_PIECE (WHITE)
+0004: 00                           ; ----------
+0005: 20                           ; ----xx----
+0006: 70                           ; --xxxxxx--
+0007: 20                           ; ----xx----
+0008: 00                           ; ----------
 
-; SQUARE_PIECE
-0009: 00                          ; ----------
-000A: 70                          ; --xxxxxx--
-000B: 70                          ; --xxxxxx--
-000C: 70                          ; --xxxxxx--
-000D: 00                          ; ----------
+; SQUARE_PIECE (BLACK)
+0009: 00                           ; ----------
+000A: 70                           ; --xxxxxx--
+000B: 70                           ; --xxxxxx--
+000C: 70                           ; --xxxxxx--
+000D: 00                           ; ----------
 
 ; BLANK_SPACE
-000E: 00                          ; ----------
-000F: 00                          ; ----------
-0010: 00                          ; ----------
-0011: 00                          ; ----------
-0012: 00                          ; ----------
+000E: 00                           ; ----------
+000F: 00                           ; ----------
+0010: 00                           ; ----------
+0011: 00                           ; ----------
+0012: 00                           ; ----------
 
 ; CPU_OPENING_MOVE_TABLE (COL, ROW)
 0013: 03 02
@@ -30,170 +30,220 @@
 0019: 04 05
 
 ; BOARD_SPACE_VALUE_TABLE
-001B: FF                          ; #00 (Corners) = 255
-001C: 03                          ; #01 = 3
-001D: 3C                          ; #02 = 60
-001E: 28                          ; #03 = 40
-001F: 03                          ; #04 = 3
-0020: 01                          ; #05 (X-squares) = 1
-0021: 0A                          ; #06 = 10
-0022: 05                          ; #07 = 5
-0023: 3C                          ; #08 = 60
-0024: 0A                          ; #09 = 10
-0025: 1E                          ; #0A = 30
-0026: 14                          ; #0B = 20
-0027: 28                          ; #0C = 40
-0028: 05                          ; #0D = 5
-0029: 14                          ; #0E = 20
-002A: 01                          ; #0F (Starters) = 1
+; Used by the CPU player to determine its next move
+; FF 03 3C 28 28 3C 03 FF
+; 03 01 0A 05 05 0A 01 03
+; 3C 0A 1E 14 14 1E 0A 3C
+; 28 05 14 01 01 14 05 28
+; 28 05 14 01 01 14 05 28
+; 3C 0A 1E 14 14 1E 0A 3C
+; 03 01 0A 05 05 0A 01 03
+; FF 03 3C 28 28 3C 03 FF
+001B: FF                           ; #00 (Corners) = 255
+001C: 03                           ; #01 = 3
+001D: 3C                           ; #02 = 60
+001E: 28                           ; #03 = 40
+001F: 03                           ; #04 = 3
+0020: 01                           ; #05 (X-squares) = 1
+0021: 0A                           ; #06 = 10
+0022: 05                           ; #07 = 5
+0023: 3C                           ; #08 = 60
+0024: 0A                           ; #09 = 10
+0025: 1E                           ; #0A = 30
+0026: 14                           ; #0B = 20
+0027: 28                           ; #0C = 40
+0028: 05                           ; #0D = 5
+0029: 14                           ; #0E = 20
+002A: 01                           ; #0F (Starters) = 1
 
 ; MESSAGES
 
 ; コンピュータオセロ
-; "COMPUTER OTHELLO"
+; "COMPUTER OTHELLO" - Title displayed during attract sequence
 002B: 05 10 0D 17 0E 18 09 02 07 12 8D
 
 0036: 00 00
 
 ; TIMER EXPIRED (RST 7 INTERRUPT)
-0038: C3 DC 02		JMP $02DC
+0038: C3 DC 02    JMP $02DC        ; TIMER_EXPIRED_ADD_COIN_PROMPT
 
 ; ￥100ドーゾ
-; "INSERT ￥100"
+; "INSERT ￥100" - Prompt displayed during attract sequence and timer expiration
 003B: 13 14 15 15 0B 16 18 08 16 8D
 
 ; セレクトドーゾ
-; "SELECT GAME"
+; "SELECT GAME" - Prompt displayed after coin inserted during attract
 0045: 07 11 04 0B 0B 16 18 08 16 8D
 
 ; ハンテイドーゾ
-; "PRESS JUDGE"
+; "PRESS JUDGE" - Prompt displayed when game is over
 004F: 0C 10 0A 00 0B 16 18 08 16 8D
 
 ; パスキードーゾ
-; "PRESS PASS"
+; "PRESS PASS" - Prompt displayed when no player moves are possible
 0059: 0C 17 06 03 18 0B 16 18 08 16 8D
 
 ; リセットドーゾ
-; "PRESS RESET"
+; "PRESS RESET" - Prompt displayed after game has been scored
 0064: 0F 07 01 0B 0B 16 18 08 16 8D
 
 ; コンピュータパス
-; "CPU PASSES"
+; "CPU PASSES" - Message indicating that the CPU player has had to pass
 006E: 05 10 0D 17 0E 18 09 0C 17 06 8D
 
 ; STARTUP
-0079: 31 FA 40    LXI SP, $40FA   ; INIT_STACK <= $40F9
-007C: CD EE 08    CALL $08EE      ; INIT_GAME
+; Resets stack, clears memory, draws initial board, and starts attract mode
+0079: 31 FA 40    LXI SP, $40FA    ; INIT_STACK <= $40F9 (63 bytes reserved for stack)
+007C: CD EE 08    CALL $08EE       ; INIT_GAME
+; Sets CURRENT_PIECE to '■' and the MOVE coordinates to (3,2),
+; which is the equivalent of CPU_OPENING_MOVE_TABLE(1). However, this
+; doesn't get used by anything before being changed in attract mode.
 007F: 3E 05       MVI A, #05
-0081: 32 8A 40    STA $408A       ; CURRENT_PIECE = '■'
+0081: 32 8A 40    STA $408A        ; CURRENT_PIECE = '■'
 0084: 3E 03       MVI A, #03
-0086: 32 8B 40    STA $408B       ; MOVE_COL = 3
+0086: 32 8B 40    STA $408B        ; MOVE_COL = 3
 0089: 3E 02       MVI A, #02
-008B: 32 8C 40    STA $408C       ; MOVE_ROW = 2
+008B: 32 8C 40    STA $408C        ; MOVE_ROW = 2
 008E: AF          XRA A
-008F: 32 FC 40    STA $40FC       ; DISABLE_JUDGE_FLAG = 0
-0092: 3E 07       MVI A, #07      ; ATTRACT_MOVE_COUNT = 7
+008F: 32 FC 40    STA $40FC        ; GAME_SCORED_FLAG = 0
+0092: 3E 07       MVI A, #07       ; ATTRACT_MOVE_COUNT = 7
+
+; The coin selector logic is a bit of a black box, so the following are
+; educated guesses based on code behavior. Analysis of the involved
+; hardware would be needed to determine exact meanings.
+; 
+; States tested by the game:
+; #0E -> #03 = coin drop with some kind of anti-fraud/debounce test?
+; #06 = another accepted coin path, potentially used when the
+;       Reset button is pressed while the timer is active?
+; #05 = game in progress / coin blocker engaged?
+; #0F/#07 = presumed idle state when waiting for coin
 
 ; ATTRACT_MODE_LOOP
 0094: F3          DI
 0095: 32 88 40    STA $4088
-0098: 3A 00 A0    LDA $A000       ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
+0098: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
 009B: E6 0F       ANI #0F
 009D: FE 0E       CPI #0E
-009F: CA AC 00    JZ $00AC        ; #0E: REREAD_COIN_SLOT
+009F: CA AC 00    JZ $00AC         ; #0E: REREAD_COIN_SLOT
 00A2: FE 05       CPI #05
-00A4: CA B6 00    JZ $00B6        ; #05: CONTINUE_ATTRACT
+00A4: CA B6 00    JZ $00B6         ; #05: CONTINUE_ATTRACT
 00A7: FE 06       CPI #06
-00A9: CA FC 00    JZ $00FC        ; #06: COIN_INSERTED
+00A9: CA FC 00    JZ $00FC         ; #06: COIN_INSERTED
 
 ; REREAD_COIN_SLOT
-00AC: 3A 00 A0    LDA $A000       ; READ_COIN_SLOT
+00AC: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT
 00AF: E6 07       ANI #07
 00B1: FE 03       CPI #03
-00B3: CA FC 00    JZ $00FC        ; #03: COIN_INSERTED
+00B3: CA FC 00    JZ $00FC         ; #03: COIN_INSERTED
 
 ; CONTINUE_ATTRACT
-00B6: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-00B9: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-00BC: 01                          ; unused arg
-00BD: 00 2B                       ; "COMPUTER OTHELLO"
-00BF: CD 5A 03    CALL $035A      ; LONG_DELAY [1s]
-00C2: CD 5A 03    CALL $035A      ; LONG_DELAY [1s]
-00C5: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-00C8: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-00CB: 01                          ; unused arg
-00CC: 00 3B                       ; "INSERT ￥100"
-00CE: 3A 00 60    LDA $6000       ; READ_INPUT
-00D1: FE 7F       CPI #7F         ; Service:
-00D3: CA F1 00    JZ $00F1        ; SET_SERVICE_MODE_FLAGS
-                                  ; else
-00D6: CD 2A 05    CALL $052A      ; TOGGLE_CURRENT_PIECE
-00D9: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-00DC: CD A0 07    CALL $07A0      ; DRAW_GRID
+; Attract mode toggles messages between "COMPUTER OTHELLO" and "INSERT COIN."
+; Every time it toggles to "INSERT COIN," the computer plays a piece.
+; There is no sound. After 7 moves are played, the program resets.
+00B6: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+00B9: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+00BC: 01                           ; unused arg
+00BD: 00 2B                        ; "COMPUTER OTHELLO"
+00BF: CD 5A 03    CALL $035A       ; LONG_DELAY [1s]
+00C2: CD 5A 03    CALL $035A       ; LONG_DELAY [1s]
+00C5: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+00C8: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+00CB: 01                           ; unused arg
+00CC: 00 3B                        ; "INSERT ￥100"
+00CE: 3A 00 60    LDA $6000        ; READ_INPUT
+00D1: FE 7F       CPI #7F          ; Service:
+00D3: CA F1 00    JZ $00F1         ; SET_SERVICE_MODE_FLAGS
+                                   ; else
+; Note that this toggles the piece before it calculates any moves, so
+; the side that STARTUP doesn't seed in CURRENT_PIECE will go first
+; in attract mode.
+00D6: CD 2A 05    CALL $052A       ; TOGGLE_CURRENT_PIECE
+00D9: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+00DC: CD A0 07    CALL $07A0       ; DRAW_GRID
 00DF: 3E 01       MVI A, #01
-00E1: 32 FD 40    STA $40FD       ; ATTRACT_MODE_SUPPRESS_SOUND = 1
-00E4: CD 7C 03    CALL $037C      ; CPU_FIND_AND_PLAY_BEST_MOVE
+00E1: 32 FD 40    STA $40FD        ; ATTRACT_MODE_SUPPRESS_SOUND = 1
+; Note how it doesn't use the MOVE coordinates that were set in STARTUP.
+; It also can't use FIRST_MOVE_CPU at all, since that is strictly for '■'
+; going first. Instead, it simply finds the best move every turn. For
+; the first move, since all four of the possible opening moves are
+; equivalent, it uses the last one scanned, which is (3,5).
+00E4: CD 7C 03    CALL $037C       ; CPU_FIND_AND_PLAY_BEST_MOVE
 00E7: 3A 88 40    LDA $4088
-00EA: 3D          DCR A           ; if --ATTRACT_MOVE_COUNT != 0,
-00EB: C2 94 00    JNZ $0094       ; ATTRACT_MODE_LOOP
-                                  ; else
-00EE: C3 00 00    JMP $0000       ; RESET
+00EA: 3D          DCR A            ; if --ATTRACT_MOVE_COUNT != 0,
+00EB: C2 94 00    JNZ $0094        ; ATTRACT_MODE_LOOP
+                                   ; else
+00EE: C3 00 00    JMP $0000        ; RESET
 
 ; SET_SERVICE_MODE_FLAGS
-00F1: 06 04       MVI B, #04      ; B = 4
+; If Service B is enabled, set CPU_OPENING_MOVE_TABLE_INDEX = 4,
+; GAME_MODE = Service, and reenable sound. In this mode, both sides
+; are controlled by the CPU and all input prompts are disabled.
+00F1: 06 04       MVI B, #04       ; B = 4
 00F3: AF          XRA A
-00F4: 32 FD 40    STA $40FD       ; ATTRACT_MODE_SUPPRESS_SOUND = 0
-00F7: 3E 7F       MVI A, #7F      ; A = #7F
-00F9: C3 49 01    JMP $0149       ; CPU_FIRST_MOVE
+00F4: 32 FD 40    STA $40FD        ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+00F7: 3E 7F       MVI A, #7F       ; A = #7F
+00F9: C3 49 01    JMP $0149        ; FIRST_MOVE_CPU
 
 ; COIN_INSERTED
-00FC: 31 FA 40    LXI SP, #40FA   ; INIT_STACK <= $40F9
-00FF: CD EE 08    CALL $08EE      ; INIT_GAME
+; Reset attract mode state, reenable sound, and prompt for game
+; type selection. Each time through the prompt loop changes what
+; the CPU's first move will be if 1P Gote is selected.
+00FC: 31 FA 40    LXI SP, #40FA    ; INIT_STACK <= $40F9
+00FF: CD EE 08    CALL $08EE       ; INIT_GAME
 0102: AF          XRA A
-0103: 32 FD 40    STA $40FD       ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+0103: 32 FD 40    STA $40FD        ; ATTRACT_MODE_SUPPRESS_SOUND = 0
 
 ; RESET_PSEUDORANDOM_OPENING_MOVE
 0106: F3          DI
-0107: 06 04       MVI B, #04      ; PSEUDORANDOM_OPENING_MOVE = 4
+0107: 06 04       MVI B, #04       ; PSEUDORANDOM_OPENING_MOVE = 4
 
 ; PROMPT_SELECT_GAME
 0109: F3          DI
-010A: C5          PUSH B          ; save PSEUDORANDOM_OPENING_MOVE
-010B: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-010E: 01                          ; unused arg
-010F: 00 45                       ; "SELECT GAME"
-0111: C1          POP B           ; restore PSEUDORANDOM_OPENING_MOVE
+010A: C5          PUSH B           ; save PSEUDORANDOM_OPENING_MOVE
+010B: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+010E: 01                           ; unused arg
+010F: 00 45                        ; "SELECT GAME"
+0111: C1          POP B            ; restore PSEUDORANDOM_OPENING_MOVE
 0112: FB          EI
-0113: 3A 00 60    LDA $6000       ; READ_INPUT
-0116: FE FE       CPI #FE         ; 1P Sente:
-0118: CA 31 01    JZ $0131        ; FIRST_MOVE_+
-011B: FE FD       CPI #FD         ; 1P Gote:
-011D: CA 49 01    JZ $0149        ; FIRST_MOVE_CPU
-0120: FE FB       CPI #FB         ; 2P Sente:
-0122: CA 31 01    JZ $0131        ; FIRST_MOVE_+
-0125: FE F7       CPI #F7         ; 2P Gote:
-0127: CA 40 01    JZ $0140        ; FIRST_MOVE_■
-012A: 05          DCR B           ; if --PSEUDORANDOM_OPENING_MOVE != 0,
-012B: C2 09 01    JNZ $0109       ; PROMPT_SELECT_GAME
-                                  ; else
-012E: C3 06 01    JMP $0106       ; RESET_PSEUDORANDOM_OPENING_MOVE
+0113: 3A 00 60    LDA $6000        ; READ_INPUT
+; By the rules of Othello, black ('■') always moves first, but that is
+; not the case here. 1P is always white ('+') and 2P (or the CPU) is
+; always black ('■'). Sente and Gote are terms borrowed from Go. Here
+; they indicate which side moves first.
+0116: FE FE       CPI #FE          ; 1P Sente:
+0118: CA 31 01    JZ $0131         ; FIRST_MOVE_+
+011B: FE FD       CPI #FD          ; 1P Gote:
+011D: CA 49 01    JZ $0149         ; FIRST_MOVE_CPU
+0120: FE FB       CPI #FB          ; 2P Sente:
+0122: CA 31 01    JZ $0131         ; FIRST_MOVE_+
+0125: FE F7       CPI #F7          ; 2P Gote:
+0127: CA 40 01    JZ $0140         ; FIRST_MOVE_■
+012A: 05          DCR B            ; if --PSEUDORANDOM_OPENING_MOVE != 0,
+012B: C2 09 01    JNZ $0109        ; PROMPT_SELECT_GAME
+                                   ; else
+012E: C3 06 01    JMP $0106        ; RESET_PSEUDORANDOM_OPENING_MOVE
+
+; Instead of having a distinct turn indicator value, when playing a 2P
+; game the GAME_MODE is toggled back and forth between #FB and #F7.
+; This gets used to determine which player's inputs to read, where to
+; display the on-screen turn indicator, etc.
 
 ; FIRST_MOVE_+
 0131: F3          DI
-0132: 32 FF 40    STA $40FF       ; GAME_MODE = 1P Sente/2P Sente
-0135: 3E 03       MVI A, #03      ; CURRENT_PIECE = '+'
+0132: 32 FF 40    STA $40FF        ; GAME_MODE = 1P Sente/2P Sente
+0135: 3E 03       MVI A, #03       ; CURRENT_PIECE = '+'
 
 ; FIRST_MOVE_COMMON
 0137: 32 8A 40    STA $408A
-013A: CD F6 07    CALL $07F6      ; WAIT_FOR_INPUT_RELEASE
-013D: C3 8E 01    JMP $018E       ; PLAYER_TURN_CORE
+013A: CD F6 07    CALL $07F6       ; WAIT_FOR_INPUT_RELEASE
+013D: C3 8E 01    JMP $018E        ; PLAYER_TURN_CORE
 
 ; FIRST_MOVE_■
 0140: F3          DI
-0141: 32 FF 40    STA $40FF       ; GAME_MODE = 2P Gote
-0144: 3E 05       MVI A, #05      ; CURRENT_PIECE = '■'
-0146: C3 37 01    JMP $0137       ; FIRST_MOVE_COMMON
+0141: 32 FF 40    STA $40FF        ; GAME_MODE = 2P Gote
+0144: 3E 05       MVI A, #05       ; CURRENT_PIECE = '■'
+0146: C3 37 01    JMP $0137        ; FIRST_MOVE_COMMON
 
 ; FIRST_MOVE_CPU
 ; Input:
@@ -201,55 +251,64 @@
 ;     Service or 1P Gote
 ;   B = CPU_OPENING_MOVE_INDEX (1..4)
 ;     is always 4 when GAME_MODE = Service
+;
+; INIT_GAME is always called here. This is required for the Service
+; path because execution reaches this code directly from attract mode.
+; For 1P Gote, however, the board was already initialized by
+; COIN_INSERTED, making this second INIT_GAME call redundant.
 0149: F3          DI
-014A: 32 FF 40    STA $40FF       ; GAME_MODE = A
+014A: 32 FF 40    STA $40FF        ; GAME_MODE = A
 014D: 78          MOV A,B
-014E: 32 FE 40    STA $40FE       ; CPU_OPENING_MOVE_INDEX = B
-0151: 31 FA 40    LXI SP, $40FA   ; INIT_STACK <= $40F9
-0154: CD EE 08    CALL $08EE      ; INIT_GAME
+014E: 32 FE 40    STA $40FE        ; CPU_OPENING_MOVE_INDEX = B
+0151: 31 FA 40    LXI SP, $40FA    ; INIT_STACK <= $40F9
+0154: CD EE 08    CALL $08EE       ; INIT_GAME
 0157: 3E 05       MVI A, #05
-0159: 32 8A 40    STA $408A       ; CURRENT_PIECE = '■'
-015C: CD D2 08    CALL $08D2      ; PERFORM_CPU_OPENING_MOVE
-015F: C3 7A 01    JMP $017A       ; EXIT_CPU_TURN
+0159: 32 8A 40    STA $408A        ; CURRENT_PIECE = '■'
+015C: CD D2 08    CALL $08D2       ; PERFORM_CPU_OPENING_MOVE
+015F: C3 7A 01    JMP $017A        ; EXIT_CPU_TURN
 
 ; CPU_TURN
 0162: F3          DI
-0163: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
+0163: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
 0166: 3A 89 40    LDA $4089
-0169: FE 02       CPI #02         ; if CONSECUTIVE_PASS_COUNTER == 2,
-016B: CA B5 01    JZ $01B5        ; PROMPT_FOR_JUDGE_WITH_SERVICE_CHECK
-                                  ; else
-016E: CD 2A 05    CALL $052A      ; TOGGLE_CURRENT_PIECE
-0171: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-0174: CD D4 0A    CALL $0AD4      ; DRAW_TURN_INDICATOR
-0177: CD 7C 03    CALL $037C      ; CPU_FIND_AND_PLAY_BEST_MOVE
+; If both players passed on their previous turns, then neither
+; side has a legal move and the game is over.
+0169: FE 02       CPI #02          ; if CONSECUTIVE_PASS_COUNTER == 2,
+016B: CA B5 01    JZ $01B5         ; PROMPT_FOR_JUDGE_WITH_SERVICE_CHECK
+                                   ; else
+016E: CD 2A 05    CALL $052A       ; TOGGLE_CURRENT_PIECE
+0171: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+0174: CD D4 0A    CALL $0AD4       ; DRAW_TURN_INDICATOR
+0177: CD 7C 03    CALL $037C       ; CPU_FIND_AND_PLAY_BEST_MOVE
 
 ; EXIT_CPU_TURN
 017A: 3A FF 40    LDA $40FF
-017D: FE 7F       CPI #7F         ; if GAME_MODE == Service,
-017F: CA 62 01    JZ $0162        ; CPU_TURN
-                                  ; else
+017D: FE 7F       CPI #7F          ; if GAME_MODE == Service,
+017F: CA 62 01    JZ $0162         ; CPU_TURN
+                                   ; else
 ; PLAYER_TURN
 0182: F3          DI
 0183: 3A 89 40    LDA $4089
-0186: FE 02       CPI #02         ; if CONSECUTIVE_PASS_COUNTER == 2,
-0188: CA BD 01    JZ $01BD        ; CLEAR_AND_PROMPT_FOR_JUDGE
-                                  ; else
-018B: CD 2A 05    CALL $052A      ; TOGGLE_CURRENT_PIECE
+; If both players passed on their previous turns, then neither
+; side has a legal move and the game is over.
+0186: FE 02       CPI #02          ; if CONSECUTIVE_PASS_COUNTER == 2,
+0188: CA BD 01    JZ $01BD         ; CLEAR_AND_PROMPT_FOR_JUDGE
+                                   ; else
+018B: CD 2A 05    CALL $052A       ; TOGGLE_CURRENT_PIECE
 
 ; PLAYER_TURN_CORE
-018E: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-0191: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-0194: CD D4 0A    CALL $0AD4      ; DRAW_TURN_INDICATOR
-0197: CD FC 01    CALL $01FC      ; PLAYER_INPUT_LOOP
-019A: 01 BD                       ; JUMP_ADDRESS = CLEAR_AND_PROMPT_FOR_JUDGE
+018E: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+0191: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+0194: CD D4 0A    CALL $0AD4       ; DRAW_TURN_INDICATOR
+0197: CD FC 01    CALL $01FC       ; PLAYER_INPUT_LOOP
+019A: 01 BD                        ; JUMP_ADDRESS = CLEAR_AND_PROMPT_FOR_JUDGE
 019C: 3A FF 40    LDA $40FF
-019F: FE FB       CPI #FB         ; if GAME_MODE == 2P Sente,
-01A1: CA AC 01    JZ $01AC        ; TOGGLE_2P_GAME_MODE
-01A4: FE F7       CPI #F7         ; else if GAME_MODE == 2P Gote,
-01A6: CA AC 01    JZ $01AC        ; TOGGLE_2P_GAME_MODE
-                                  ; else
-01A9: C3 62 01    JMP $0162       ; CPU_TURN
+019F: FE FB       CPI #FB          ; if GAME_MODE == 2P Sente,
+01A1: CA AC 01    JZ $01AC         ; TOGGLE_2P_GAME_MODE
+01A4: FE F7       CPI #F7          ; else if GAME_MODE == 2P Gote,
+01A6: CA AC 01    JZ $01AC         ; TOGGLE_2P_GAME_MODE
+                                   ; else
+01A9: C3 62 01    JMP $0162        ; CPU_TURN
 
 ; TOGGLE_2P_GAME_MODE
 ; Input:
@@ -257,183 +316,232 @@
 ;     2P Sente or 2P Gote
 01AC: 2F          CMA
 01AD: C6 F3       ADI #F3
-01AF: 32 FF 40    STA $40FF       ; GAME_MODE = 2P Sente (#FB) <-> 2P Gote (#F7)
-01B2: C3 82 01    JMP $0182       ; PLAYER_TURN
+01AF: 32 FF 40    STA $40FF        ; GAME_MODE = 2P Sente (#FB) <-> 2P Gote (#F7)
+01B2: C3 82 01    JMP $0182        ; PLAYER_TURN
 
 ; PROMPT_FOR_JUDGE_WITH_SERVICE_CHECK
+; In Service mode, automatically score the game. Otherwise
+; make 1P press the Judge button.
 01B5: 3A FF 40    LDA $40FF
-01B8: FE 7F       CPI #7F         ; if GAME_MODE = Service,
-01BA: CA D5 01    JZ $01D5        ; JUDGE_PRESSED_FINAL
-                                  ; else
+01B8: FE 7F       CPI #7F          ; if GAME_MODE = Service,
+01BA: CA D5 01    JZ $01D5         ; JUDGE_PRESSED_FINAL
+                                   ; else
 ; CLEAR_AND_PROMPT_FOR_JUDGE
-01BD: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-01C0: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
+01BD: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+01C0: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
 
 ; PROMPT_FOR_JUDGE
 01C3: FB          EI
-01C4: 3A 00 60    LDA $6000       ; READ_INPUT
-01C7: FE BF       CPI #BF         ; Judge:
-01C9: CA D5 01    JZ $01D5        ; JUDGE_PRESSED_FINAL
-                                  ; else
-01CC: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-01CF: 01                          ; unused arg
-01D0: 00 4F                       ; "PRESS JUDGE"
-01D2: C3 C3 01    JMP $01C3       ; PROMPT_FOR_JUDGE
+01C4: 3A 00 60    LDA $6000        ; READ_INPUT
+01C7: FE BF       CPI #BF          ; Judge:
+01C9: CA D5 01    JZ $01D5         ; JUDGE_PRESSED_FINAL
+                                   ; else
+01CC: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+01CF: 01                           ; unused arg
+01D0: 00 4F                        ; "PRESS JUDGE"
+01D2: C3 C3 01    JMP $01C3        ; PROMPT_FOR_JUDGE
 
 ; JUDGE_PRESSED_FINAL
 01D5: F3          DI
-01D6: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-01D9: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-01DC: CD F7 09    CALL $09F7      ; SCORE_GAME
-01DF: CD 54 03    CALL $0354      ; VERY_LONG_DELAY [6s]
+01D6: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+01D9: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+01DC: CD F7 09    CALL $09F7       ; SCORE_GAME
+01DF: CD 54 03    CALL $0354       ; VERY_LONG_DELAY [6s]
+; In Service mode, automatically reset after scoring.
+; Otherwise make 1P press the Reset button.
 01E2: 3A FF 40    LDA $40FF
-01E5: FE 7F       CPI #7F         ; if GAME_MODE = Service,
-01E7: CA 00 00    JZ $0000        ; RESET
-                                  ; else
+01E5: FE 7F       CPI #7F          ; if GAME_MODE = Service,
+01E7: CA 00 00    JZ $0000         ; RESET
+                                   ; else
 ; PROMPT_FOR_RESET
 01EA: FB          EI
-01EB: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-01EE: 01                          ; unused arg
-01EF: 00 64                       ; "PRESS RESET"
-01F1: 3A 00 60    LDA $6000       ; READ_INPUT
-01F4: FE DF       CPI #DF         ; Reset:
-01F6: CA 00 00    JZ $0000        ; RESET
-                                  ; else
-01F9: C3 EA 01    JMP $01EA       ; PROMPT_FOR_RESET
+01EB: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+01EE: 01                           ; unused arg
+01EF: 00 64                        ; "PRESS RESET"
+01F1: 3A 00 60    LDA $6000        ; READ_INPUT
+01F4: FE DF       CPI #DF          ; Reset:
+01F6: CA 00 00    JZ $0000         ; RESET
+                                   ; else
+01F9: C3 EA 01    JMP $01EA        ; PROMPT_FOR_RESET
 
 ; PLAYER_INPUT_LOOP
+; Handles player input during a human player's turn. The Pass and
+; Set buttons end the turn when their use is permitted. The Judge
+; and Reset buttons end the game immediately. The Arrow buttons
+; update the location of the move cursors.
 01FC: F3          DI
 01FD: AF          XRA A
-01FE: 32 8B 40    STA $408B       ; MOVE_COL = 0
+01FE: 32 8B 40    STA $408B        ; MOVE_COL = 0
 0201: AF          XRA A
-0202: 32 8C 40    STA $408C       ; MOVE_ROW = 0
+0202: 32 8C 40    STA $408C        ; MOVE_ROW = 0
 0205: AF          XRA A
-0206: 32 98 40    STA $4098       ; PASS_REQUIRED_FLAG = 0
-0209: CD 45 08    CALL $0845      ; DRAW_MOVE_CURSORS
-020C: CD A0 07    CALL $07A0      ; DRAW_GRID
-020F: CD 27 08    CALL $0827      ; CHECK_IF_PLAYER_MUST_PASS
+0206: 32 98 40    STA $4098        ; PASS_REQUIRED_FLAG = 0
+0209: CD 45 08    CALL $0845       ; DRAW_MOVE_CURSORS
+020C: CD A0 07    CALL $07A0       ; DRAW_GRID
+020F: CD 27 08    CALL $0827       ; CHECK_IF_PLAYER_MUST_PASS
+; If the player doesn't have any legal moves, then prompt them to
+; press the Pass button. Unlike most prompts in the game, this
+; doesn't suspend normal input handling. The player can still press
+; any button and they will function normally, but since there are
+; no legal moves they will be unable to set a piece anywhere.
 0212: 78          MOV A,B
-0213: FE 00       CPI #00         ; if PLAYER_MUST_PASS != 0,
-0215: C2 67 02    JNZ $0267       ; PASS_BUTTON_PROMPT
-                                  ; else
+0213: FE 00       CPI #00          ; if PLAYER_MUST_PASS != 0,
+0215: C2 67 02    JNZ $0267        ; PASS_BUTTON_PROMPT
+                                   ; else
 ; PLAYER_INPUT_LOOP_CORE
 0218: F3          DI
 0219: 3A 98 40    LDA $4098
-021C: FE 01       CPI #01         ; if PASS_REQUIRED_FLAG == 1,
-021E: CA 67 02    JZ $0267        ; PASS_BUTTON_PROMPT
-                                  ; else
+021C: FE 01       CPI #01          ; if PASS_REQUIRED_FLAG == 1,
+021E: CA 67 02    JZ $0267         ; PASS_BUTTON_PROMPT
+                                   ; else
 ; PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
-0221: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
+0221: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
 0224: FB          EI
-0225: 3A 00 60    LDA $6000       ; READ_INPUT
-0228: FE FB       CPI #FB         ; Pass:
-022A: CA 78 02    JZ $0278        ; PASS_PRESSED
-022D: FE FD       CPI #FD         ; Right/Left Arrow:
-022F: CA B4 02    JZ $02B4        ; P1_RIGHT_P2_LEFT_PRESSED
-0232: FE FE       CPI #FE         ; Up/Down Arrow:
-0234: CA CB 02    JZ $02CB        ; P1_DOWN_P2_UP_PRESSED
-0237: 3A FC 40    LDA $40FC       ; else
+0225: 3A 00 60    LDA $6000        ; READ_INPUT
+; Both players' Pass buttons are mapped to the same value. There's
+; no need to differentiate them because the Pass button only has an
+; effect when there are no legal moves for the active player.
+0228: FE FB       CPI #FB          ; Pass:
+022A: CA 78 02    JZ $0278         ; PASS_PRESSED
+; Both players' Arrow buttons are mapped to the same values. The controls
+; are mirrored on opposite sides of the screen, so 'Right' for P1 and
+; 'Left' for P2 both move the horizontal cursor in the same direction.
+022D: FE FD       CPI #FD          ; Right/Left Arrow:
+022F: CA B4 02    JZ $02B4         ; P1_RIGHT_P2_LEFT_PRESSED
+; Likewise, 'Down' for P1 and 'Up' for P2 both move the vertical
+; cursor in the same direction.
+0232: FE FE       CPI #FE          ; Up/Down Arrow:
+0234: CA CB 02    JZ $02CB         ; P1_DOWN_P2_UP_PRESSED
+0237: 3A FC 40    LDA $40FC        ; else
+; The Judge button is skipped if GAME_SCORED_FLAG is set. This is
+; meaningless in practice, since control never returns to the player
+; input loop after SCORE_GAME has begun.
 023A: FE 01       CPI #01
-023C: CA 47 02    JZ $0247        ; if DISABLE_JUDGE_FLAG != 1,
-023F: 3A 00 60    LDA $6000       ; READ_INPUT
-0242: FE BF       CPI #BF         ; Judge:
-0244: CA 8E 02    JZ $028E        ; JUDGE_PRESSED
-                                  ; else
-0247: 3A 00 60    LDA $6000       ; READ_INPUT
-024A: FE DF       CPI #DF         ; Reset:
-024C: CA 00 00    JZ $0000        ; RESET
-024F: 3A FF 40    LDA $40FF       ; else
-0252: FE FB       CPI #FB         ; if GAME_MODE == 2P Sente,
-0254: CA 96 02    JZ $0296        ; CHECK_P1_SET_PRESSED
-0257: FE F7       CPI #F7         ; else if GAME_MODE != 2P Gote,
-0259: C2 96 02    JNZ $0296       ; CHECK_P1_SET_PRESSED
-                                  ; else
-025C: 3A 00 60    LDA $6000       ; READ_INPUT
-025F: FE F7       CPI #F7         ; P2_Set:
-0261: CA A1 02    JZ $02A1        ; SET_PRESSED
-                                  ; else
-0264: C3 18 02    JMP $0218       ; PLAYER_INPUT_LOOP_CORE
+023C: CA 47 02    JZ $0247         ; if GAME_SCORED_FLAG != 1,
+023F: 3A 00 60    LDA $6000        ; READ_INPUT
+; The Judge and Reset buttons are immediate game-ending actions.
+; There is no confirmation prompt.
+0242: FE BF       CPI #BF          ; Judge:
+0244: CA 8E 02    JZ $028E         ; JUDGE_PRESSED
+                                   ; else
+0247: 3A 00 60    LDA $6000        ; READ_INPUT
+024A: FE DF       CPI #DF          ; Reset:
+024C: CA 00 00    JZ $0000         ; RESET
+024F: 3A FF 40    LDA $40FF        ; else
+; Unlike the Pass and Arrow buttons, the Set buttons are treated as
+; distinct inputs. The current value of GAME_MODE determines which
+; player's Set button is accepted. Both inputs ultimately lead to
+; the SET_PRESSED function.
+0252: FE FB       CPI #FB          ; if GAME_MODE == 2P Sente,
+0254: CA 96 02    JZ $0296         ; CHECK_P1_SET_PRESSED
+0257: FE F7       CPI #F7          ; else if GAME_MODE != 2P Gote,
+0259: C2 96 02    JNZ $0296        ; CHECK_P1_SET_PRESSED
+                                   ; else
+025C: 3A 00 60    LDA $6000        ; READ_INPUT
+025F: FE F7       CPI #F7          ; P2_Set:
+0261: CA A1 02    JZ $02A1         ; SET_PRESSED
+                                   ; else
+0264: C3 18 02    JMP $0218        ; PLAYER_INPUT_LOOP_CORE
 
 ; PASS_BUTTON_PROMPT
-0267: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-026A: 01                          ; unused arg
-026B: 00 59                       ; "PRESS PASS"
-026D: CD 60 03    CALL $0360      ; SHORT_DELAY [0.37s]
+0267: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+026A: 01                           ; unused arg
+026B: 00 59                        ; "PRESS PASS"
+026D: CD 60 03    CALL $0360       ; SHORT_DELAY [0.37s]
 0270: 3E 01       MVI A, #01
-0272: 32 98 40    STA $4098       ; PASS_REQUIRED_FLAG = 1
-0275: C3 21 02    JMP $0221       ; PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
+0272: 32 98 40    STA $4098        ; PASS_REQUIRED_FLAG = 1
+0275: C3 21 02    JMP $0221        ; PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
 
 ; PASS_PRESSED
 0278: F3          DI
-0279: CD F6 07    CALL $07F6      ; WAIT_FOR_INPUT_RELEASE
-027C: CD 27 08    CALL $0827      ; CHECK_IF_PLAYER_MUST_PASS
+0279: CD F6 07    CALL $07F6       ; WAIT_FOR_INPUT_RELEASE
+; Run CHECK_IF_PLAYER_MUST_PASS again, even though checking PASS_REQUIRED_FLAG
+; should probably suffice. Restart the player's turn if passing is not allowed,
+; otherwise update the pass counter and end the player's turn.
+027C: CD 27 08    CALL $0827       ; CHECK_IF_PLAYER_MUST_PASS
 027F: 78          MOV A,B
-0280: FE 00       CPI #00         ; if PLAYER_MUST_PASS == 0,
-0282: CA FC 01    JZ $01FC        ; PLAYER_INPUT_LOOP
-                                  ; else
+0280: FE 00       CPI #00          ; if PLAYER_MUST_PASS == 0,
+0282: CA FC 01    JZ $01FC         ; PLAYER_INPUT_LOOP
+                                   ; else
 0285: 21 89 40    LXI #4089
-0288: 34          INR M           ; CONSECUTIVE_PASS_COUNTER++
+0288: 34          INR M            ; CONSECUTIVE_PASS_COUNTER++
 
 ; EXIT_INPUT_LOOP
-0289: E3          XTHL            ; save HL / pop RETURN_ADDRESS
-028A: 23          INX H           ; RETURN_ADDRESS++
-028B: 23          INX H           ; RETURN_ADDRESS++
-028C: E3          XTHL            ; push RETURN_ADDRESS / restore HL
-028D: C9          RET             ; return to RETURN_ADDRESS
+; Ends the player's current turn. The caller placed a 2-byte inline
+; Judge target after the CALL, so normal exits must skip over it.
+0289: E3          XTHL             ; save HL / pop RETURN_ADDRESS
+028A: 23          INX H            ; RETURN_ADDRESS++
+028B: 23          INX H            ; RETURN_ADDRESS++
+028C: E3          XTHL             ; push RETURN_ADDRESS / restore HL
+028D: C9          RET              ; return to RETURN_ADDRESS
 
 ; JUDGE_PRESSED
+; Replace PLAYER_INPUT_LOOP's return address with the inline Judge
+; target. Judge is handled outside PLAYER_INPUT_LOOP because it can
+; also be invoked from non-input contexts. When called here,
+; CLEAR_AND_PROMPT_FOR_JUDGE will not prompt because the Judge
+; button has already been pressed and inputs are not cleared, so
+; execution falls through to JUDGE_PRESSED_FINAL.
+;
+; Jumping directly to JUDGE_PRESSED_FINAL instead would appear to
+; produce the same behavior.
 028E: F3          DI
-028F: E3          XTHL            ; save HL / pop RETURN_ADDRESS
-0290: 56          MOV D,M         ; D = JUMP_ADDRESS_HI
-0291: 23          INX H           ; RETURN_ADDRESS++
-0292: 5E          MOV E,M         ; E = JUMP_ADDRESS_LO
-0293: EB          XCHG            ; HL = JUMP_ADDRESS
-0294: E3          XTHL            ; push JUMP_ADDRESS / restore HL
-0295: C9          RET             ; return to JUMP_ADDRESS (CLEAR_AND_PROMPT_FOR_JUDGE)
+028F: E3          XTHL             ; save HL / pop RETURN_ADDRESS
+0290: 56          MOV D,M          ; D = JUMP_ADDRESS_HI
+0291: 23          INX H            ; RETURN_ADDRESS++
+0292: 5E          MOV E,M          ; E = JUMP_ADDRESS_LO
+0293: EB          XCHG             ; HL = JUMP_ADDRESS
+0294: E3          XTHL             ; push JUMP_ADDRESS / restore HL
+0295: C9          RET              ; return to JUMP_ADDRESS (CLEAR_AND_PROMPT_FOR_JUDGE)
 
 ; CHECK_P1_SET_PRESSED
-0296: 3A 00 60    LDA $6000       ; READ_INPUT
-0299: FE EF       CPI #EF         ; P1 Set:
-029B: CA A1 02    JZ $02A1        ; SET_PRESSED
-                                  ; else
-029E: C3 18 02    JMP $0218       ; PLAYER_INPUT_LOOP_CORE
+0296: 3A 00 60    LDA $6000        ; READ_INPUT
+0299: FE EF       CPI #EF          ; P1 Set:
+029B: CA A1 02    JZ $02A1         ; SET_PRESSED
+                                   ; else
+029E: C3 18 02    JMP $0218        ; PLAYER_INPUT_LOOP_CORE
 
 ; SET_PRESSED
 02A1: F3          DI
-02A2: CD FF 07    CALL $07FF      ; CHECK_IF_MOVE_IS_VALID
+; Restart the player's turn if the attempted move is illegal, otherwise
+; apply the move and end the player's turn.
+02A2: CD FF 07    CALL $07FF       ; CHECK_IF_MOVE_IS_LEGAL
 02A5: 78          MOV A,B
-02A6: FE 00       CPI #00         ; if MOVE_VALID == 0,
-02A8: CA FC 01    JZ $01FC        ; PLAYER_INPUT_LOOP
-                                  ; else
-02AB: CD FF 03    CALL $03FF      ; PLAY_MOVE_AND_FLIP_SANDWICHES
-02AE: CD F6 07    CALL $07F6      ; WAIT_FOR_INPUT_RELEASE
-02B1: C3 89 02    JMP $0289       ; EXIT_INPUT_LOOP
+02A6: FE 00       CPI #00          ; if MOVE_LEGAL == 0,
+02A8: CA FC 01    JZ $01FC         ; PLAYER_INPUT_LOOP
+                                   ; else
+02AB: CD FF 03    CALL $03FF       ; PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
+02AE: CD F6 07    CALL $07F6       ; WAIT_FOR_INPUT_RELEASE
+02B1: C3 89 02    JMP $0289        ; EXIT_INPUT_LOOP
+
+; The move cursors each only move in one direction and wrap around
+; at the board edge.
 
 ; P1_RIGHT_P2_LEFT_PRESSED
 02B4: F3          DI
-02B5: 3A 8B 40    LDA $408B       ; A = MOVE_COL
-02B8: 3C          INR A           ; A++
-02B9: FE 08       CPI #08         ; if A != 8,
-02BB: C2 BF 02    JNZ $02BF       ; UPDATE_MOVE_COL
-                                  ; else
-02BE: AF          XRA A           ; A = 0
+02B5: 3A 8B 40    LDA $408B        ; A = MOVE_COL
+02B8: 3C          INR A            ; A++
+02B9: FE 08       CPI #08          ; if A != 8,
+02BB: C2 BF 02    JNZ $02BF        ; UPDATE_MOVE_COL
+                                   ; else
+02BE: AF          XRA A            ; A = 0
 
 ; UPDATE_MOVE_COL
-02BF: 32 8B 40    STA $408B       ; MOVE_COL = A
+02BF: 32 8B 40    STA $408B        ; MOVE_COL = A
 
 ; UPDATE_MOVE_CURSOR
-02C2: CD 42 08    CALL $0842      ; HIGH_TONE_AND_DRAW_MOVE_CURSORS
-02C5: CD F6 07    CALL $07F6      ; WAIT_FOR_INPUT_RELEASE
-02C8: C3 18 02    JMP $0218       ; PLAYER_INPUT_LOOP_CORE
+02C2: CD 42 08    CALL $0842       ; HIGH_TONE_AND_DRAW_MOVE_CURSORS
+02C5: CD F6 07    CALL $07F6       ; WAIT_FOR_INPUT_RELEASE
+02C8: C3 18 02    JMP $0218        ; PLAYER_INPUT_LOOP_CORE
 
 ; P1_DOWN_P2_UP_PRESSED
 02CB: F3          DI
-02CC: 3A 8C 40    LDA $408C       ; A = MOVE_ROW
-02CF: 3C          INR A           ; A++
-02D0: FE 08       CPI #08         ; if A != 8,
-02D2: C2 D6 02    JNZ $02D6       ; UPDATE_MOVE_ROW
-                                  ; else
-02D5: AF          XRA A           ; A = 0
+02CC: 3A 8C 40    LDA $408C        ; A = MOVE_ROW
+02CF: 3C          INR A            ; A++
+02D0: FE 08       CPI #08          ; if A != 8,
+02D2: C2 D6 02    JNZ $02D6        ; UPDATE_MOVE_ROW
+                                   ; else
+02D5: AF          XRA A            ; A = 0
 
 ; UPDATE_MOVE_ROW
 02D6: 32 8C 40    STA $408C       ; MOVE_ROW = A
@@ -441,229 +549,282 @@
 
 ; TIMER_EXPIRED_ADD_COIN_PROMPT
 02DC: F3          DI
-02DD: F5          PUSH PSW        ; save everything
+02DD: F5          PUSH PSW         ; save everything
 02DE: E5          PUSH H
 02DF: D5          PUSH D
 02E0: C5          PUSH B
 
 ; WAIT_05_COIN_CLEAR
-02E1: 3A 00 A0    LDA $A000       ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
+; Waits for coin slot state #05 to clear before proceeding.
+; Based on code behavior, this may indicate that a game is active
+; and/or that the coin blocker is engaged.
+02E1: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
 02E4: E6 07       ANI #07
 02E6: FE 05       CPI #05
-02E8: CA E1 02    JZ $02E1        ; #05: WAIT_05_COIN_CLEAR
-                                  ; else
-02EB: 0E 82       MVI C, #82      ; CONTINUE_LOOP_COUNTER = 130
+02E8: CA E1 02    JZ $02E1         ; #05: WAIT_05_COIN_CLEAR
+                                   ; else
+02EB: 0E 82       MVI C, #82       ; CONTINUE_LOOP_COUNTER = 130
 
 ; CHECK_FOR_CONTINUE_LOOP
-02ED: CD 05 03    CALL $0305      ; CHECK_COIN_SLOT_FOR_CONTINUE_COIN
-02F0: 05          DCR B           ; if --ESCAPE_FLAG < 0,
-02F1: FA 4E 03    JM $034E        ; ESCAPE
+; Flash the 'INSERT ￥100' message and check the coin slot
+; for roughly one minute before resetting.
+;
+; Coin slot states #06, #03, and #05 are all treated as valid
+; continue states. Their exact hardware meaning is unknown.
+02ED: CD 05 03    CALL $0305       ; CHECK_COIN_SLOT_FOR_CONTINUE_COIN
+02F0: 05          DCR B            ; if --ESCAPE_FLAG < 0,
+02F1: FA 4E 03    JM $034E         ; ESCAPE
 
-02F4: 0D          DCR C           ; if --CONTINUE_LOOP_COUNTER != 0,
-02F5: C2 ED 02    JNZ $02ED       ; CHECK_FOR_CONTINUE_LOOP
-                                  ; else
-02F8: 3A 00 A0    LDA $A000       ; READ_COIN_SLOT
+02F4: 0D          DCR C            ; if --CONTINUE_LOOP_COUNTER != 0,
+02F5: C2 ED 02    JNZ $02ED        ; CHECK_FOR_CONTINUE_LOOP
+                                   ; else
+02F8: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT
 02FB: E6 07       ANI #07
 02FD: FE 05       CPI #05
-02FF: CA 4E 03    JZ $034E        ; #05 -> ESCAPE
-                                  ; else
-0302: C3 00 00    JMP $0000       ; RESET
+02FF: CA 4E 03    JZ $034E         ; #05 -> ESCAPE
+                                   ; else
+0302: C3 00 00    JMP $0000        ; RESET
 
 ; CHECK_COIN_SLOT_FOR_CONTINUE_COIN
-0305: 06 01       MVI B, #01      ; ESCAPE_FLAG = 1
-0307: 3A 00 A0    LDA $A000       ; READ_COIN_SLOT
+0305: 06 01       MVI B, #01       ; ESCAPE_FLAG = 1
+0307: 3A 00 A0    LDA $A000        ; READ_COIN_SLOT
 030A: E6 07       ANI #07
 030C: FE 06       CPI #06
-030E: CA 3D 03    JZ $033D        ; #06 -> SET_ESCAPE
+030E: CA 3D 03    JZ $033D         ; #06 -> SET_ESCAPE
 0311: FE 03       CPI #03
-0313: CA 3D 03    JZ $033D        ; #03 -> SET_ESCAPE
+0313: CA 3D 03    JZ $033D         ; #03 -> SET_ESCAPE
 0316: FE 05       CPI #05
-0318: CA 3D 03    JZ $033D        ; #05 -> SET ESCAPE 
+0318: CA 3D 03    JZ $033D         ; #05 -> SET ESCAPE 
+; The Judge button is still functional during the continue
+; screen unless GAME_SCORED_FLAG is set. This occurs when
+; the game has already ended and SCORE_GAME has started
+; when the timer expires. Since interrupts are disabled while
+; scoring, the game is always fully scored before entering the
+; continue loop.
+;
+; If a new coin is inserted in this state, the only remaining
+; action is to prompt the player to push the Reset button.
+;
+; Note: Once scoring has completed, entering the continue loop
+; serves little practical purpose. The program could instead
+; reset immediately.
 031B: 3A FC 40    LDA $40FC
-031E: FE 01       CPI #01         ; if DISABLE_JUDGE_FLAG == 1,
-0320: CA 2B 03    JZ $032B        ; COIN_PROMPT
-                                  ; else
-0323: 3A 00 60    LDA $6000       ; READ_INPUT
-0326: FE BF       CPI #BF         ; Judge:
-0328: CA 3F 03    JZ $033F        ; JUDGE_PRESSED_AT_CONTINUE
-                                  ; else
+031E: FE 01       CPI #01          ; if GAME_SCORED_FLAG == 1,
+0320: CA 2B 03    JZ $032B         ; COIN_PROMPT
+                                   ; else
+0323: 3A 00 60    LDA $6000        ; READ_INPUT
+0326: FE BF       CPI #BF          ; Judge:
+0328: CA 3F 03    JZ $033F         ; JUDGE_PRESSED_AT_CONTINUE
+                                   ; else
 ; COIN_PROMPT
-032B: C5          PUSH B          ; save ESCAPE_FLAG
-032C: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-032F: 01                          ; unused arg
-0330: 00 3B                       ; "INSERT ￥100"
-0332: CD 60 03    CALL $0360      ; SHORT_DELAY [0.37s]
-0335: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-0338: CD 6E 03    CALL $036E      ; CORE_DELAY [30ms]
-033B: C1          POP B	          ; restore ESCAPE_FLAG
-033C: C9          RET             ; RETURN
+032B: C5          PUSH B           ; save ESCAPE_FLAG
+032C: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+032F: 01                           ; unused arg
+0330: 00 3B                        ; "INSERT ￥100"
+0332: CD 60 03    CALL $0360       ; SHORT_DELAY [0.37s]
+0335: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+0338: CD 6E 03    CALL $036E       ; CORE_DELAY [30ms]
+033B: C1          POP B	           ; restore ESCAPE_FLAG
+033C: C9          RET              ; RETURN
 
 ; SET_ESCAPE
-033D: 05          DCR B           ; ESCAPE_FLAG = 0
-033E: C9          RET             ; RETURN
+033D: 05          DCR B            ; ESCAPE_FLAG = 0
+033E: C9          RET              ; RETURN
 
 ; JUDGE_PRESSED_AT_CONTINUE
-033F: CD 79 08    CALL $0879      ; CLEAR_MOVE_CURSORS
-0342: CD 6A 09    CALL $096A      ; CLEAR_MESSAGE
-0345: CD F7 09    CALL $09F7      ; SCORE_GAME
-0348: CD 54 03    CALL $0354      ; VERY_LONG_DELAY [6s]
-034B: C3 00 00    JMP $0000       ; RESET
+033F: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
+0342: CD 6A 09    CALL $096A       ; CLEAR_MESSAGE
+0345: CD F7 09    CALL $09F7       ; SCORE_GAME
+0348: CD 54 03    CALL $0354       ; VERY_LONG_DELAY [6s]
+034B: C3 00 00    JMP $0000        ; RESET
 
 ; ESCAPE
-034E: C1          POP B           ; restore everything
+034E: C1          POP B            ; restore everything
 034F: D1          POP D
 0350: E1          POP H
 0351: F1          POP PSW
 0352: FB          EI
-0353: C9          RET             ; RETURN
+0353: C9          RET              ; RETURN
 
 ; VERY_LONG_DELAY [6s]
-0354: C5          PUSH B          ; save BC
-0355: 06 C8       MVI B, #C8      ; DELAY_LOOP_COUNTER = 200
-0357: C3 63 03    JMP $0363       ; DELAY_LOOP
+; Used before resetting the game after generating the scores
+0354: C5          PUSH B           ; save BC
+0355: 06 C8       MVI B, #C8       ; DELAY_LOOP_COUNTER = 200
+0357: C3 63 03    JMP $0363        ; DELAY_LOOP
 
 ; LONG_DELAY [1s]
+; Used twice in succession after the CPU passes and to cycle
+; messages during attract mode.
+;
+; Note: LONG_DELAY is always called twice consecutively. A dedicated
+; 2-second delay routine would have reduced code size slightly.
 ; 742,487 cycles
-035A: C5          PUSH B          ; save BC
-035B: 06 1E       MVI B, #1E      ; DELAY_LOOP_COUNTER = 30
-035D: C3 63 03    JMP $0363       ; DELAY_LOOP
+035A: C5          PUSH B           ; save BC
+035B: 06 1E       MVI B, #1E       ; DELAY_LOOP_COUNTER = 30
+035D: C3 63 03    JMP $0363        ; DELAY_LOOP
 
 ; SHORT_DELAY [0.37s]
+; Used to flash the 'PRESS PASS' and continue messages
 ; 278,417 cycles
-0360: C5          PUSH B          ; save BC
-0361: 06 0A       MVI B, #0A      ; DELAY_LOOP_COUNTER = 10
+0360: C5          PUSH B           ; save BC
+0361: 06 0A       MVI B, #0A       ; DELAY_LOOP_COUNTER = 10
 
 ; DELAY_LOOP
-0363: CD 6E 03    CALL $036E      ; CORE_DELAY
-0366: 05          DCR B           ; if --DELAY_LOOP_COUNTER != 0,
-0367: C2 63 03    JNZ $0363       ; DELAY_LOOP
-036A: C1          POP B           ; restore BC
+0363: CD 6E 03    CALL $036E       ; CORE_DELAY
+0366: 05          DCR B            ; if --DELAY_LOOP_COUNTER != 0,
+0367: C2 63 03    JNZ $0363        ; DELAY_LOOP
+036A: C1          POP B            ; restore BC
 
 ; DOUBLE_DELAY [60ms]
-036B: CD 6E 03    CALL $036E      ; CORE_DELAY
+; Used as the spacing between tones in the victory jingle.
+036B: CD 6E 03    CALL $036E       ; CORE_DELAY
 
 ; CORE_DELAY [30ms]
 ; 23,171 cycles
-036E: E5          PUSH H          ; save HL
-036F: 21 00 06    LXI H, #0600    ; OUTER_LOOP_COUNTER = 6, INNER_LOOP_COUNTER = 256/0
+; Serves as the basis for all longer delays. Also used directly
+; to flash the board after a move is made and when adding
+; pieces to the board during SCORE_GAME.
+036E: E5          PUSH H           ; save HL
+036F: 21 00 06    LXI H, #0600     ; OUTER_LOOP_COUNTER = 6, INNER_LOOP_COUNTER = 256/0
 
 ; INNER_LOOP
-0372: 2D          DCR L           ; if --INNER_LOOP_COUNTER != 0,
-0373: C2 72 03    JNZ $0372       ; INNER_LOOP
-                                  ; else
-0376: 25          DCR H           ; if --OUTER_LOOP_COUNTER != 0,
-0377: C2 72 03    JNZ $0372       ; INNER_LOOP
-                                  ; else
-037A: E1          POP H           ; restore HL
-037B: C9          RET             ; RETURN
+0372: 2D          DCR L            ; if --INNER_LOOP_COUNTER != 0,
+0373: C2 72 03    JNZ $0372        ; INNER_LOOP
+                                   ; else
+0376: 25          DCR H            ; if --OUTER_LOOP_COUNTER != 0,
+0377: C2 72 03    JNZ $0372        ; INNER_LOOP
+                                   ; else
+037A: E1          POP H            ; restore HL
+037B: C9          RET              ; RETURN
 
 ; CPU_FIND_AND_PLAY_BEST_MOVE
-037C: 3E 01       MVI A, #01      ; AI_FIRST_PASS_FLAG = 1
+; Creates a MOVE_ASSESSMENT (a packed 16-byte representation
+; of the board's contents) of the current board status. On the
+; first pass, it marks the X-squares as illegal moves, so they
+; won't be considered during move evaluation. Each legal move
+; is attempted on the ANALYSIS_BOARD and the resulting position
+; is scored using the BOARD_SPACE_VALUE_TABLE. The move that
+; leads to the best score is the one that is selected.
+;
+; If no legal moves are found on the first pass, a second pass
+; is performed, this time with the X-squares under consideration.
+037C: 3E 01       MVI A, #01       ; AI_FIRST_PASS_FLAG = 1
 
 ; CPU_FIND_AND_PLAY_BEST_MOVE_CORE
 037E: 32 86 40    STA $4086
 0381: AF          XRA A
-0382: 32 8B 40    STA $408B       ; MOVE_COL = 0
+0382: 32 8B 40    STA $408B        ; MOVE_COL = 0
 0385: AF          XRA A
-0386: 32 8C 40    STA $408C       ; MOVE_ROW = 0
+0386: 32 8C 40    STA $408C        ; MOVE_ROW = 0
 0389: 21 00 80    LXI H, #8000
-038C: 22 8D 40    SHLD $408D      ; BEST_MOVE_EVAL_SCORE = -32,768
+038C: 22 8D 40    SHLD $408D       ; BEST_MOVE_EVAL_SCORE = -32,768
 038F: 3E 01       MVI A, #01
-0391: 32 8F 40    STA $408F       ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
-0394: CD D6 06    CALL $06D6      ; CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
+0391: 32 8F 40    STA $408F        ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
+0394: CD D6 06    CALL $06D6       ; CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
 0397: 3A 86 40    LDA $4086
 039A: FE 01       CPI #01
-039C: C2 A2 03    JNZ $03A2       ; if AI_FIRST_PASS_FLAG == 1,
-039F: CD AA 08    CALL $08AA      ; FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
+039C: C2 A2 03    JNZ $03A2        ; if AI_FIRST_PASS_FLAG == 1,
+039F: CD AA 08    CALL $08AA       ; FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
 
 03A2: AF          XRA A
-03A3: 32 90 40    STA $4090       ; UNUSED? = 0
-03A6: 11 00 00    LXI D, #0000    ; ROW_D, COL_E = (0,0)
-03A9: CD 3D 04    CALL $043D      ; FIND_CANDIDATE_MOVE_FROM_D,E
+03A3: 32 90 40    STA $4090        ; UNUSED? = 0
+03A6: 11 00 00    LXI D, #0000     ; ROW_D, COL_E = (0,0)
+03A9: CD 3D 04    CALL $043D       ; FIND_NEXT_CANDIDATE_MOVE_FROM_D,E
 03AC: 78          MOV A,B
-03AD: FE 01       CPI #01         ; if NO_CANDIDATE_MOVE == 1,
-03AF: CA F3 03    JZ $03F3        ; NO_LEGAL_MOVES
-                                  ; else
-03B2: CD D6 04    CALL $04D6      ; TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
-; Builds opponent-perspective move map for the candidate,
-; but it does not appear to be used in move evaluation
+03AD: FE 01       CPI #01          ; if NO_CANDIDATE_MOVE == 1,
+03AF: CA F3 03    JZ $03F3         ; NO_LEGAL_MOVES
+                                   ; else
+03B2: CD D6 04    CALL $04D6       ; TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
+; Builds an opponent-perspective move map for the first candidate
+; on each pass, but it does not appear to be used in move
+; evaluation. This code is not repeated for the second and
+; subsequent candidates.
 03B5: 3E 02       MVI A, #02
-03B7: 32 8F 40    STA $408F       ; CPU_PERSPECTIVE_FLAG? = 2 (unused)
-03BA: CD 2A 05    CALL $052A      ; TOGGLE_CURRENT_PIECE
-03BD: CD E3 06    CALL $06E3      ; CREATE_ANALYSIS_BOARD_MOVE_ASSESSMENT
+03B7: 32 8F 40    STA $408F        ; CPU_PERSPECTIVE_FLAG? = 2 (unused)
+03BA: CD 2A 05    CALL $052A       ; TOGGLE_CURRENT_PIECE
+03BD: CD E3 06    CALL $06E3       ; CREATE_ANALYSIS_BOARD_MOVE_ASSESSMENT
 03C0: 3E 01       MVI A, #01
-03C2: 32 8F 40    STA $408F       ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
-03C5: CD 2A 05    CALL $052A      ; TOGGLE_CURRENT_PIECE
+03C2: 32 8F 40    STA $408F        ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
+03C5: CD 2A 05    CALL $052A       ; TOGGLE_CURRENT_PIECE
 
 ; EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH
-03C8: CD 45 06    CALL $0645      ; GENERATE_CANDIDATE_MOVE_EVAL_SCORE
-03CB: CD 0C 06    CALL $060C      ; UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER
-03CE: CD 07 06    CALL $0607      ; GET_CANDIDATE_MOVE
-03D1: 1C          INR E           ; COL_E++
+03C8: CD 45 06    CALL $0645       ; GENERATE_CANDIDATE_MOVE_EVAL_SCORE
+03CB: CD 0C 06    CALL $060C       ; UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER
+03CE: CD 07 06    CALL $0607       ; GET_CANDIDATE_MOVE
+03D1: 1C          INR E            ; COL_E++
 03D2: 7B          MOV A,E
-03D3: FE 08       CPI #08         ; if COL_E != 8,
-03D5: C2 E4 03    JNZ $03E4       ; CONTINUE_MOVE_SEARCH
-                                  ; else
-03D8: 1E 00       MVI E, #00      ; COL_E = 0
-03DA: 14          INR D           ; ROW_D++
+03D3: FE 08       CPI #08          ; if COL_E != 8,
+03D5: C2 E4 03    JNZ $03E4        ; CONTINUE_MOVE_SEARCH
+                                   ; else
+03D8: 1E 00       MVI E, #00       ; COL_E = 0
+03DA: 14          INR D            ; ROW_D++
 03DB: 7A          MOV A,D
-03DC: FE 08       CPI #08         ; if ROW_D != 8,
-03DE: C2 E4 03    JNZ $03E4       ; CONTINUE_MOVE_SEARCH
-                                  ; else
-03E1: C3 FF 03    JMP $03FF       ; PLAY_MOVE_AND_FLIP_SANDWICHES
+03DC: FE 08       CPI #08          ; if ROW_D != 8,
+03DE: C2 E4 03    JNZ $03E4        ; CONTINUE_MOVE_SEARCH
+                                   ; else
+03E1: C3 FF 03    JMP $03FF        ; PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
 
 ; CONTINUE_MOVE_SEARCH
-03E4: CD 3D 04    CALL $043D      ; FIND_CANDIDATE_MOVE_FROM_D,E
+03E4: CD 3D 04    CALL $043D       ; FIND_NEXT_CANDIDATE_MOVE_FROM_D,E
 03E7: 78          MOV A,B
-03E8: FE 01       CPI #01         ; if NO_CANDIDATE_MOVE == 1,
-03EA: CA FF 03    JZ $03FF        ; PLAY_MOVE_AND_FLIP_SANDWICHES
-                                  ; else
-03ED: CD D6 04    CALL $04D6      ; TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
-03F0: C3 C8 03    JMP $03C8       ; EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH
+03E8: FE 01       CPI #01          ; if NO_CANDIDATE_MOVE == 1,
+03EA: CA FF 03    JZ $03FF         ; PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
+                                   ; else
+03ED: CD D6 04    CALL $04D6       ; TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
+03F0: C3 C8 03    JMP $03C8        ; EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH
 
 ; NO_LEGAL_MOVES
 03F3: 3A 86 40    LDA $4086
-03F6: FE 01       CPI #01         ; if AI_FIRST_PASS_FLAG != 1,
-03F8: C2 2C 04    JNZ $042C       ; STILL_NO_LEGAL_MOVES
-                                  ; else
-03FB: 3D          DCR A           ; AI_FIRST_PASS_FLAG = 0
-03FC: C3 7E 03    JMP $037E       ; CPU_FIND_AND_PLAY_BEST_MOVE_CORE
+03F6: FE 01       CPI #01          ; if AI_FIRST_PASS_FLAG != 1,
+03F8: C2 2C 04    JNZ $042C        ; STILL_NO_LEGAL_MOVES
+                                   ; else
+03FB: 3D          DCR A            ; AI_FIRST_PASS_FLAG = 0
+03FC: C3 7E 03    JMP $037E        ; CPU_FIND_AND_PLAY_BEST_MOVE_CORE
 
-; PLAY_MOVE_AND_FLIP_SANDWICHES
+; PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
+; A move (MOVE_COL, MOVE_ROW) has been previously selected by
+; either the player or the CPU. This adds it to the ANALYSIS_BOARD.
+;
+; The new piece is flashed on the screen 3 times, followed by the
+; newly outflanked pieces flashing 3 times. The DISPLAY_BOARD is
+; then updated with all of the changes.
 03FF: AF          XRA A
-0400: 32 89 40    STA $4089       ; CONSECUTIVE_PASS_COUNTER = 0
-0403: CD A0 07    CALL $07A0      ; DRAW_GRID
-0406: CD DD 04    CALL $04DD      ; COPY_DISPLAY_BOARD_TO_ANALYSIS_BOARD
+0400: 32 89 40    STA $4089        ; CONSECUTIVE_PASS_COUNTER = 0
+0403: CD A0 07    CALL $07A0       ; DRAW_GRID
+0406: CD DD 04    CALL $04DD       ; COPY_DISPLAY_BOARD_TO_ANALYSIS_BOARD
 
 0409: 3A 8C 40    LDA $408C
-040C: 67          MOV H,A         ; H = MOVE_ROW
+040C: 67          MOV H,A          ; H = MOVE_ROW
 040D: 3A 8B 40    LDA $408B
-0410: 6F          MOV L,A         ; L = MOVE_COL
-0411: E5          PUSH H          ; save MOVE_ROW/COL
-0412: CD CA 04    CALL $04CA      ; GET_SPACE_ON_ANALYSIS_BOARD
+0410: 6F          MOV L,A          ; L = MOVE_COL
+0411: E5          PUSH H           ; save MOVE_ROW/COL
+0412: CD CA 04    CALL $04CA       ; GET_SPACE_ON_ANALYSIS_BOARD
 
 0415: 3A 8A 40    LDA $408A
-0418: 77          MOV M,A         ; ANALYSIS_BOARD (H,L) = CURRENT_PIECE
-0419: CD 8A 08    CALL $088A      ; FLASH_BOARD_CHANGE
-041C: E1          POP H           ; restore MOVE_ROW/COL
+0418: 77          MOV M,A          ; ANALYSIS_BOARD (H,L) = CURRENT_PIECE
+0419: CD 8A 08    CALL $088A       ; FLASH_BOARD_CHANGE
+041C: E1          POP H            ; restore MOVE_ROW/COL
 041D: 3E 01       MVI A, #01
-041F: 32 84 40    STA $4084       ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
-0422: CD B2 04    CALL $04B2      ; SCAN_AND_FLIP_SANDWICHES
-0425: CD 8A 08    CALL $088A      ; FLASH_BOARD_CHANGE
-0428: CD E6 04    CALL $04E6      ; COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
-042B: C9          RET             ; RETURN
+041F: 32 84 40    STA $4084        ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
+0422: CD B2 04    CALL $04B2       ; SCAN_AND_FLIP_OUTFLANKED_PIECES
+0425: CD 8A 08    CALL $088A       ; FLASH_BOARD_CHANGE
+0428: CD E6 04    CALL $04E6       ; COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
+042B: C9          RET              ; RETURN
 
 ; STILL_NO_LEGAL_MOVES
+; If no legal moves are found on either pass, record a pass,
+; display the 'CPU PASSES' message, and advance to the other
+; player's turn.
 042C: 21 89 40    LXI H, #4089
-042F: 34          INR M           ; CONSECUTIVE_PASS_COUNTER++
-0430: CD 7F 09    CALL $097F      ; DRAW_MESSAGE
-0433: 01                          ; unused
-0434: 00 6E                       ; "CPU PASSES"
-0436: CD 5A 03    CALL $035A      ; LONG_DELAY [1s]
-0439: CD 5A 03    CALL $035A      ; LONG_DELAY [1s]
-043C: C9          RET             ; RETURN
+042F: 34          INR M            ; CONSECUTIVE_PASS_COUNTER++
+0430: CD 7F 09    CALL $097F       ; DRAW_MESSAGE
+0433: 01                           ; unused
+0434: 00 6E                        ; "CPU PASSES"
+0436: CD 5A 03    CALL $035A       ; LONG_DELAY [1s]
+0439: CD 5A 03    CALL $035A       ; LONG_DELAY [1s]
+043C: C9          RET              ; RETURN
 
-; FIND_CANDIDATE_MOVE_FROM_D,E
+; FIND_NEXT_CANDIDATE_MOVE_FROM_D,E
 ; Input:
 ;   D = ROW_D (0..7)
 ;   E = COL_E (0..7)
@@ -671,124 +832,136 @@
 ;   B = NO_CANDIDATE_MOVE (0/1)
 ;     if 0,
 ;       set CANDIDATE_MOVE_COL, CANDIDATE_MOVE_ROW
-043D: 21 99 40    LXI H, #4099    ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER = (0,0)
-0440: D5          PUSH D          ; save ROW_D, COL_E
-0441: 14          INR D           ; ROW_D++
+043D: 21 99 40    LXI H, #4099     ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER = (0,0)
+0440: D5          PUSH D           ; save ROW_D, COL_E
+0441: 14          INR D            ; ROW_D++
+
+; Advance the MOVE_ASSESSMENT_POINTER to (D,E) before searching
+; for candidate moves.
 
 ; FIND_ROW_D
-0442: 15          DCR D           ; if --ROW_D != 0,
-0443: C2 93 04    JNZ $0493       ; ADVANCE_POINTER_1_ROW
-                                  ; else
+0442: 15          DCR D            ; if --ROW_D != 0,
+0443: C2 93 04    JNZ $0493        ; ADVANCE_POINTER_1_ROW
+                                   ; else
 ; FIND_COL_E_BYTE
-0446: 46          MOV B,M         ; B = ROW_D_POINTER_BYTE
+0446: 46          MOV B,M          ; B = ROW_D_POINTER_BYTE
 0447: 7B          MOV A,E
-0448: FE 04       CPI #04         ; if COL_E == 4,
-044A: CA 98 04    JZ $0498        ; ADVANCE_POINTER_4_COLS
-                                  ; else if COL_E > 4,
-044D: F2 98 04    JP $0498        ; ADVANCE_POINTER_4_COLS
-                                  ; else
-0450: 78          MOV A,B         ; A = POINTER_BYTE
-0451: 1C          INR E           ; COL_E++
+0448: FE 04       CPI #04          ; if COL_E == 4,
+044A: CA 98 04    JZ $0498         ; ADVANCE_POINTER_4_COLS
+                                   ; else if COL_E > 4,
+044D: F2 98 04    JP $0498         ; ADVANCE_POINTER_4_COLS
+                                   ; else
+0450: 78          MOV A,B          ; A = POINTER_BYTE
+0451: 1C          INR E            ; COL_E++
 
 ; FIND_COL_E_BITS
-0452: 1D          DCR E           ; if --COL_E != 0,
-0453: C2 A0 04    JNZ $04A0       ; ADVANCE_POINTER_1_COL
-                                  ; else
-0456: D1          POP D           ; restore ROW_D, COL_E
-0457: C3 5C 04    JMP $045C       ; INSPECT_SPACE
+0452: 1D          DCR E            ; if --COL_E != 0,
+0453: C2 A0 04    JNZ $04A0        ; ADVANCE_POINTER_1_COL
+                                   ; else
+; MOVE_ASSESSMENT_POINTER is now set to (D,E), so begin
+; scanning for a legal move.
+0456: D1          POP D            ; restore ROW_D, COL_E
+0457: C3 5C 04    JMP $045C        ; INSPECT_SPACE
 
 ; GET_POINTER_BYTE
-045A: F1          POP PSW         ; clear POINTER_BYTE from stack
-045B: 7E          MOV A,M         ; A = POINTER_BYTE
+045A: F1          POP PSW          ; clear POINTER_BYTE from stack
+045B: 7E          MOV A,M          ; A = POINTER_BYTE
 
 ; INSPECT_SPACE
-045C: 07          RLC             ; if SPACE == 1x,
-045D: DA 8B 04    JC $048B        ; SKIP_OCCUPIED_SPACE
-0460: 07          RLC             ; else if SPACE == 01,
-0461: DA 82 04    JC $0482        ; RETURN_LEGAL_SPACE
-                                  ; else
-; GET_NEXT_SPACE
-0464: F5          PUSH PSW        ; save POINTER_BYTE
-0465: 1C          INR E           ; COL_E++
+; Occupied spaces are set to 10/11, legal moves are 01
+045C: 07          RLC              ; if SPACE == 1x,
+045D: DA 8B 04    JC $048B         ; SKIP_OCCUPIED_SPACE
+0460: 07          RLC              ; else if SPACE == 01,
+0461: DA 82 04    JC $0482         ; RETURN_LEGAL_SPACE
+                                   ; else
+; ADVANCE_POINTER_TO_NEXT_SPACE
+0464: F5          PUSH PSW         ; save POINTER_BYTE
+0465: 1C          INR E            ; COL_E++
 0466: 7B          MOV A,E
-0467: FE 04       CPI #04         ; if COL_E == 4,
-0469: CA 8F 04    JZ $048F        ; GET_NEXT_POINTER_BYTE
-046C: FE 08       CPI #08         ; else if COL_E != 8,
-046E: C2 7E 04    JNZ $047E       ; INSPECT_NEXT_SPACE
-                                  ; else
-0471: 1E 00       MVI E, #00      ; COL_E = 0
-0473: 14          INR D           ; ROW_D++
+0467: FE 04       CPI #04          ; if COL_E == 4,
+0469: CA 8F 04    JZ $048F         ; GET_NEXT_POINTER_BYTE
+046C: FE 08       CPI #08          ; else if COL_E != 8,
+046E: C2 7E 04    JNZ $047E        ; INSPECT_NEXT_SPACE
+                                   ; else
+0471: 1E 00       MVI E, #00       ; COL_E = 0
+0473: 14          INR D            ; ROW_D++
 0474: 7A          MOV A,D
-0475: FE 08       CPI #08         ; if ROW_D != 8,
-0477: C2 8F 04    JNZ $048F       ; GET_NEXT_POINTER_BYTE
-                                  ; else
-047A: 06 01       MVI B, #01      ; NO_CANDIDATE_MOVE = 1
-047C: F1          POP PSW         ; clear POINTER_BYTE from stack
-047D: C9          RET             ; RETURN
+0475: FE 08       CPI #08          ; if ROW_D != 8,
+0477: C2 8F 04    JNZ $048F        ; GET_NEXT_POINTER_BYTE
+                                   ; else
+047A: 06 01       MVI B, #01       ; NO_CANDIDATE_MOVE = 1
+047C: F1          POP PSW          ; clear POINTER_BYTE from stack
+047D: C9          RET              ; RETURN
 
 ; INSPECT_NEXT_SPACE
-047E: F1          POP PSW         ; restore POINTER_BYTE
-047F: C3 5C 04    JMP $045C       ; INSPECT_SPACE
+047E: F1          POP PSW          ; restore POINTER_BYTE
+047F: C3 5C 04    JMP $045C        ; INSPECT_SPACE
 
 ; RETURN_LEGAL_SPACE
+; Store CANDIDATE_MOVE in RAM
 0482: 21 A9 40    LXI H, #40A9
-0485: 73          MOV M,E         ; CANDIDATE_MOVE_COL = COL_E
+0485: 73          MOV M,E          ; CANDIDATE_MOVE_COL = COL_E
 0486: 23          INX H
-0487: 72          MOV M,D         ; CANDIDATE_MOVE_ROW = ROW_D
-0488: 06 00       MVI B, #00      ; NO_CANDIDATE_MOVE = 0
-048A: C9          RET             ; RETURN
+0487: 72          MOV M,D          ; CANDIDATE_MOVE_ROW = ROW_D
+0488: 06 00       MVI B, #00       ; NO_CANDIDATE_MOVE = 0
+048A: C9          RET              ; RETURN
 
 ; SKIP_OCCUPIED_SPACE
-048B: 07          RLC             ; discard next bit (POINTER_BYTE << 1)
-048C: C3 64 04    JMP $0464       ; GET_NEXT_SPACE
+048B: 07          RLC              ; discard low bit (POINTER_BYTE << 1)
+048C: C3 64 04    JMP $0464        ; ADVANCE_POINTER_TO_NEXT_SPACE
 
 ; GET_NEXT_POINTER_BYTE
-048F: 23          INX H           ; MOVE_ASSESSMENT_POINTER++
-0490: C3 5A 04    JMP $045A       ; GET_POINTER_BYTE
+048F: 23          INX H            ; MOVE_ASSESSMENT_POINTER++
+0490: C3 5A 04    JMP $045A        ; GET_POINTER_BYTE
 
 ; ADVANCE_POINTER_1_ROW
 0493: 23          INX H
-0494: 23          INX H           ; MOVE_ASSESSEMENT_POINTER = (x++,y)
-0495: C3 42 04    JMP $0442       ; FIND_ROW_D
+0494: 23          INX H            ; MOVE_ASSESSEMENT_POINTER = (x++,y)
+0495: C3 42 04    JMP $0442        ; FIND_ROW_D
 
 ; ADVANCE_POINTER_4_COLS
-0498: 23          INX H           ; MOVE_ASSESSEMENT_POINTER = (x,y+4)
+0498: 23          INX H            ; MOVE_ASSESSEMENT_POINTER = (x,y+4)
 0499: 1D          DCR E
 049A: 1D          DCR E
 049B: 1D          DCR E
-049C: 1D          DCR E           ; COL_E = COL_E-4
-049D: C3 46 04    JMP $0446       ; FIND_COL_E_BYTE
+049C: 1D          DCR E            ; COL_E = COL_E-4
+049D: C3 46 04    JMP $0446        ; FIND_COL_E_BYTE
 
 ; ADVANCE_POINTER_1_COL
 04A0: 07          RLC
-04A1: 07          RLC             ; FOUND_POINTER_BYTE << 2
-04A2: C3 52 04    JMP $0452       ; FIND_COL_E_BITS
+04A1: 07          RLC              ; FOUND_POINTER_BYTE << 2
+04A2: C3 52 04    JMP $0452        ; FIND_COL_E_BITS
 
 ; TRY_CANDIDATE_MOVE
 04A5: 3E 01       MVI A, #01
-04A7: 32 84 40    STA $4084       ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
-04AA: CD 07 06    CALL $0607      ; GET_CANDIDATE_MOVE
-04AD: EB          XCHG            ; HL = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
-04AE: CD B2 04    CALL $04B2      ; SCAN_AND_FLIP_SANDWICHES
-04B1: C9          RET             ; RETURN
+04A7: 32 84 40    STA $4084        ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
+04AA: CD 07 06    CALL $0607       ; GET_CANDIDATE_MOVE
+04AD: EB          XCHG             ; HL = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
+04AE: CD B2 04    CALL $04B2       ; SCAN_AND_FLIP_OUTFLANKED_PIECES
+04B1: C9          RET              ; RETURN
 
-; SCAN_AND_FLIP_SANDWICHES
+; SCAN_AND_FLIP_OUTFLANKED_PIECES
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
-04B2: 16 01       MVI D, #01      ; DIRECTION = 1
+; Scan all 8 directions from the selected move on the ANALYSIS_BOARD,
+; flipping all of the resulting outflanked pieces. Once all directions
+; have been processed, place the new piece on the board.
+04B2: 16 01       MVI D, #01       ; DIRECTION = 1
 
-; CONTINUE_SANDWICH_SCAN
-04B4: CD 58 05    CALL $0558      ; INIT_SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
-04B7: 1E 01       MVI E, #01      ; FLIP_PIECES = 1
-04B9: CD 5B 05    CALL $055B      ; SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+; CONTINUE_SCAN_FOR_OUTFLANKED_PIECES
+04B4: CD 58 05    CALL $0558       ; INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
+04B7: 1E 01       MVI E, #01       ; FLIP_PIECES = 1
+04B9: CD 5B 05    CALL $055B       ; SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
+; Upon exit, D holds the next DIRECTION to be scanned
 04BC: 7A          MOV A,D
-04BD: FE 09       CPI #09         ; if DIRECTION != 9,
-048F: C2 B4 04    JNZ $04B4       ; CONTINUE_SANDWICH_SCAN
-                                  ; else
-04C2: CD CA 04    CALL $04CA      ; GET_SPACE_ON_ANALYSIS_BOARD
-04C5: 3A 8A 40    LDA $408A       ; A = CURRENT_PIECE
-04C8: 77          MOV M,A         ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
-04C9: C9          RET             ; RETURN
+04BD: FE 09       CPI #09          ; if DIRECTION != 9,
+048F: C2 B4 04    JNZ $04B4        ; CONTINUE_SCAN_FOR_OUTFLANKED_PIECES
+                                   ; else
+; Finally, actually play the piece on the board
+04C2: CD CA 04    CALL $04CA       ; GET_SPACE_ON_ANALYSIS_BOARD
+04C5: 3A 8A 40    LDA $408A        ; A = CURRENT_PIECE
+04C8: 77          MOV M,A          ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
+04C9: C9          RET              ; RETURN
 
 ; GET_SPACE_ON_ANALYSIS_BOARD
 ; Input:
@@ -796,250 +969,306 @@
 ;   L = L_COL (0..7)
 ; Output:
 ;   HL = ANALYSIS_BOARD_POINTER (H,L)
-04CA: CD E3 07    CALL $07E3      ; GET_SPACE_ON_DISPLAY_BOARD
+04CA: CD E3 07    CALL $07E3       ; GET_SPACE_ON_DISPLAY_BOARD
 04CD: 7D          MOV A,L
 04CE: C6 40       ADI #40
 04D0: 6F          MOV L,A
 04D1: 3E 00       MVI A, #00
 04D3: 8C          ADC H
-04D4: 67          MOV H,A         ; ANALYSIS_BOARD_POINTER = DISPLAY_BOARD_POINTER + #0040
-04D5: C9          RET             ; RETURN
+04D4: 67          MOV H,A          ; ANALYSIS_BOARD_POINTER = DISPLAY_BOARD_POINTER + #0040
+04D5: C9          RET              ; RETURN
 
 ; TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
-04D6: CD 5D 07    CALL $075D      ; POPULATE_ANALYSIS_BOARD_FROM_DISPLAY_BOARD_MOVE_ASSESSMENT
-04D9: CD A5 04    CALL $04A5      ; TRY_CANDIDATE_MOVE
-04DC: C9          RET             ; RETURN
+; Expand the MOVE_ASSESSMENT into the ANALYSIS_BOARD and apply
+; the current candidate move.
+04D6: CD 5D 07    CALL $075D       ; POPULATE_ANALYSIS_BOARD_FROM_DISPLAY_BOARD_MOVE_ASSESSMENT
+04D9: CD A5 04    CALL $04A5       ; TRY_CANDIDATE_MOVE
+04DC: C9          RET              ; RETURN
 
 ; COPY_DISPLAY_BOARD_TO_ANALYSIS_BOARD
-04DD: 21 00 40    LXI H, #4000    ; HL = DISPLAY_BOARD_POINTER
-04E0: 11 40 40    LXI D, #4040    ; DE = ANALYSIS_BOARD_POINTER
-04E3: C3 EC 04    JMP $04EC       ; COPY_BOARD_CORE
+04DD: 21 00 40    LXI H, #4000     ; HL = DISPLAY_BOARD_POINTER
+04E0: 11 40 40    LXI D, #4040     ; DE = ANALYSIS_BOARD_POINTER
+04E3: C3 EC 04    JMP $04EC        ; COPY_BOARD_CORE
 
 ; COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
-04E6: 21 40 40    LXI H, #4040    ; HL = ANALYSIS_BOARD_POINTER
-04E9: 11 00 40    LXI D, #4000    ; DE = DISPLAY_BOARD_POINTER
+04E6: 21 40 40    LXI H, #4040     ; HL = ANALYSIS_BOARD_POINTER
+04E9: 11 00 40    LXI D, #4000     ; DE = DISPLAY_BOARD_POINTER
 
 ; COPY_BOARD_CORE
 ; Input:
 ;   HL = SOURCE_BOARD_POINTER
 ;   DE = TARGET_BOARD_POINTER
-04EC: 06 40       MVI B, #40      ; COPY_SPACE_LOOP_COUNTER = 64
+04EC: 06 40       MVI B, #40       ; COPY_SPACE_LOOP_COUNTER = 64
 
 ; COPY_SPACE
 04EE: 7E          MOV A,M
-04EF: 12          STAX D          ; TARGET_BOARD(POINTER) = SOURCE_BOARD(POINTER)
-04F0: 23          INX H           ; SOURCE_BOARD_POINTER++
-04F1: 13          INX D           ; TARGET_BOARD_POINTER++
-04F2: 05          DCR B           ; if --COPY_SPACE_LOOP_COUNTER != 0
-04F3: C2 EE 04    JNZ $04EE       ; COPY_SPACE
-                                  ; else
-04F6: C9          RET             ; RETURN
+04EF: 12          STAX D           ; TARGET_BOARD(POINTER) = SOURCE_BOARD(POINTER)
+04F0: 23          INX H            ; SOURCE_BOARD_POINTER++
+04F1: 13          INX D            ; TARGET_BOARD_POINTER++
+04F2: 05          DCR B            ; if --COPY_SPACE_LOOP_COUNTER != 0
+04F3: C2 EE 04    JNZ $04EE        ; COPY_SPACE
+                                   ; else
+04F6: C9          RET              ; RETURN
 
 ; LOAD_CANDIDATE_MOVE_EVAL_SCORE
 ; Output:
 ;   BC = CANDIDATE_MOVE_EVAL_SCORE
-04F7: E5          PUSH H          ; save HL
+04F7: E5          PUSH H           ; save HL
 04F8: 21 95 40    LXI H, #4095
 04FB: 4E          MOV C,M
 04FC: 23          INX H
-04FD: 46          MOV B,M         ; BC = CANDIDATE_MOVE_EVAL_SCORE
-04FE: E1          POP H           ; restore HL
-04FF: C9          RET             ; RETURN
+04FD: 46          MOV B,M          ; BC = CANDIDATE_MOVE_EVAL_SCORE
+04FE: E1          POP H            ; restore HL
+04FF: C9          RET              ; RETURN
 
 ; DRAW_ANALYSIS_BOARD
-0500: 11 40 40    LXI D, #4040    ; DE = ANALYSIS_BOARD_POINTER
-0503: C3 09 05    JMP $0509       ; DRAW_BOARD_CORE
+0500: 11 40 40    LXI D, #4040     ; DE = ANALYSIS_BOARD_POINTER
+0503: C3 09 05    JMP $0509        ; DRAW_BOARD_CORE
 
 ; DRAW_DISPLAY_BOARD
-0506: 11 00 40    LXI D, #4000    ; DE = DISPLAY_BOARD_POINTER
+0506: 11 00 40    LXI D, #4000     ; DE = DISPLAY_BOARD_POINTER
 
 ; DRAW_BOARD_CORE
-0509: 21 0A CE    LXI H, #CE0A    ; HL = VRAM_POINTER(0,0) = $CE0A
-050C: 0E 08       MVI C, #08      ; ROW_COUNTER = 8
+0509: 21 0A CE    LXI H, #CE0A     ; HL = VRAM_POINTER(0,0) = $CE0A
+050C: 0E 08       MVI C, #08       ; ROW_COUNTER = 8
 
 ; DRAW_ROW
-050E: E5          PUSH H          ; save VRAM_POINTER (start of row)
-050F: 06 08       MVI B, #08      ; COL_COUNTER = 8
+050E: E5          PUSH H           ; save VRAM_POINTER (start of row)
+050F: 06 08       MVI B, #08       ; COL_COUNTER = 8
 
 ; DRAW_SPACE
-0511: E5          PUSH H          ; save VRAM_POINTER
-0512: 1A          LDAX D          ; SPACE_CONTENTS = BOARD(POINTER)
-0513: CD 12 09    CALL $0912      ; DRAW_GAME_PIECE
-0516: 13          INX D           ; BOARD_POINTER++
-0517: E1          POP H           ; restore VRAM_POINTER
+0511: E5          PUSH H           ; save VRAM_POINTER
+0512: 1A          LDAX D           ; SPACE_CONTENTS = BOARD(POINTER)
+0513: CD 12 09    CALL $0912       ; DRAW_GAME_PIECE
+0516: 13          INX D            ; BOARD_POINTER++
+0517: E1          POP H            ; restore VRAM_POINTER
 0518: 7D          MOV A,L
-0519: C6 06       ADI #06         ; VRAM_POINTER = VRAM_POINTER + 6
-051B: 6F          MOV L,A         ; HL = VRAM_POINTER(x++,y)
-051C: 05          DCR B           ; if --COL_COUNTER != 0,
-051D: C2 11 05    JNZ $0511       ; DRAW_SPACE
-                                  ; else
-0520: E1          POP H           ; restore VRAM_POINTER (start of row)
+; Advance VRAM pointer 6 pixels horizontally
+; (5 for the space + 1 for the grid line)
+0519: C6 06       ADI #06          ; VRAM_POINTER = VRAM_POINTER + 6
+051B: 6F          MOV L,A          ; HL = VRAM_POINTER(x++,y)
+051C: 05          DCR B            ; if --COL_COUNTER != 0,
+051D: C2 11 05    JNZ $0511        ; DRAW_SPACE
+                                   ; else
+0520: E1          POP H            ; restore VRAM_POINTER (start of row)
 0521: 7C          MOV A,H
-0522: C6 06       ADI #06         ; VRAM_POINTER += #0600
-0524: 67          MOV H,A         ; HL = VRAM_POINTER(x,y++)
-0525: 0D          DCR C           ; if --ROW_COUNTER != 0,
-0526: C2 0E 05    JNZ $050E       ; DRAW_ROW
-                                  ; else
-0529: C9          RET             ; RETURN
+; Advance VRAM pointer 6 pixels vertically
+; (5 for the space + 1 for the grid line)
+0522: C6 06       ADI #06          ; VRAM_POINTER += #0600
+0524: 67          MOV H,A          ; HL = VRAM_POINTER(x,y++)
+0525: 0D          DCR C            ; if --ROW_COUNTER != 0,
+0526: C2 0E 05    JNZ $050E        ; DRAW_ROW
+                                   ; else
+0529: C9          RET              ; RETURN
 
 ; TOGGLE_CURRENT_PIECE
 052A: 3A 8A 40    LDA $408A
-052D: FE 03       CPI #03         ; if CURRENT_PIECE == '+',
-052F: CA 38 05    JZ $0538        ; SET_CURRENT_PIECE_■
-                                  ; else
+052D: FE 03       CPI #03          ; if CURRENT_PIECE == '+',
+052F: CA 38 05    JZ $0538         ; SET_CURRENT_PIECE_■
+                                   ; else
 0532: 3E 03       MVI A, #03
-0534: 32 8A 40    STA $408A       ; CURRENT_PIECE = '+'
-0537: C9          RET             ; RETURN
+0534: 32 8A 40    STA $408A        ; CURRENT_PIECE = '+'
+0537: C9          RET              ; RETURN
 
 ; SET_CURRENT_PIECE_■
 0538: 3E 05       MVI A, #05
-053A: 32 8A 40    STA $408A       ; CURRENT_PIECE = '■'
-053D: C9          RET             ; RETURN
+053A: 32 8A 40    STA $408A        ; CURRENT_PIECE = '■'
+053D: C9          RET              ; RETURN
 
 ; CLEAR_WORK_RAM
 ; Output:
-;   RAM from $4000-$40F0 = 0
-053E: 21 00 40    LXI H, #4000    ; RAM_POINTER = $4000
-0541: 0E F0       MVI C, #F0      ; CLEAR_RAM_LOOP_COUNTER = 240
+;   RAM from $4000-$40EF = 0
+; Preserves top of stack (so calls through INIT_GAME can return) as
+; well as GAME_SCORED_FLAG, ATTRACT_MODE_SUPPRESS_SOUND,
+; CPU_OPENING_MOVE_INDEX, and GAME_MODE. These values are required by
+; code that executes after INIT_GAME returns, so need to be preserved.
+053E: 21 00 40    LXI H, #4000     ; RAM_POINTER = $4000
+0541: 0E F0       MVI C, #F0       ; CLEAR_RAM_LOOP_COUNTER = 240
 
 ; ZERO_OUT_RAM
-0543: 36 00       MVI M, #00      ; RAM(POINTER) = 0
-0545: 23          INX H           ; RAM_POINTER++
-0546: 0D          DCR C           ; if --CLEAR_RAM_LOOP_COUNTER != 0,
-0547: C2 43 05    JNZ $0543       ; ZERO_OUT_RAM
-                                  ; else
-054A: C9          RET             ; RETURN
+0543: 36 00       MVI M, #00       ; RAM(POINTER) = 0
+0545: 23          INX H            ; RAM_POINTER++
+0546: 0D          DCR C            ; if --CLEAR_RAM_LOOP_COUNTER != 0,
+0547: C2 43 05    JNZ $0543        ; ZERO_OUT_RAM
+                                   ; else
+054A: C9          RET              ; RETURN
 
-CLEAR_VRAM:
+; CLEAR_VRAM
 ; Output:
 ;   VRAM from $C000-$FFFF = 0
-054B: 01 01 00    LXI B, #0001    ; INCREMENTER = 1
-054E: 21 00 C0    LXI H, $C000    ; VRAM_POINTER = $C000
+;
+; Total viewable space (64 x 64):
+;   $C000-$C03F
+;   ...
+;   $FF00-$FF3F
+;
+; Space is used as follows:
+; MESSAGE space (8 x 64):
+;   $C000-$C03F
+;   ...
+;   $C700-$C73F
+; P2_TURN_INDICATOR (5 x 5):
+;   $CA00-$CA04
+;   ...
+;   $CE00-$CE04
+; P1_TURN_INDICATOR (5 x 5):
+;   $F800-$F804
+;   ...
+;   $FC00-$FC04
+; MOVE_CURSORS (1 x 52):
+;   $CA06-$CA3A (Horizontal)
+;   ...
+;   $FE06 (Vertical)
+; BOARD space (49 x 49):
+;   $CD09-$CD39
+;   ...
+;   $FD09-$FD39
+054B: 01 01 00    LXI B, #0001     ; INCREMENTER = 1
+054E: 21 00 C0    LXI H, $C000     ; VRAM_POINTER = $C000
 0551: AF          XRA A
 
 ; ZERO_OUT_VRAM
-0552: 77          MOV M,A         ; VRAM(POINTER) = 0
-0553: 09          DAD B           ; VRAM_POINTER = VRAM_POINTER + INCREMENTER
-0554: D2 52 05    JNC $0552       ; ZERO_OUT_VRAM while VRAM_POINTER < $0000 (carry not set)
-                                  ; else
-0557: C9          RET             ; RETURN
+0552: 77          MOV M,A          ; VRAM(POINTER) = 0
+0553: 09          DAD B            ; VRAM_POINTER = VRAM_POINTER + INCREMENTER
+0554: D2 52 05    JNC $0552        ; ZERO_OUT_VRAM while VRAM_POINTER < $0000 (carry not set)
+                                   ; else
+0557: C9          RET              ; RETURN
 
-; INIT_SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+; INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
 ;   D = DIRECTION
 ; Output:
-;   B = SANDWICH_SIZE
-;   D = SANDWICH_DIRECTION (9, if no sandwiches found)
+;   B = NUM_OUTFLANKED_PIECES
+;   D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
 0558: AF          XRA A
-0559: 47          MOV B,A         ; SANDWICH_SIZE = 0
-055A: 5F          MOV E,A         ; FLIP_PIECES = 0
+0559: 47          MOV B,A          ; NUM_OUTFLANKED_PIECES = 0
+055A: 5F          MOV E,A          ; FLIP_PIECES = 0
 
-; SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+; SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
-;   B = SANDWICH_SIZE
+;   B = NUM_OUTFLANKED_PIECES
 ;   D = DIRECTION
 ;   E = FLIP_PIECES (0/1)
-;     if 0, scans for sandwich and returns with:
-;       B = SANDWICH_SIZE
-;       D = SANDWICH_DIRECTION (9, if no sandwiches found)
-;     if 1, flips sandwich and returns with:
+;     if 0, scans for outflanked pieces and returns with:
+;       B = NUM_OUTFLANKED_PIECES
+;       D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
+;     if 1, flips outflanked pieces and returns with:
 ;       B = 0
-;       D = SANDWICH_DIRECTION++
+;       D = DIRECTION_OUTFLANKED_PIECES++
 055B: E5          PUSH H          ; save MOVE_ROW, MOVE_COL
 
-; SCAN_FOR_SANDWICH_CORE
-055C: 7A          MOV A,D         ; CURR_DIRECTION = DIRECTION
-055D: E5          PUSH H          ; save MOVE_ROW, MOVE_COL
-055E: 21 73 05    LXI H, #0573    ; HL = $0573, DIRECTION_TABLE(1)
+; SCAN_FOR_OUTFLANKED_PIECES_CORE
+; If FLIP_PIECES is 0, scan the current direction for outflanked
+; pieces. An empty space, board edge, or CURRENT_PIECE without
+; first encountering any opponent pieces advances the scan to
+; the next direction. Opponent pieces increment
+; NUM_OUTFLANKED_PIECES and continue the scan in the same
+; direction. If one or more opponent pieces are followed by a
+; CURRENT_PIECE, then outflanked pieces have been found and the
+; count and direction of the pieces are returned to the caller.
+;
+; If FLIP_PIECES is 1, then NUM_OUTFLANKED_PIECES is the number
+; of pieces to flip in the current direction. Flip the pieces
+; one by one until all of the outflanked pieces have been
+; handled. Return the next direction to scan to the caller.
+055C: 7A          MOV A,D          ; CURR_DIRECTION = DIRECTION
+055D: E5          PUSH H           ; save MOVE_ROW, MOVE_COL
+055E: 21 73 05    LXI H, #0573     ; HL = $0573, DIRECTION_TABLE(1)
 
 ; FIND_DIRECTION_IN_DIRECTION_TABLE
-0561: 3D          DCR A           ; if --CURR_DIRECTION == 0,
-0562: CA 72 05    JZ $0572        ; EXEC_DIRECTION_TABLE
+; Set DIRECTION_TABLE pointer to match caller's indicated direction.
+0561: 3D          DCR A            ; if --CURR_DIRECTION == 0,
+0562: CA 72 05    JZ $0572         ; EXEC_DIRECTION_TABLE
 
-0565: F5          PUSH PSW        ; save CURR_DIRECTION
+0565: F5          PUSH PSW         ; save CURR_DIRECTION
 0566: 7D          MOV A,L
 0567: C6 06       ADI #06
 0569: 6F          MOV L,A
 056A: 3E 00       MVI A, #00
 056C: 8C          ADC H
-056D: 67          MOV H,A         ; HL = HL + 6, DIRECTION_TABLE(++)
-056E: F1          POP PSW         ; restore CURR_DIRECTION
-056F: C3 61 05    JMP $0561       ; FIND_DIRECTION_IN_DIRECTION_TABLE
+056D: 67          MOV H,A          ; HL = HL + 6, DIRECTION_TABLE(++)
+056E: F1          POP PSW          ; restore CURR_DIRECTION
+056F: C3 61 05    JMP $0561        ; FIND_DIRECTION_IN_DIRECTION_TABLE
 
 ; EXEC_DIRECTION_TABLE
-0572: E9          PCHL            ; exec DIRECTION_TABLE(D)
+; Each DIRECTION_TABLE entry adjusts MOVE_ROW/MOVE_COL, then
+; jumps into the common scan logic.
+0572: E9          PCHL             ; exec DIRECTION_TABLE(D)
 
 ; DIRECTION_TABLE(1) - UP
-0573: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-0574: 25          DCR H           ; MOVE_ROW--
+0573: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+0574: 25          DCR H            ; MOVE_ROW--
 0575: 00          NOP
-0576: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+0576: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(2) - UP-RIGHT
-0579: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-057A: 2C          INR L           ; MOVE_COL++
-057B: 25          DCR H           ; MOVE_ROW--
-057C: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+0579: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+057A: 2C          INR L            ; MOVE_COL++
+057B: 25          DCR H            ; MOVE_ROW--
+057C: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(3) - RIGHT
-057F: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-0580: 2C          INR L           ; MOVE_COL++
+057F: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+0580: 2C          INR L            ; MOVE_COL++
 0581: 00          NOP
-0582: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+0582: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(4) - DOWN-RIGHT
-0585: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-0586: 24          INR H           ; MOVE_ROW++
-0587: 2C          INR L           ; MOVE_COL++
-0588: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+0585: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+0586: 24          INR H            ; MOVE_ROW++
+0587: 2C          INR L            ; MOVE_COL++
+0588: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(5) - DOWN
-058B: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-058C: 24          INR H           ; MOVE_ROW++
+058B: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+058C: 24          INR H            ; MOVE_ROW++
 058D: 00          NOP
-058E: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+058E: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(6) - DOWN-LEFT
-0591: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-0592: 24          INR H           ; MOVE_ROW++
-0593: 2D          DCR L           ; MOVE_COL--
-0594: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+0591: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+0592: 24          INR H            ; MOVE_ROW++
+0593: 2D          DCR L            ; MOVE_COL--
+0594: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(7) - LEFT
-0597: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-0598: 2D          DCR L           ; MOVE_COL--
+0597: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+0598: 2D          DCR L            ; MOVE_COL--
 0599: 00          NOP
-059A: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+059A: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(8) - UP-LEFT
-059D: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-059E: 2D          DCR L           ; MOVE_COL--
-059F: 25          DCR H           ; MOVE_ROW++
-05A0: C3 A6 05    JMP $05A6       ; SCAN_DIRECTION
+059D: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+059E: 2D          DCR L            ; MOVE_COL--
+059F: 25          DCR H            ; MOVE_ROW++
+05A0: C3 A6 05    JMP $05A6        ; SCAN_DIRECTION
 
 ; DIRECTION_TABLE(9) - RETURN
-05A3: E1          POP H           ; clear MOVE_ROW, MOVE_COL from stack
-05A4: E1          POP H           ; restore MOVE_ROW, MOVE_COL
-05A5: C9          RET             ; RETURN
+; Reached when all 8 directions have been exhausted.
+05A3: E1          POP H            ; clear MOVE_ROW, MOVE_COL from stack
+05A4: E1          POP H            ; restore MOVE_ROW, MOVE_COL
+05A5: C9          RET              ; RETURN
 
 ; SCAN_DIRECTION
+; If board edges are found, advance the scan to the next direction.
 05A6: 7C          MOV A,H
-05A7: FE FF       CPI #FF         ; if MOVE_ROW == -1,
-05A9: CA DC 05    JZ $05DC        ; INCREMENT_DIRECTION_AND_DISPATCH
-05AC: FE 08       CPI #08         ; else if MOVE_ROW == 8,
-05AE: CA DC 05    JZ $05DC        ; INCREMENT_DIRECTION_AND_DISPATCH
-                                  ; else
+05A7: FE FF       CPI #FF          ; if MOVE_ROW == -1,
+05A9: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
+05AC: FE 08       CPI #08          ; else if MOVE_ROW == 8,
+05AE: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
+                                   ; else
 05B1: 7D          MOV A,L
-05B2: FE FF       CPI #FF         ; if MOVE_COL == -1,
-05B4: CA DC 05    JZ $05DC        ; INCREMENT_DIRECTION_AND_DISPATCH
-05B7: FE 08       CPI #08         ; else if MOVE_COL == 8,
-05B9: CA DC 05    JZ $05DC        ; INCREMENT_DIRECTION_AND_DISPATCH
-                                  ; else
+05B2: FE FF       CPI #FF          ; if MOVE_COL == -1,
+05B4: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
+05B7: FE 08       CPI #08          ; else if MOVE_COL == 8,
+05B9: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
+                                   ; else
 05BC: 3A 8A 40    LDA $408A
 058F: 4F          MOV C,A          ; C = CURRENT_PIECE
 05C0: E5          PUSH H           ; save MOVE_ROW, MOVE_COL
+; Scan either the DISPLAY_BOARD or ANALYSIS_BOARD as requested by caller.
 05C1: 3A 84 40    LDA $4084
 05C4: 1F          RAR              ; if BOARD_SELECTION_FOR_SCAN == 1,
 05C5: DA E7 05    JC $05E7         ; USE_ANALYSIS_BOARD
@@ -1050,21 +1279,21 @@ CLEAR_VRAM:
 05CB: 7E          MOV A,M          ; SPACE_CONTENTS = BOARD_POINTER (MOVE_ROW, MOVE_COL)
 05CC: E1          POP H            ; restore MOVE_ROW, MOVE_COL
 05CD: FE 00       CPI #00          ; if SPACE_CONTENTS == 0 (BLANK),
-05CF: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_DISPATCH
+05CF: CA DC 05    JZ $05DC         ; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
 05D2: B9          CMP C            ; else if SPACE_CONTENTS != CURRENT_PIECE,
 05D3: C2 F3 05    JNZ $05F3        ; HANDLE_OPPONENT_PIECE
                                    ; else
 05D6: 78          MOV A,B
-05D7: FE 00       CPI #00          ; if SANDWICH_SIZE != 0,
-05D9: C2 ED 05    JNZ $05ED        ; COMPLETE_SANDWICH
+05D7: FE 00       CPI #00          ; if NUM_OUTFLANKED_PIECES != 0,
+05D9: C2 ED 05    JNZ $05ED        ; OUTFLANK_COMPLETE
                                    ; else
-; INCREMENT_DIRECTION_AND_DISPATCH
+; INCREMENT_DIRECTION_AND_CONTINUE_SCAN
 05DC: E1          POP H            ; restore MOVE_ROW, MOVE_COL
 05DD: 14          INR D            ; DIRECTION++
-05DE: 06 00       MVI B, #00       ; SANDWICH_SIZE = 0
+05DE: 06 00       MVI B, #00       ; NUM_OUTFLANKED_PIECES = 0
 05E0: 7A          MOV A,D
 05E1: FE 09       CPI #09          ; if DIRECTION != 9,
-05E3: C2 5B 05    JNZ $055B        ; SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+05E3: C2 5B 05    JNZ $055B        ; SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
                                    ; else
 05E6: C9          RET              ; RETURN
 
@@ -1072,24 +1301,27 @@ CLEAR_VRAM:
 05E7: CD CA 04    CALL $04CA       ; GET_SPACE_ON_ANALYSIS_BOARD
 05EA: C3 CB 05    JMP $05CB        ; EXAMINE_SPACE_CONTENTS
 
-; COMPLETE_SANDWICH
+; OUTFLANK_COMPLETE
+; Save NUM_OUTFLANKED_PIECES to RAM, though no other code
+; appears to reference this value.
 05ED: 78          MOV A,B
-05EE: 32 97 40    STA $4097        ; SANDWICH_SIZE? (unused) = SANDWICH_SIZE
+05EE: 32 97 40    STA $4097        ; NUM_OUTFLANKED_PIECES? (unused) = NUM_OUTFLANKED_PIECES
 05F1: E1          POP H            ; restore MOVE_ROW, MOVE_COL
 05F2: C9          RET              ; RETURN
 
 ; HANDLE_OPPONENT_PIECE
+; Flip or count piece depending on FLIP_PIECES setting.
 05F3: 7B          MOV A,E
 05F4: FE 01       CPI #01          ; if FLIP_PIECES == 1,
 05F6: CA FD 05    JZ $05FD         ; FLIP_SQUARE
                                    ; else
-05F9: 04          INR B            ; SANDWICH_SIZE++
-05FA: C3 5C 05    JMP $055C        ; SCAN_FOR_SANDWICH_CORE
+05F9: 04          INR B            ; NUM_OUTFLANKED_PIECES++
+05FA: C3 5C 05    JMP $055C        ; SCAN_FOR_OUTFLANKED_PIECES_CORE
 
 ; FLIP_SQUARE
 05FD: CD EC 07    CALL $07EC       ; FLIP_SQUARE_ON_ANALYSIS_BOARD
-0600: 05          DCR B	           ; if --SANDWICH_SIZE != 0,
-0601: C2 5C 05    JNZ $055C        ; SCAN_FOR_SANDWICH_CORE
+0600: 05          DCR B	           ; if --NUM_OUTFLANKED_PIECES != 0,
+0601: C2 5C 05    JNZ $055C        ; SCAN_FOR_OUTFLANKED_PIECES_CORE
                                    ; else
 0604: 14          INR D            ; DIRECTION++
 0605: E1          POP H            ; restore MOVE_ROW, MOVE_COL
@@ -1098,13 +1330,23 @@ CLEAR_VRAM:
 ; GET_CANDIDATE_MOVE
 ; Output:
 ;   DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
-0607: 2A A9 40    LHLD $40A9       ; HL = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
+;
+; Retrieve stored CANDIDATE_MOVE
+0607: 2A A9 40    LHLD $40A9       ; HL = stored CANDIDATE_MOVE
 060A: EB          XCHG             ; DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
 060B: C9          RET              ; RETURN
 
 ; UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER
 ; Input:
 ;   BC = CANDIDATE_MOVE_EVAL_SCORE
+;
+; Compare CANDIDATE_MOVE_EVAL_SCORE against the stored
+; BEST_MOVE_EVAL_SCORE. Scores are signed 16-bit values.
+; If the candidate score is greater than or equal to the
+; current best score, update BEST_MOVE_EVAL_SCORE and update
+; MOVE_COL/MOVE_ROW with the associated candidate move.
+;
+; Ties update the best move, so moves scanned later win.
 060C: 21 8D 40    LXI H, #408D
 060F: 5E          MOV E,M
 0610: 23          INX H
@@ -1155,6 +1397,18 @@ CLEAR_VRAM:
 ; GENERATE_CANDIDATE_MOVE_EVAL_SCORE
 ; Output:
 ;   BC = CANDIDATE_MOVE_EVAL_SCORE
+;
+; Scans all of the spaces of the ANALYSIS_BOARD after a
+; candidate move has been applied to it and generates a move
+; evaluation score for that candidate. The move evaluation
+; score uses the values from the BOARD_SPACE_VALUE_TABLE.
+; Spaces occupied by the current player's pieces are added
+; to the total. Spaces occupied by their opponent's pieces
+; are subtracted from the total. Unoccupied spaces are not
+; included.
+;
+; The largest possible value is 2252 (#08CC), so the score
+; must be stored in a register pair rather than a single byte.
 0645: 21 95 40    LXI H, #4095
 0648: 36 00       MVI M, #00
 064A: 23          INX H
@@ -1162,10 +1416,10 @@ CLEAR_VRAM:
 064D: 21 40 40    LXI H, #4040     ; HL = ANALYSIS_BOARD_POINTER
 0650: 16 00       MVI D, #00       ; ROW_D = 0
 
-; START_NEXT_ROW
+; START_NEXT_EVAL_ROW
 0652: 1E 00       MVI E, #00       ; COL_E = 0
 
-; GET_NEXT_SPACE
+; GET_NEXT_EVAL_SPACE
 0654: 7E          MOV A,M          ; CURRENT_SPACE = ANALYSIS_BOARD (ROW_D,COL_E)
 0655: F5          PUSH PSW         ; save CURRENT_SPACE
 0656: 3A 8A 40    LDA $408A
@@ -1175,23 +1429,23 @@ CLEAR_VRAM:
 065C: B8          CMP B            ; if CURRENT_SPACE == CURRENT_PIECE,
 065D: CA 82 06    JZ $0682         ; ADD_SPACE_VALUE
 0660: FE 00       CPI #00          ; else if CURRENT_SPACE == 0,
-0662: CA 6B 06    JZ $066B         ; NEXT_SPACE
+0662: CA 6B 06    JZ $066B         ; NEXT_EVAL_SPACE
                                    ; else
 0665: CD 8B 06    CALL $068B       ; GET_SPACE_VALUE
 0668: CD CA 06    CALL $06CA       ; SUB_VALUE_FROM_MOVE_EVAL_SCORE
 
-; NEXT_SPACE
+; NEXT_EVAL_SPACE
 066B: D1          POP D            ; restore ROW_D
 066C: 23          INX H            ; ANALYSIS_BOARD_POINTER++
 066D: 1C          INR E            ; COL_E++
 066E: 7B          MOV A,E
 066F: FE 08       CPI #08          ; if COL_E != 8,
-0671: C2 54 06    JNZ $0654        ; GET_NEXT_SPACE
+0671: C2 54 06    JNZ $0654        ; GET_NEXT_EVAL_SPACE
                                    ; else
 0674: 14          INR D            ; ROW_D++
 0675: 7A          MOV A,D
 0676: FE 08       CPI #08          ; if ROW_D != 8,
-0678: C2 52 06    JNZ $0652        ; START_NEXT_ROW
+0678: C2 52 06    JNZ $0652        ; START_NEXT_EVAL_ROW
                                    ; else
 067B: 21 95 40    LXI H, #4095
 067E: 4E          MOV C,M
@@ -1202,17 +1456,24 @@ CLEAR_VRAM:
 ; ADD_SPACE_VALUE
 0682: CD 8B 06    CALL $068B       ; GET_SPACE_VALUE
 0685: CD B5 06    CALL $06B5       ; ADD_VALUE_TO_MOVE_EVAL_SCORE
-0688: C3 6B 06    JMP $066B        ; NEXT_SPACE
+0688: C3 6B 06    JMP $066B        ; NEXT_EVAL_SPACE
 
 ; GET_SPACE_VALUE
-; 255 003 060 040 040 060 003 255
-; 003 001 010 005 005 010 001 003
-; 060 010 030 020 020 030 010 060
-; 040 005 020 001 001 020 005 040
-; 040 005 020 001 001 020 005 040
-; 060 010 030 020 020 030 010 060
-; 003 001 010 005 005 010 001 003
-; 255 003 060 040 040 060 003 255
+; The BOARD_SPACE_VALUE_TABLE contains only 16 entries. Due to the
+; symmetry of the board, every space can be mapped into the upper-left
+; 4x4 quadrant, where unique values are stored.
+;
+; Any ROW or COL coordinate greater than 3 is reflected about the
+; board's centerline by replacing it with (7 - coordinate).
+;
+; The resulting 2-bit ROW and 2-bit COL values are then combined to
+; form a 4-bit table index:
+;
+;     Index = (COL << 2) | ROW
+;
+; Examples:
+;   (3,1) -> (11,01) -> index 1101 = D (13)
+;   (5,2) -> (2,2) -> (10,10) -> index 1010 = A (10)
 068B: E5          PUSH H           ; save ANALYSIS_BOARD_POINTER
 068C: 42          MOV B,D          ; B = ROW_D
 068D: CD A8 06    CALL $06A8       ; GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS
@@ -1238,9 +1499,10 @@ CLEAR_VRAM:
 
 ; GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS
 ; Input:
-;   B = ROW_D|COL_E
+;   B = ROW_D or COL_E
 ; Output:
-;   C = BITS (00, 01, 10, 11, 11, 10, 01, 00)
+;   C = coordinate reflected in 0..3
+;       0,1,2,3,3,2,1,0
 06A8: 3E 03       MVI A, #03
 06AA: B8          CMP B            ; if ROW_D|COL_E > 3,
 06AB: FA B0 06    JM $06B0         ; MODIFY_INDEX_BITS
@@ -1249,6 +1511,7 @@ CLEAR_VRAM:
 06AF: C9          RET              ; RETURN
 
 ; MODIFY_INDEX_BITS
+; Reflects coordinates about the board's centerline.
 06B0: 3E 07       MVI A, #07
 06B2: 90          SUB B
 06B3: 4F          MOV C,A          ; BITS = 7 - ROW_D|COL_E
@@ -1256,6 +1519,12 @@ CLEAR_VRAM:
 
 ; ADD_VALUE_TO_MOVE_EVAL_SCORE
 06B5: CD F7 04    CALL $04F7       ; LOAD_CANDIDATE_MOVE_EVAL_SCORE
+
+; Because a register pair is needed to store the score, the 8-bit
+; BOARD_SPACE_VALUE is added to or subtracted from MOVE_EVAL_SCORE
+; by repeated increment/decrement of BC. The 8080 has 16-bit addition
+; via DAD, but not a compact way to add or subtract an 8-bit value
+; directly to/from a register pair.
 
 ; INCREMENT_MOVE_EVAL_SCORE
 06B8: 03          INX B            ; MOVE_EVAL_SCORE++
@@ -1302,6 +1571,16 @@ CLEAR_VRAM:
 06EB: 21 AB 40    LXI H, #40AB     ; HL = ANALYSIS_BOARD_MOVE_ASSESSMENT_POINTER (0,0)
 
 ; CREATE_MOVE_ASSESSMENT_CORE
+; Creates a 16-byte packed representation of the board. Each byte
+; holds four two-bit values representing a set of four adjacent
+; spaces. Empty spaces are scanned to determine whether playing
+; there would outflank opponent pieces.
+;
+; Possible values are:
+;   0 = Empty but illegal
+;   1 = Empty and legal
+;   2 = Contains black piece ('■')
+;   3 = Contains white piece ('+')
 06EE: 22 92 40    SHLD $4092       ; MOVE_ASSESSMENT_WRITE_POINTER = BOARD_MOVE_ASSESSMENT_POINTER
 06F1: 0E 04       MVI C, #04       ; ACCUMULATOR_COUNTER = 4
 06F3: 21 00 00    LXI H, #0000     ; ROW_H, COL_L = (0,0)
@@ -1316,16 +1595,22 @@ CLEAR_VRAM:
 0701: D5          PUSH D           ; save BOARD_POINTER
 0702: 16 01       MVI D, #01       ; DIRECTION = 1
 0704: C5          PUSH B           ; save CURRENT_SPACE_ACCUMULATOR (unnecessary, uninitialized)
-0705: CD 58 05    CALL $0558       ; INIT_SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+; Unlike when applying moves, this call does not flip pieces.
+; It only checks whether the empty space would outflank pieces
+; in any direction.
+0705: CD 58 05    CALL $0558       ; INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 0708: C1          POP B            ; restore CURRENT_SPACE_ACCUMULATOR
 0709: 7A          MOV A,D
 070A: FE 09       CPI #09          ; if DIRECTION == 9,
-070C: CA 49 07    JZ $0749         ; INVALID_MOVE
+070C: CA 49 07    JZ $0749         ; ILLEGAL_SPACE
                                    ; else
 070F: 06 01       MVI B, #01       ; CURRENT_SPACE_ACCUMULATOR = 1
 0711: D1          POP D            ; restore BOARD_POINTER
 
 ; ACCUMULATOR_HANDLER
+; Pack CURRENT_SPACE_ACCUMULATOR into MOVE_ASSESSMENT_ACCUMULATOR.
+; After four spaces, write the completed byte and advance
+; MOVE_ASSESSMENT_WRITE_POINTER.
 0712: E5          PUSH H           ; save ROW_H, COL_L
 0713: 79          MOV A,C
 0714: FE 04       CPI #04          ; if ACCUMULATOR_COUNTER != 4,
@@ -1344,18 +1629,18 @@ CLEAR_VRAM:
 0724: 22 92 40    SHLD $4092       ; MOVE_ASSESSMENT_WRITE_POINTER++
 0727: 0E 04       MVI C, #04       ; ACCUMULATOR_COUNTER = 4
 
-; GET_NEXT_SPACE
+; GET_NEXT_ASSESSMENT_SPACE
 0729: E1          POP H            ; restore ROW_H, COL_L
 072A: 2C          INR L            ; COL_L++
 072B: 7D          MOV A,L
 072C: FE 08       CPI #08          ; if COL_L == 8,
-072E: CA 35 07    JZ $0735         ; GET_NEXT_ROW
+072E: CA 35 07    JZ $0735         ; GET_NEXT_ASSESSMENT_ROW
                                    ; else
 ; ASSESS_NEXT_SPACE
 0731: 13          INX D            ; BOARD_POINTER++
 0732: C3 F6 06    JMP $06F6        ; ASSESS_SPACE
 
-; GET_NEXT_ROW
+; GET_NEXT_ASSESSMENT_ROW
 0735: 2E 00       MVI L, #00       ; COL_L = 0
 0737: 24          INR H            ; ROW_H++
 0738: 7C          MOV A,H
@@ -1372,7 +1657,7 @@ CLEAR_VRAM:
 0744: 06 02       MVI B, #02       ; CURRENT_SPACE_ACCUMULATOR = 2
 0746: C3 12 07    JMP $0712        ; ACCUMULATOR_HANDLER
 
-; INVALID_MOVE
+; ILLEGAL_SPACE
 0749: 06 00       MVI B, #00       ; CURRENT_SPACE_ACCUMULATOR = 0
 074B: D1          POP D            ; restore BOARD_POINTER
 074C: C3 12 07    JMP $0712        ; ACCUMULATOR_HANDLER
@@ -1385,13 +1670,13 @@ CLEAR_VRAM:
 0755: 07          RLC
 0756: 07          RLC
 0757: 32 94 40    STA $4094        ; MOVE_ASSESSMENT_ACCUMULATOR = TEMP_ACCUMULATOR << 2
-075A: C3 29 07    JMP $0729        ; GET_NEXT_SPACE
+075A: C3 29 07    JMP $0729        ; GET_NEXT_ASSESSMENT_SPACE
 
 ; POPULATE_ANALYSIS_BOARD_FROM_DISPLAY_BOARD_MOVE_ASSESSMENT
 075D: 21 99 40    LXI H, #4099     ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER
 0760: 16 00       MVI D, #00       ; ROW_D = 0
 
-; START_NEXT_ROW
+; START_NEXT_ASSESSMENT_ROW
 0762: 1E 00       MVI E, #00       ; COL_E = 0
 
 ; GET_NEXT_MOVE_ASSESSMENT_BYTE
@@ -1422,7 +1707,7 @@ CLEAR_VRAM:
 0782: 23          INX H            ; MOVE_ASSESSMENT_POINTER++
 0783: 7A          MOV A,D
 0784: FE 08       CPI #08          ; if ROW_D != 8,
-0786: C2 62 07    JNZ $0762        ; START_NEXT_ROW
+0786: C2 62 07    JNZ $0762        ; START_NEXT_ASSESSMENT_ROW
                                    ; else
 0789: C9          RET              ; RETURN
 
@@ -1446,6 +1731,9 @@ CLEAR_VRAM:
 079D: C3 64 07    JMP $0764        ; GET_NEXT_MOVE_ASSESSMENT_BYTE
 
 ; DRAW_GRID
+; Draws the 9 intersecting vertical and horizontal lines that
+; make up the 8x8 gameboard. Each line is 49 pixels in length,
+; spanning 8 5-pixel cells and the 9 perpendicular 1-pixel lines.
 07A0: 0E 09       MVI C, #09       ; NUM_LINES = 9
 07A2: 21 09 CD    LXI H, #CD09     ; HORI_LINE_VRAM_POINTER = $CD09
 07A5: E5          PUSH H
@@ -1467,6 +1755,7 @@ CLEAR_VRAM:
                                    ; else
 07B5: D1          POP D            ; restore VERT_LINE_VRAM_POINTER
 07B6: E1          POP H            ; restore HORI_LINE_VRAM_POINTER
+; Advance pointers by 6 to next lines, moving past the next 5-pixel cell.
 07B7: 7C          MOV A,H
 07B8: C6 06       ADI #06
 07BA: 67          MOV H,A          ; HORI_LINE_VRAM_POINTER += #0600
@@ -1479,6 +1768,14 @@ CLEAR_VRAM:
 07C3: C9          RET              ; RETURN
 
 ; ADD_STARTING_PIECES_TO_BOARDS_AND_DRAW
+; Initialize the ANALYSIS and DISPLAY boards to Othello's
+; standard starting position, then draw the DISPLAY_BOARD.
+; Pieces are written directly into the ANALYSIS_BOARD's RAM
+; rather than using GET_SPACE_ON_ANALYSIS_BOARD with
+; coordinates.
+;
+; + ■
+; ■ +
 07C4: 3E 03       MVI A, #03
 07C6: 21 5B 40    LXI H, #405B
 07C9: 77          MOV M,A          ; ANALYSIS_BOARD(3,3) = '+'
@@ -1502,9 +1799,9 @@ CLEAR_VRAM:
 ; Output:
 ;   HL = DISPLAY_BOARD_POINTER (H,L)
 ;
-; H_ROW and L_COL are 3-bit values, so the pointer to the board is:
-;   L = 00rrrccc
-; which exactly matches the board's memory map
+; H_ROW and L_COL are 3-bit values, so the byte offset is:
+;   00rrrccc
+; which exactly matches the DISPLAY_BOARD's memory map
 07E3: 7C          MOV A,H
 07E4: 07          RLC
 07E5: 07          RLC
@@ -1517,6 +1814,11 @@ CLEAR_VRAM:
 ; FLIP_SQUARE_ON_ANALYSIS_BOARD
 ; Input:
 ;   HL = H_ROW, L_COL
+;
+; Set ANALYSIS_BOARD (H_ROW,L_COL) to CURRENT_PIECE. This
+; routine does not toggle the existing piece. Callers are
+; responsible for ensuring that the space contained an
+; opponent piece.
 07EC: E5          PUSH H           ; save H_ROW, L_COL
 07ED: CD CA 04    CALL $04CA       ; GET_SPACE_ON_ANALYSIS_BOARD
 07F0: 3A 8A 40    LDA $408A
@@ -1525,58 +1827,70 @@ CLEAR_VRAM:
 07F5: C9          RET              ; RETURN
 
 ; WAIT_FOR_INPUT_RELEASE
+; Loops until no pressed inputs are detected.
 07F6: 3A 00 60    LDA $6000        ; READ_INPUT
-07F9: FE FF       CPI #FF          ; Any Button:
+07F9: FE FF       CPI #FF          ; !No Input:
 07FB: C2 F6 07    JNZ $07F6        ; WAIT_FOR_INPUT_RELEASE
                                    ; else
 07FE: C9          RET              ; RETURN
 
-; CHECK_IF_MOVE_IS_VALID
+; CHECK_IF_MOVE_IS_LEGAL
 07FF: 3A 8C 40    LDA $408C
 0802: 67          MOV H,A          ; H_ROW = MOVE_ROW
 0803: 3A 8B 40    LDA $408B
 0806: 6F          MOV L,A          ; L_COL = MOVE_COL
 
-; CHECK_IF_SPACE_IS_VALID_MOVE
+; CHECK_IF_SPACE_IS_LEGAL_MOVE
 ; Input:
 ;   H = H_ROW (0..7)
 ;   L = L_COL (0..7)
 ; Output:
-;   B = MOVE_VALID (0/1)
+;   B = MOVE_LEGAL (0/1)
+;
+; A move is legal only if the selected DISPALY_BOARD space is empty
+; and placing CURRENT_PIECE there would outflank at least one
+; opponent piece.
 0807: E5          PUSH H           ; save H_ROW, L_COL
 0808: CD E3 07    CALL $07E3       ; GET_SPACE_ON_DISPLAY_BOARD
 080B: 7E          MOV A,M          ; SPACE_CONTENTS = DISPLAY_BOARD(H_ROW,L_COL)
 080C: E1          POP H            ; restore H_ROW, L_COL
 080D: FE 00       CPI #00          ; if SPACE_CONTENTS != 0,
-080F: C2 24 08    JNZ $0824        ; INVALID_MOVE
+080F: C2 24 08    JNZ $0824        ; ILLEGAL_MOVE
 0812: AF          XRA A
 0813: 32 84 40    STA $4084        ; BOARD_SELECTION_FOR_SCAN = 0 (DISPLAY)
 0816: 16 01       MVI D, #01       ; DIRECTION = 1
-0818: CD 58 05    CALL $0558       ; INIT_SCAN_CLOCKWISE_FOR_SANDWICH_FROM_DIRECTION
+; Unlike when applying moves, this call does not flip pieces.
+; It only checks whether the empty space would outflank pieces
+; in any direction. If it would, then MOVE_LEGAL is set to 1.
+0818: CD 58 05    CALL $0558       ; INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 081B: 7A          MOV A,D
 081C: FE 09       CPI #09          ; if DIRECTION == 9,
-081E: CA 24 08    JZ $0824         ; INVALID_MOVE
+081E: CA 24 08    JZ $0824         ; ILLEGAL_MOVE
                                    ; else
-0821: 06 01       MVI B, #01       ; MOVE_VALID = 1
+0821: 06 01       MVI B, #01       ; MOVE_LEGAL = 1
 0823: C9          RET              ; RETURN
 
 ; INVALID_MOVE
-0824: 06 00       MVI B, #00       ; MOVE_VALID = 0
+0824: 06 00       MVI B, #00       ; MOVE_LEGAL = 0
 0826: C9          RET              ; RETURN
 
 ; CHECK_IF_PLAYER_MUST_PASS
 ; Output:
 ;   B = PLAYER_MUST_PASS (0/1)
+;
+; Scans the entire board for a legal move for the current
+; player. The search terminates immediately if one is found.
+; If no legal move exists, PLAYER_MUST_PASS is set to 1.
 0827: 26 07       MVI H, #07       ; H_ROW = 7
 
 ; CHECK_NEXT_ROW
 0829: 2E 07       MVI L, #07       ; L_COL = 7
 
 ; CHECK_NEXT_SPACE
-082B: CD 07 08    CALL $0807       ; CHECK_IF_SPACE_IS_VALID_MOVE
+082B: CD 07 08    CALL $0807       ; CHECK_IF_SPACE_IS_LEGAL_MOVE
 082E: 78          MOV A,B
-082F: FE 00       CPI #00          ; if MOVE_VALID != 0,
-0831: C2 3F 08    JNZ $083F        ; PLAYER_CAN_MOVE
+082F: FE 00       CPI #00          ; if MOVE_LEGAL != 0,
+0831: C2 3F 08    JNZ $083F        ; PLAYER_HAS_LEGAL_MOVE
 0834: 2D          DCR L            ; if --L_COL >= 0,
 0835: F2 2B 08    JP $082B         ; CHECK_NEXT_SPACE
                                    ; else
@@ -1586,7 +1900,7 @@ CLEAR_VRAM:
 083C: 06 01       MVI B, #01       ; PLAYER_MUST_PASS = 1
 083E: C9          RET              ; RETURN
 
-; PLAYER_CAN_MOVE
+; PLAYER_HAS_LEGAL_MOVE
 083F: 06 00       MVI B, #00       ; PLAYER_MUST_PASS = 0
 0841: C9          RET              ; RETURN
 
@@ -1594,6 +1908,12 @@ CLEAR_VRAM:
 0842: CD 05 09    CALL $0905       ; HIGH_TONE
 
 ; DRAW_MOVE_CURSORS
+; Clear the old move cursors, then draw new 5-pixel length
+; cursors matching MOVE_COL/MOVE_ROW.
+;
+; From 1P's perspective, the horizontal cursor is drawn
+; above the board, and the vertical cursor is drawn to the
+; left of the board.
 0845: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
 0848: 21 0A CA    LXI H, #CA0A     ; HL = VRAM_HORI_CURSOR_POINTER(0) = $CA0A
 084B: 3A 8C 40    LDA $408C
@@ -1603,9 +1923,11 @@ CLEAR_VRAM:
 
 ; SET_HORIZONTAL_CURSOR
 0853: 1D          DCR E            ; if --MOVE_COL < 0,
-0854: FA 5E 08    JM $085E         ; DRAW_COLUMN_CURSOR
+0854: FA 5E 08    JM $085E         ; DRAW_HORIZONTAL_CURSOR
                                    ; else
 0857: 7D          MOV A,L
+; Cursor moves 6 pixels at a time to skip over 5-pixel cell
+; and 1-pixel line.
 0858: C6 06       ADI #06          ; VRAM_HORI_CURSOR_POINTER += #0006
 085A: 6F          MOV L,A          ; VRAM_HORI_CURSOR_POINTER(++)
 085B: C3 53 08    JMP $0853        ; SET_HORIZONTAL_CURSOR
@@ -1621,6 +1943,8 @@ CLEAR_VRAM:
 0868: FA 72 08    JM $0872         ; DRAW_VERTICAL_CURSOR
                                    ; else
 086B: 7C          MOV A,H
+; Cursor moves 6 pixels at a time to skip over 5-pixel cell
+; and 1-pixel line.
 086C: C6 06       ADI #06          ; VRAM_VERT_CURSOR_POINTER += #0600
 086E: 67          MOV H,A          ; VRAM_VERT_CURSOR_POINTER(++)
 086F: C3 67 08    JMP $0867        ; SET_VERTICAL_CURSOR
@@ -1631,7 +1955,13 @@ CLEAR_VRAM:
 0878: C9          RET              ; RETURN
 
 ; CLEAR_MOVE_CURSORS
-0879: 06 34       MVI B, #34       ; MOVE_CURSOR_LINE_LENGTH = 34
+; Blanks out the entire 52-pixel horizontal and vertical lines
+; where the move cursors are displayed.
+;
+; The cursor lines extend slightly beyond the 49-pixel board span.
+; The extra pixels are never drawn as cursors, but clearing them
+; simplifies the implementation.
+0879: 06 34       MVI B, #34       ; MOVE_CURSOR_LINE_LENGTH = 52
 087B: 21 06 CA    LXI H, $CA06     ; VRAM_HORI_CURSOR_POINTER = $CA06
 087E: E5          PUSH H
 087F: D1          POP D            ; VRAM_VERT_CURSOR_POINTER = $CA06
@@ -1648,8 +1978,12 @@ CLEAR_VRAM:
 0889: C9          RET              ; RETURN
 
 ; FLASH_BOARD_CHANGE
-; Alternate Boards 3 times
-; Play LOW_TONE when $40FD != 1
+; Alternates between the DISPLAY_BOARD (before the move) and
+; ANALYSIS_BOARD (after the move) 3 times in rapid succession,
+; highlighting the newly played piece or any resulting flips.
+;
+; If not in attract mode, LOW_TONE is emitted each time the
+; ANALYSIS_BOARD is drawn.
 088A: 3E 03       MVI A, #03       ; FLASH_LOOP_COUNTER = 3
 
 ; FLASH_BOARD
@@ -1672,13 +2006,21 @@ CLEAR_VRAM:
 08A9: C9          RET              ; RETURN
 
 ; FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
-; 1,1; 1,6; 6,1; 6,6 are the X-squares that help your opponent take a corner
-; Zeroes the four X-squares in the MOVE_ASSESSMENT. This prevents the CPU
-; from considering them as moves on the first pass, but also causes those
-; squares to appear empty when the ANALYSIS_BOARD is reconstructed from the
-; MOVE_ASSESSMENT. As a result, first-pass evaluation can miss
-; otherwise-valid corner captures or other sandwiches that depend on actual
-; occupancy of an X-square.
+; X-squares are the diagonally corner-adjacent squares:
+;   (1,1), (1,6), (6,1), (6,6)
+; Othello strategy classifies these as high risk positions to avoid
+; because they often allow an opponent to capture a corner.
+;
+; Zeroes the four X-squares in the MOVE_ASSESSMENT, marking them as
+; illegal moves. This prevents the CPU from considering them as
+; moves on the first pass.
+;
+; But this also causes those squares to appear empty when the
+; ANALYSIS_BOARD is reconstructed from the MOVE_ASSESSMENT. As a
+; result, first-pass evaluation can miss otherwise-legal corner
+; captures or other outflanked pieces that depend on actual occupancy
+; of an X-square. A better implementation would somehow only mark
+; these spaces as illegal if they didn't already contain pieces.
 08AA: 06 02       MVI B, #02       ; ROW_LOOP_COUNTER = 2
 08AC: 21 9B 40    LXI H, #409B     ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER(1,0) = $409B
 
@@ -1702,11 +2044,11 @@ CLEAR_VRAM:
 ;   A = CURRENT_PIECE
 08C0: 06 05       MVI B, #05       ; MOVE_CURSOR_LENGTH = 5
 
-; DRAW_COL_PIXEL
+; DRAW_NEXT_HORI_PIXEL
 08C2: 77          MOV M,A          ; VRAM_HORI_CURSOR(POINTER) = CURRENT_PIECE
 08C3: 2C          INR L            ; VRAM_HORI_CURSOR_POINTER++
 08C4: 05          DCR B            ; if --MOVE_CURSOR_LENGTH != 0,
-08C5: C2 C2 08    JNZ $08C2        ; DRAW_COL_PIXEL
+08C5: C2 C2 08    JNZ $08C2        ; DRAW_NEXT_HORI_PIXEL
                                    ; else
 08C8: C9          RET              ; RETURN
 
@@ -1716,15 +2058,24 @@ CLEAR_VRAM:
 ;   A = CURRENT_PIECE
 08C9: 06 05       MVI B, #05       ; MOVE_CURSOR_LENGTH = 5
 
-; DRAW_ROW_PIXEL
+; DRAW_NEXT_VERT_PIXEL
 08CB: 77          MOV M,A          ; VRAM_VERT_CURSOR(POINTER) = CURRENT_PIECE
 08CC: 24          INR H            ; VRAM_VERT_CURSOR_POINTER += #0100
 08CD: 05          DCR B            ; if --MOVE_CURSOR_LENGTH != 0,
-08CE: C2 CB 08    JNZ $08CB        ; DRAW_ROW_PIXEL
+08CE: C2 CB 08    JNZ $08CB        ; DRAW_NEXT_VERT_PIXEL
                                    ; else
 08D1: C9          RET              ; RETURN
 
 ; PERFORM_CPU_OPENING_MOVE
+; Look up the coordinates of the selected CPU_OPENING_MOVE
+; from the four-entry table and play it. All of the opening
+; moves would be equivalent if using the normal MOVE_ASSESSMENT
+; approach, so CPU_FIND_AND_PLAY_BEST_MOVE would just result in
+; the same move always being selected.
+;
+; Instead, the PROMPT_SELECT_GAME loop supplies a pseudo-random
+; index into the table, and the selected opening move is played
+; without checking its legality.
 08D2: 3A FE 40    LDA $40FE        ; A = CPU_OPENING_MOVE_INDEX
 08D5: 21 13 00    LXI H, #0013     ; HL = CPU_OPENING_MOVE_TABLE(0)
 
@@ -1742,10 +2093,12 @@ CLEAR_VRAM:
 08E5: 23          INX H
 08E6: 7E          MOV A,M
 08E7: 32 8C 40    STA $408C        ; MOVE_ROW = CPU_OPENING_MOVE_TABLE().ROW
-08EA: CD FF 03    CALL $03FF       ; PLAY_MOVE_AND_FLIP_SANDWICHES
+08EA: CD FF 03    CALL $03FF       ; PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
 08ED: C9          RET              ; RETURN
 
 ; INIT_GAME
+; Reset game state, clear the screen, draw the board, and
+; place the starting pieces so a new game can begin.
 08EE: CD 3E 05    CALL $053E       ; CLEAR_WORK_RAM
 08F1: CD 4B 05    CALL $054B       ; CLEAR_VRAM
 08F4: CD A0 07    CALL $07A0       ; DRAW_GRID
@@ -1753,17 +2106,28 @@ CLEAR_VRAM:
 08FA: C9          RET              ; RETURN
 
 ; VERY_LOW_TONE
-08FB: 06 85       MVI B, #85       ; FREQUENCY_DIVISOR = 5
+; ~583 Hz tone used as pieces are counted during the SCORE_GAME
+; routine and as part of the victory jingle.
+08FB: 06 85       MVI B, #85       ; TONE_COMMAND = #85, FREQUENCY_DIVISOR = low bits (5)
 08FD: C3 07 09    JMP $0907        ; PLAY_TONE
 
 ; LOW_TONE
-0900: 06 84       MVI B, #84       ; FREQUENCY_DIVISOR = 4
+; ~700 Hz tone used every time the board flashes when a move is
+; made and as part of the victory jingle.
+0900: 06 84       MVI B, #84       ; TONE_COMMAND = #84, FREQUENCY_DIVISOR = low bits (4)
 0902: C3 07 09    JMP $0907        ; PLAY_TONE
 
 ; HIGH_TONE
-0905: 06 82       MVI B, #82       ; FREQUENCY_DIVISOR = 2
+; ~1167 Hz tone used every time a player presses an Arrow button
+; and the move cursors move and as part of the victory jingle.
+0905: 06 82       MVI B, #82       ; TONE_COMMAND = #82, FREQUENCY_DIVISOR = low bits (2)
 
 ; PLAY_TONE
+; Writes a command sequence to the sound hardware at $8000.
+; The ROM selects the pitch, and tone duration appears to be
+; controlled by the hardware, but each call begins by clearing
+; the sound state, so rapid successive calls can cut off
+; earlier tones.
 0907: 21 00 80    LXI H, $8000
 090A: 36 00       MVI M, #00       ; CLEAR_SOUND_STATE
 090C: 36 88       MVI M, #88       ; START_TONE
@@ -1771,10 +2135,18 @@ CLEAR_VRAM:
 0910: 70          MOV M,B          ; SET_TONE_FREQUENCY (Mame: 3500/(FREQUENCY_DIVISOR+1))
 0911: C9          RET              ; RETURN
 
+; Piece and character graphics are stored as 5x5 and 5x7 bitmap
+; images respectively. Each row of the image is stored in one byte,
+; with the five most-significant bits representing the pixels from
+; left to right.
+
 ; DRAW_GAME_PIECE
 ; Input:
 ;   A = SPACE_CONTENTS
 ;   HL = VRAM_POINTER
+;
+; Draws a 5x5 game piece image at the specified VRAM location.
+; Blank spaces are rendered as an empty 5x5 image.
 0912: C5          PUSH B           ; save BC
 0913: 0E 05       MVI C, #05       ; ROW_COUNTER = 5
 0915: D5          PUSH D           ; save DE
@@ -1789,6 +2161,8 @@ CLEAR_VRAM:
 ; Input:
 ;   DE = FONT_TABLE_POINTER
 ;   HL = VRAM_POINTER
+;
+; Used for drawing messages and the digits in the final game score.
 0923: 3E 01       MVI A, #01       ; PIXEL_TYPE = 1
 0925: C5          PUSH B           ; save BC
 0926: D5          PUSH D           ; save DE
@@ -1796,7 +2170,7 @@ CLEAR_VRAM:
 0929: C3 32 09    JMP $0932        ; DRAW_IMAGE
 
 ; DRAW_5x6_IMAGE
-; Not used
+; Unused in this ROM.
 092C: 3E 01       MVI A, #01       ; PIXEL_TYPE = 1
 092E: C5          PUSH B           ; save BC
 092F: D5          PUSH D           ; save DE
@@ -1808,6 +2182,14 @@ CLEAR_VRAM:
 ;   HL = VRAM_POINTER
 ;   C = ROW_COUNTER
 ;   A = PIXEL_TYPE
+;
+; Scans the bitmap one row at a time and expands set bits
+; into VRAM as PIXEL_TYPE. Clear bits are written as 0.
+;
+; For example:
+;   01110000 (#70)
+; becomes:
+;   0 PIXEL_TYPE PIXEL_TYPE PIXEL_TYPE 0
 0932: 32 81 40    STA $4081        ; IMAGE_PIXEL_VALUE = PIXEL_TYPE
 
 ; DRAW_NEXT_ROW
@@ -1816,6 +2198,7 @@ CLEAR_VRAM:
 0938: E5          PUSH H           ; save VRAM_POINTER
 
 ; GET_AND_DRAW_NEXT_PIXEL
+; Shift next image bit into carry, which is tested with JC.
 0939: 17          RAL              ; IMAGE_DATA << 1
 093A: F5          PUSH PSW         ; save IMAGE_DATA
                                    ; if IMAGE_DATA_HI_BIT == 1,
@@ -1858,9 +2241,12 @@ CLEAR_VRAM:
 0967: C3 32 09    JMP $0932        ; DRAW_IMAGE
 
 ; CLEAR_MESSAGE
+; Clears the 8x64 pixel message area:
 ; $C000-$C03F
 ; ...
 ; $C700-$C73F
+;
+; Sets all of the pixels in the message space to 0 (blank).
 096A: 26 C0       MVI H, #C0       ; VRAM_POINTER_HI = #C0
 096C: 06 08       MVI B, #08       ; ROW_COUNTER = 8
 
@@ -1881,6 +2267,11 @@ CLEAR_VRAM:
 097E: C9          RET              ; RETURN
 
 ; DRAW_MESSAGE
+; Looks up the supplied message by its pointer, reads it one
+; character at a time. Each character is looked up in the
+; MESSAGE_FONT_TABLE and is drawn to the message space.
+; #8D is the message stop character. Once it is encountered
+; in the string, this function exits.
 097F: E3          XTHL             ; save HL / pop RETURN_ADDRESS
 0980: 46          MOV B,M          ; B = PARAM_1 (unused)
 0981: 23          INX H            ; RETURN_ADDRESS++
@@ -1914,6 +2305,8 @@ CLEAR_VRAM:
 099E: C3 93 09    JMP 0993         ; FIND_CHARACTER_BY_INDEX
 
 ; DRAW_CHARACTER
+; After the character is drawn, the VRAM_POINTER is advanced
+; 6 pixels to the right.
 09A1: E5          PUSH H           ; save VRAM_POINTER
 09A2: CD 23 09    CALL $0923       ; DRAW_5x7_IMAGE
 09A5: E1          POP H            ; restore VRAM_POINTER
@@ -1922,12 +2315,13 @@ CLEAR_VRAM:
 09A8: 23          INX H
 09A9: 23          INX H
 09AA: 23          INX H
-09AB: 23          INX H            ; VRAM_POINTER += #0600
+09AB: 23          INX H            ; VRAM_POINTER += 6
 09AC: D1          POP D            ; restore MESSAGES_POINTER
 09AD: 13          INX D            ; MESSAGES_POINTER++
 09AE: C3 8A 09    JMP $098A        ; INIT_FIND_CHARACTER
 
 ; DIGIT_FONT_TABLE
+; Used when displaying the final score.
 ; 0
 09B1: 70                           ; --xxxxxx--
 09B2: 88                           ; xx------xx
@@ -2019,13 +2413,35 @@ CLEAR_VRAM:
 09F6: 60                           ; --xxxx----
 
 ; SCORE_GAME
+; Removes the move cursors and clears the ANALYSIS_BOARD before
+; making a three-pass scoring loop.
+;
+; Pass 1 scans the DISPLAY_BOARD for black pieces ('■'). Each
+; black piece increments black's score and is copied into the
+; ANALYSIS_BOARD, filling spaces from upper-left to lower-right.
+;
+; Pass 2 scans for blank spaces and copies them into the next
+; available ANALYSIS_BOARD spaces.
+;
+; Pass 3 scans for white pieces ('+'). Each white piece
+; increments white's score and is copied into the next available
+; ANALYSIS_BOARD space.
+;
+; As a result, the ANALYSIS_BOARD ends up sorted into black
+; pieces, then blanks, then white pieces.
+;
+; Each space drawn to the ANALYSIS_BOARD, including blanks,
+; is accompanied by the VERY_LOW_TONE.
+;
+; The final scores are displayed in the message area and a
+; winner is determined.
 09F7: CD 79 08    CALL $0879       ; CLEAR_MOVE_CURSORS
 09FA: AF          XRA A
 09FB: 32 82 40    STA $4082        ; ■_COUNT = 0
 09FE: AF          XRA A
 09FF: 32 83 40    STA $4083        ; +_COUNT = 0
 0A02: 3E 01       MVI A, #01
-0A04: 32 FC 40    STA $40FC        ; DISABLE_JUDGE_FLAG = 1
+0A04: 32 FC 40    STA $40FC        ; GAME_SCORED_FLAG = 1
 0A07: 21 40 40    LXI H, #4040     ; ANALYSIS_BOARD_POINTER = $4040
 0A0A: 06 40       MVI B, #40       ; SPACE_LOOP_COUNTER = 64
 
@@ -2037,6 +2453,8 @@ CLEAR_VRAM:
                                    ; else
 0A13: CD 00 05    CALL $0500       ; DRAW_ANALYSIS_BOARD
 0A16: 11 40 40    LXI D, #4040     ; ANALYSIS_BOARD_POINTER = $4040
+; Selects what this pass is looking for:
+;   3 = Black ('■'), 2 = Blanks, 1 = White ('+'), 0 = done
 0A19: 0E 03       MVI C, #03       ; SCORING_PASS_COUNTER = 3
 
 ; START_SCORING_PASS
@@ -2059,7 +2477,7 @@ CLEAR_VRAM:
 ; SCORE_■
 0A37: 3E 05       MVI A, #05
 0A39: BE          CMP M            ; if DISPLAY_BOARD(POINTER) != '■',
-0A3A: C2 75 0A    JNZ $0A75        ; GET_NEXT_SPACE
+0A3A: C2 75 0A    JNZ $0A75        ; GET_NEXT_SCORE_SPACE
                                    ; else
 0A3D: F5          PUSH PSW         ; save PIECE_TYPE
 0A3E: 3A 82 40    LDA $4082        ; A = ■_COUNT
@@ -2070,7 +2488,7 @@ CLEAR_VRAM:
 ; SCORE_BLANK
 0A4A: AF          XRA A
 0A4B: BE          CMP M            ; if DISPLAY_BOARD(POINTER) != BLANK,
-0A4C: C2 75 0A    JNZ $0A75        ; GET_NEXT_SPACE
+0A4C: C2 75 0A    JNZ $0A75        ; GET_NEXT_SCORE_SPACE
                                    ; else
 0A4F: F5          PUSH PSW         ; save PIECE_TYPE
 0A50: C3 63 0A    JMP $0A63        ; WRITE_PIECE_TO_ANALYSIS_BOARD
@@ -2078,7 +2496,7 @@ CLEAR_VRAM:
 ; SCORE_+
 0A53: 3E 03       MVI A, #03
 0A55: BE          CMP M            ; if DISPLAY_BOARD(POINTER) != '+',
-0A56: C2 75 0A    JNZ $0A75        ; GET_NEXT_SPACE
+0A56: C2 75 0A    JNZ $0A75        ; GET_NEXT_SCORE_SPACE
                                    ; else
 0A59: F5          PUSH PSW         ; save PIECE_TYPE
 0A5A: 3A 83 40    LDA $4083        ; A = +_COUNT
@@ -2086,6 +2504,8 @@ CLEAR_VRAM:
 0A60: 32 83 40    STA $4083        ; +_COUNT = A
 
 ; WRITE_PIECE_TO_ANALYSIS_BOARD
+; Write the scored piece to the next position in the
+; ANALYSIS_BOARD, redraw that board, and play VERY_LOW_TONE.
 0A63: F1          POP PSW          ; restore PIECE_TYPE
 0A64: 12          STAX D           ; ANALYSIS_BOARD(POINTER) = PIECE_TYPE
 0A65: 13          INX D            ; ANALYSIS_BOARD_POINTER++
@@ -2099,7 +2519,7 @@ CLEAR_VRAM:
 0A73: E1          POP H            ; restore DISPLAY_BOARD_POINTER
 0A74: D1          POP D            ; restore ANALYSIS_BOARD_POINTER
 
-; GET_NEXT_SPACE
+; GET_NEXT_SCORE_SPACE
 0A75: 23          INX H            ; DISPLAY_BOARD_POINTER++
 0A76: 05          DCR B            ; if --SPACE_LOOP_COUNTER != 0,
 0A77: C2 20 0A    JNZ $0A20        ; SCORE_NEXT_SPACE
@@ -2108,6 +2528,8 @@ CLEAR_VRAM:
 0A7B: C3 1B 0A    JMP $0A1B        ; START_SCORING_PASS
 
 ; DRAW_SCORES
+; Draw the white ('+') and black ('■') pieces in the message
+; space, then draw their two-digit BCD counts beside them.
 0A7E: 3E 03       MVI A, #03       ; SPACE_CONTENTS = '+'
 0A80: 21 08 C2    LXI H, #C208     ; VRAM_POINTER = $C208
 0A83: CD 12 09    CALL $0912       ; DRAW_GAME_PIECE
@@ -2128,6 +2550,7 @@ CLEAR_VRAM:
 0A9D: CD C1 0A    CALL $0AC1       ; LOOKUP_DIGIT_IMAGE
 0AA0: E5          PUSH H           ; save VRAM_POINTER
 0AA1: CD 23 09    CALL $0923       ; DRAW_5x7_IMAGE
+; Advance 6 pixels to the next digit.
 0AA4: E1          POP H            ; restore VRAM_POINTER
 0AA5: 23          INX H
 0AA6: 23          INX H
@@ -2151,9 +2574,12 @@ CLEAR_VRAM:
 ; LOOKUP_DIGIT_IMAGE
 ; Input:
 ;   A = DIGIT_FONT_TABLE_INDEX
+; Output:
+;   DE = DIGIT_FONT_TABLE_POINTER
 0AC1: 11 B1 09    LXI D, #09B1     ; DIGIT_FONT_TABLE_POINTER = $09B1 (0)
 
 ; FIND_DIGIT_BY_INDEX
+; Digit 0 returns the initial table pointer.
 0AC4: 3D          DCR A
 0AC5: FE FF       CPI #FF          ; if --DIGIT_FONT_TABLE_INDEX == #FF,
 0AC7: C8          RZ               ; RETURN
@@ -2170,6 +2596,14 @@ CLEAR_VRAM:
 0AD1: C3 C4 0A    JMP $0AC4        ; FIND_DIGIT_BY_INDEX
 
 ; DRAW_TURN_INDICATOR
+; Blanks out the previous side marker, then draws a black ('■')
+; or white ('+') piece beside the board to show the active side.
+;
+; The markers are outside the move cursor track. Since 1P is
+; always white, '+' is drawn near the 1P controls and '■' is
+; drawn near the 2P controls.
+;
+; In 1-player games, only the '+' marker is displayed.
 0AD4: 3A 8A 40    LDA $408A        ; A = CURRENT_PIECE
 0AD7: FE 03       CPI #03          ; if CURRENT_PIECE == '+',
 0AD9: CA F6 0A    JZ $0AF6         ; DRAW_+_INDICATOR
@@ -2202,6 +2636,8 @@ CLEAR_VRAM:
 ;   A = ■_COUNT|+_COUNT
 ; Output:
 ;   A++
+;
+; Increments a BCD value while scoring the game.
 0B03: 37          STC              ; set carry bit
 0B04: 3F          CMC              ; clear carry bit
 0B05: C6 01       ADI #01          ; ■|+_COUNT++
@@ -2209,6 +2645,9 @@ CLEAR_VRAM:
 0B08: C9          RET              ; RETURN
 
 ; MESSAGE_FONT_TABLE
+; Some message strings use dakuten (゛) and handakuten (゜)
+; marks. These are stored as separate glyphs which modify the
+; preceding kana character, e.g. カ + ゛ = ガ and ハ + ゜ = パ.
 ; 00 = イ
 0B09: 08                           ; --------xx
 0B0A: 10                           ; ------xx--
@@ -2435,6 +2874,9 @@ CLEAR_VRAM:
 0BB7: 00                           ; ----------
 
 ; CHECK_PLAYER_WIN
+; In 1-player games, checks whether 1P defeated the CPU.
+; If so, play the victory jingle. Ties, CPU wins, and all
+; 2-player games return without playing anything.
 0BB8: 3A FF 40    LDA $40FF
 0BBB: FE FE       CPI #FE          ; if GAME_MODE == 1P Sente,
 0BBD: CA C6 0B    JZ $0BC6         ; WIN_CHECK
@@ -2450,23 +2892,29 @@ CLEAR_VRAM:
                                    ; else
 0BCE: 47          MOV B,A          ; B = ■_COUNT
 0BCF: 3A 83 40    LDA $4083        ; A = +_COUNT
-0BD3: 90          SUB B            ; if +_COUNT == ■_COUNT,
-0BD4: C8          RZ               ; RETURN
+0BD2: 90          SUB B            ; if +_COUNT == ■_COUNT,
+0BD3: C8          RZ               ; RETURN
                                    ; else if +_COUNT < ■_COUNT,
-0BD5: F8          RM               ; RETURN
+0BD4: F8          RM               ; RETURN
                                    ; else
 ; PLAYER_WINS
 0BD5: CD D9 0B    CALL $0BD9       ; PLAY_VICTORY_JINGLE
 0BD8: C9          RET              ; RETURN
 
 ; PLAY_VICTORY_JINGLE
-; Preserves BC and HL, though this seems unnecessary.
-; The only used call path is at the end of SCORE_GAME.
+; The jingle that plays when the player defeats the CPU in a 1-player
+; game. It plays for ~9 seconds before it finally stops.
+;
+; Preserves BC and HL, though this seems unnecessary. The only used
+; call path is at the end of SCORE_GAME.
 0BD9: C5          PUSH B           ; save BC
 0BDA: E5          PUSH H           ; save HL
 0BDB: 16 32       MVI D, #32       ; JINGLE_LOOP_COUNTER = 50
 
 ; PLAY_TONES
+; All three tones are used. PLAY_TONE is called every ~60ms, so each
+; new tone likely cuts off the previous one before its natural
+; hardware-controlled duration ends.
 0BDD: CD FB 08    CALL $08FB       ; VERY_LOW_TONE
 0BE0: CD 6B 03    CALL $036B       ; DOUBLE_DELAY [60ms]
 0BE3: CD 00 09    CALL $0900       ; LOW_TONE
