@@ -14,7 +14,7 @@ Added an informative "ILLEGAL MOVE" message that is displayed when a player pres
 
 Updated the blinking cadence of the "INSERT COIN" message when time has expired to a more even on/off pattern.
 
-Completed games no longer enter the continue screen. After the final score is displayed, the machine waits 6 seconds and automatically resets.
+Completed games no longer enter the continue screen if the timer expires while scoring is in progress. After the final score is displayed, the machine waits 6 seconds and automatically resets.
 
 
 ROM Optimizations
