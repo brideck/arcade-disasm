@@ -16,7 +16,19 @@ Updated the blinking cadence of the "INSERT COIN" message when time has expired 
 
 Completed games no longer enter the continue screen if the timer expires while scoring is in progress. After the final score is displayed, the machine waits 6 seconds and automatically resets.
 
+Once the board is full, the game automatically ends and the scoring routine is called. This used to take 2-3 button presses to Pass turns and press Judge.
+
+Reduced the victory jingle from 9 seconds to 3 seconds.
+
 
 ROM Optimizations
 -----------------
 Removed redundant GAME_SCORED_FLAG check from the player input loop.
+
+Removed SHORT_DELAY as it is no longer used.
+
+Removed unused code from the CPU's move selection routine.
+
+Removed unused stored value for NUM_OUTFLANKED_PIECES.
+
+Removed unused inline variable from DRAW_MESSAGE calls.
