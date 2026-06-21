@@ -22,6 +22,8 @@ Once the board is full, the game automatically ends and the scoring routine is c
 
 Added check to see if one side has been completely eliminated as the result of a move. If so, the game ends immediately. This also used to take 2-3 button presses to Pass turns and press Judge.
 
+Cleared the turn indicator from the screen while scoring is being presented.
+
 Reduced the victory jingle from 9 seconds to 3 seconds.
 
 
@@ -43,9 +45,19 @@ Tidied up the 'Pass' logic in the player input loop. There was a lot of recalcul
 
 Moved CLEAR_MESSAGE and CLEAR_MOVE_CURSORS from callers to start of SCORE_GAME.
 
-Removed now unused GAME_SCORED_FLAG.
+Removed the now unused GAME_SCORED_FLAG.
 
 Reduced the height of all characters from 7 to 6 pixels, updated to use 5x6 draw routine and eliminated the now unused 5x7 draw routine.
+
+
+Minor Enhancements
+------------------
+Updated player side logic so that Black ('■') always goes first, as is the convention in Othello's rules. Previously, P1 was always ('+') regardless of which side made the first move. The scoring display has also been updated to maintain Computer Othello's presentation regardless of which color P1 is playing, so that P1's score is always on the left and P1's pieces are always represented at the bottom of the board.
+
+Note: This change revamped the internal state model. The original game uses a mutable GAME_MODE value that's originally mapped to the button pressed during game selection, e.g. 1P Sente, etc. (In a 2P game, this value is toggled and used as a gate to determine which side's controls are active.) With this update, that state is split into three properties:
+* NUM_PLAYERS: the number of human-controlled players (0, 1, or 2)
+* ACTIVE_PLAYER_SIDE: 0 = P1 side, 1 = P2/CPU side
+* P1_PIECE: P1's piece color
 
 
 Bug Fixes
