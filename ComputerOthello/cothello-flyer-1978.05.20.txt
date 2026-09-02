@@ -34,7 +34,7 @@ By adopting Othello—a game with 15 million enthusiasts—the gameplay is easy 
 ■ オセロゲームについて
 ■ About the game of Othello
 1．先手、後手の順で1手ずつ打っていきます。
-1. Players take turns placing one piece at a time, starting with the first player.
+1. The first and second players alternate, making one move each.
 2．縦、横、斜で必ず相手の駒をはさまなければなりません。はさめない時はパスします。
 2. You must place your piece so that it outflanks at least one of your opponent’s pieces vertically, horizontally, or diagonally. If no move is possible, you must pass.
 3．相手の駒をはさむと、はさまれた駒は自分の駒になります。

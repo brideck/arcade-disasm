@@ -1,0 +1,11 @@
+オセロゲームについて
+About the game of Othello
+
+1．先手、後手の順で1手ずつ打っていきます。
+1. The first and second players alternate, making one move each.
+2．縦、横、斜で必ず相手の駒をはさまなければなりません。はさめない時はパスします。
+2. You must place your piece so that it outflanks at least one of your opponent’s pieces vertically, horizontally, or diagonally. If no move is possible, you must pass.
+3．相手の駒をはさむと、はさまれた駒は自分の駒になります。（コンピューターで自動的に変わります）
+3. When you outflank your opponent’s pieces, the captured pieces become your own. (On the computer, they change automatically)
+4．勝負は盤上の駒数が多い方が勝ちとなります。
+4. The player with more pieces on the board at the end wins.

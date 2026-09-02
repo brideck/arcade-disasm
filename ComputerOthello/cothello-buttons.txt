@@ -13,6 +13,8 @@ _______    _________________________    _____________   _______   _______   ____
             vs. Computer
 
 
+・マイクロコンピューターを相手にゲームをする場合は対面の操作ボタンでお楽しみください。
+・When playing against the microcomputer, please use the control buttons on the opposite side.
 
 駒を打つマス     セット     パス
 Piece Cursor      Set       Pass
