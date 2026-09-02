@@ -903,7 +903,7 @@ ADVANCE_POINTER_TO_NEXT_SPACE:
 	RET                            ; RETURN
 
 INSPECT_NEXT_SPACE:
-	POP	PSW                        ; restore POINTER_BYTE
+	POP PSW                        ; restore POINTER_BYTE
 	JMP INSPECT_SPACE
 
 RETURN_LEGAL_SPACE:
@@ -2208,7 +2208,7 @@ DRAW_NEXT_ROW:
 
 GET_AND_DRAW_NEXT_PIXEL:
 ; Shift next image bit into carry, which is tested with JC.
-	RAL	; IMAGE_DATA << 1
+	RAL                            ; IMAGE_DATA << 1
 	PUSH PSW                       ; save IMAGE_DATA
                                    ; if IMAGE_DATA_HI_BIT == 1,
 	JC USE_IMAGE_PIXEL_VALUE
