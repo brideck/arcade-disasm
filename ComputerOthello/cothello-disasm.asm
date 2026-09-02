@@ -2,7 +2,7 @@
 
 RESET:
 	DI
-	JMP	STARTUP
+	JMP STARTUP
 
 ; PLUS_PIECE (WHITE)
 	DB $00                         ; ----------
@@ -67,7 +67,7 @@ RESET:
 	DB $00, $00
 
 ; TIMER EXPIRED (RST 7 INTERRUPT)
-	JMP	TIMER_EXPIRED_ADD_COIN_PROMPT
+	JMP TIMER_EXPIRED_ADD_COIN_PROMPT
 
 ; ￥100ドーゾ
 ; "INSERT ￥100" - Prompt displayed during attract sequence and timer expiration
@@ -127,17 +127,17 @@ ATTRACT_MODE_LOOP:
 	LDA	$A000                      ; READ_COIN_SLOT (possible values: #0E, #05, #06, #03)
 	ANI	$0F
 	CPI	$0E                        ; #0E:
-	JZ	REREAD_COIN_SLOT
+	JZ REREAD_COIN_SLOT
 	CPI	$05                        ; #05:
-	JZ	CONTINUE_ATTRACT
+	JZ CONTINUE_ATTRACT
 	CPI	$06                        ; #06:
-	JZ	COIN_INSERTED
+	JZ COIN_INSERTED
 
 REREAD_COIN_SLOT:
 	LDA	$A000                      ; READ_COIN_SLOT
 	ANI	$07
 	CPI	$03                        ; #03:
-	JZ	COIN_INSERTED
+	JZ COIN_INSERTED
 
 CONTINUE_ATTRACT:
 ; Attract mode toggles messages between "COMPUTER OTHELLO" and "INSERT COIN."
@@ -173,9 +173,9 @@ CONTINUE_ATTRACT:
 	CALL CPU_FIND_AND_PLAY_BEST_MOVE
 	LDA	$4088
 	DCR	A                          ; if --ATTRACT_MOVE_COUNT != 0,
-	JNZ	ATTRACT_MODE_LOOP
+	JNZ ATTRACT_MODE_LOOP
                                    ; else
-	JMP	RESET
+	JMP RESET
 
 SET_SERVICE_MODE_FLAGS:
 ; If Service B is enabled, set CPU_OPENING_MOVE_TABLE_INDEX = 4,
@@ -206,7 +206,7 @@ PROMPT_SELECT_GAME:
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
 	DB $00, $45                    ; "SELECT GAME"
-	POP	B                          ; restore PSEUDORANDOM_OPENING_MOVE
+	POP B                          ; restore PSEUDORANDOM_OPENING_MOVE
 	EI
 	LDA	$6000                      ; READ_INPUT
 ; By the rules of Othello, black ('■') always moves first, but that is
@@ -261,7 +261,7 @@ FIRST_MOVE_CPU:
 ; COIN_INSERTED, making this second INIT_GAME call redundant.
 	DI
 	STA	$40FF                      ; GAME_MODE = A
-	MOV	A,B
+	MOV A,B
 	STA	$40FE                      ; CPU_OPENING_MOVE_INDEX = B
 	LXI	SP, $40FA                  ; INIT_STACK <= $40F9
 	CALL INIT_GAME
@@ -387,7 +387,7 @@ PLAYER_INPUT_LOOP:
 ; doesn't suspend normal input handling. The player can still press
 ; any button and they will function normally, but since there are
 ; no legal moves they will be unable to set a piece anywhere.
-	MOV	A,B
+	MOV A,B
 	CPI	$00                        ; if PLAYER_MUST_PASS != 0,
 	JNZ PASS_BUTTON_PROMPT
                                    ; else
@@ -466,9 +466,9 @@ PASS_PRESSED:
 ; should probably suffice. Restart the player's turn if passing is not allowed,
 ; otherwise update the pass counter and end the player's turn.
 	CALL CHECK_IF_PLAYER_MUST_PASS
-	MOV	A,B
+	MOV A,B
 	CPI	$00                        ; if PLAYER_MUST_PASS == 0,
-	JZ	PLAYER_INPUT_LOOP
+	JZ PLAYER_INPUT_LOOP
                                    ; else
 	LXI	H, $4089
 	INR	M                          ; CONSECUTIVE_PASS_COUNTER++
@@ -494,9 +494,9 @@ JUDGE_PRESSED:
 ; produce the same behavior.
 	DI
 	XTHL                           ; save HL / pop RETURN_ADDRESS
-	MOV	D,M                        ; D = JUMP_ADDRESS_HI
+	MOV D,M                        ; D = JUMP_ADDRESS_HI
 	INX	H                          ; RETURN_ADDRESS++
-	MOV	E,M                        ; E = JUMP_ADDRESS_LO
+	MOV E,M                        ; E = JUMP_ADDRESS_LO
 	XCHG                           ; HL = JUMP_ADDRESS
 	XTHL                           ; push JUMP_ADDRESS / restore HL
 	RET                            ; return to JUMP_ADDRESS (CLEAR_AND_PROMPT_FOR_JUDGE)
@@ -513,7 +513,7 @@ SET_PRESSED:
 ; Restart the player's turn if the attempted move is illegal, otherwise
 ; apply the move and end the player's turn.
 	CALL CHECK_IF_MOVE_IS_LEGAL
-	MOV	A,B
+	MOV A,B
 	CPI	$00                        ; if MOVE_LEGAL == 0,
 	JZ PLAYER_INPUT_LOOP
                                    ; else
@@ -529,7 +529,7 @@ P1_RIGHT_P2_LEFT_PRESSED:
 	LDA	$408B                      ; A = MOVE_COL
 	INR	A                          ; A++
 	CPI	$08                        ; if A != 8,
-	JNZ	UPDATE_MOVE_COL
+	JNZ UPDATE_MOVE_COL
                                    ; else
 	XRA	A                          ; A = 0
 
@@ -631,7 +631,7 @@ COIN_PROMPT:
 	CALL SHORT_DELAY               ; [0.37s]
 	CALL CLEAR_MESSAGE
 	CALL CORE_DELAY                ; [30ms]
-	POP	B                          ; restore ESCAPE_FLAG
+	POP B                          ; restore ESCAPE_FLAG
 	RET                            ; RETURN
 
 SET_ESCAPE:
@@ -646,10 +646,10 @@ JUDGE_PRESSED_AT_CONTINUE:
 	JMP RESET
 
 ESCAPE:
-	POP	B                          ; restore everything
-	POP	D
-	POP	H
-	POP	PSW
+	POP B                          ; restore everything
+	POP D
+	POP H
+	POP PSW
 	EI
 	RET                            ; RETURN
 
@@ -680,7 +680,7 @@ DELAY_LOOP:
 	CALL CORE_DELAY
 	DCR	B                          ; if --DELAY_LOOP_COUNTER != 0,
 	JNZ DELAY_LOOP
-	POP	B                          ; restore BC
+	POP B                          ; restore BC
 
 DOUBLE_DELAY:
 ; 60 ms delay used as the spacing between tones in the victory jingle.
@@ -699,9 +699,9 @@ INNER_LOOP:
 	JNZ INNER_LOOP
                                    ; else
 	DCR	H                          ; if --OUTER_LOOP_COUNTER != 0,
-	JNZ	INNER_LOOP
+	JNZ INNER_LOOP
                                    ; else
-	POP	H                          ; restore HL
+	POP H                          ; restore HL
 	RET                            ; RETURN
 
 CPU_FIND_AND_PLAY_BEST_MOVE:
@@ -730,7 +730,7 @@ CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
 	CALL CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
 	LDA	$4086
 	CPI	$01                        ; if AI_FIRST_PASS_FLAG != 1,
-	JNZ	FIND_MOVE
+	JNZ FIND_MOVE
 	                               ; else
 	CALL FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
 
@@ -739,7 +739,7 @@ FIND_MOVE:
 	STA	$4090                      ; UNUSED? = 0
 	LXI	D, $0000                   ; ROW_D, COL_E = (0,0)
 	CALL FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL
-	MOV	A,B
+	MOV A,B
 	CPI	$01                        ; if NO_CANDIDATE_MOVE == 1,
 	JZ NO_LEGAL_MOVES
                                    ; else
@@ -761,13 +761,13 @@ EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH:
 	CALL UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER
 	CALL GET_CANDIDATE_MOVE
 	INR	E                          ; COL_E++
-	MOV	A,E
+	MOV A,E
 	CPI	$08                        ; if COL_E != 8,
 	JNZ CONTINUE_MOVE_SEARCH
                                    ; else
 	MVI	E, $00                     ; COL_E = 0
 	INR	D                          ; ROW_D++
-	MOV	A,D
+	MOV A,D
 	CPI	$08                        ; if ROW_D != 8,
 	JNZ CONTINUE_MOVE_SEARCH
                                    ; else
@@ -775,7 +775,7 @@ EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH:
 
 CONTINUE_MOVE_SEARCH:
 	CALL FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL
-	MOV	A,B
+	MOV A,B
 	CPI	$01                        ; if NO_CANDIDATE_MOVE == 1,
 	JZ PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
                                    ; else
@@ -803,16 +803,16 @@ PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
 	CALL COPY_DISPLAY_BOARD_TO_ANALYSIS_BOARD
 
 	LDA	$408C
-	MOV	H,A                        ; H = MOVE_ROW
+	MOV H,A                        ; H = MOVE_ROW
 	LDA	$408B
-	MOV	L,A                        ; L = MOVE_COL
+	MOV L,A                        ; L = MOVE_COL
 	PUSH H                         ; save MOVE_ROW/COL
 	CALL GET_SPACE_ON_ANALYSIS_BOARD
 
 	LDA	$408A
-	MOV	M,A                        ; ANALYSIS_BOARD (H,L) = CURRENT_PIECE
+	MOV M,A                        ; ANALYSIS_BOARD (H,L) = CURRENT_PIECE
 	CALL FLASH_BOARD_CHANGE
-	POP	H                          ; restore MOVE_ROW/COL
+	POP H                          ; restore MOVE_ROW/COL
 	MVI	A, $01
 	STA	$4084                      ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
 	CALL SCAN_AND_FLIP_OUTFLANKED_PIECES
@@ -853,14 +853,14 @@ FIND_ROW_D:
 	JNZ ADVANCE_POINTER_1_ROW
                                    ; else
 FIND_COL_E_BYTE:
-	MOV	B,M                        ; B = ROW_D_POINTER_BYTE
-	MOV	A,E
+	MOV B,M                        ; B = ROW_D_POINTER_BYTE
+	MOV A,E
 	CPI	$04                        ; if COL_E == 4,
 	JZ ADVANCE_POINTER_4_COLS
                                    ; else if COL_E > 4,
 	JP ADVANCE_POINTER_4_COLS
                                    ; else
-	MOV	A,B                        ; A = POINTER_BYTE
+	MOV A,B                        ; A = POINTER_BYTE
 	INR	E                          ; COL_E++
 
 FIND_COL_E_BITS:
@@ -869,12 +869,12 @@ FIND_COL_E_BITS:
                                    ; else
 ; MOVE_ASSESSMENT_POINTER is now set to (D,E), so begin
 ; scanning for a legal move.
-	POP	D                          ; restore ROW_D, COL_E
+	POP D                          ; restore ROW_D, COL_E
 	JMP INSPECT_SPACE
 
 GET_POINTER_BYTE:
-	POP	PSW                        ; clear POINTER_BYTE from stack
-	MOV	A,M                        ; A = POINTER_BYTE
+	POP PSW                        ; clear POINTER_BYTE from stack
+	MOV A,M                        ; A = POINTER_BYTE
 
 INSPECT_SPACE:
 ; Occupied spaces are set to 10/11, legal moves are 01
@@ -886,7 +886,7 @@ INSPECT_SPACE:
 ADVANCE_POINTER_TO_NEXT_SPACE:
 	PUSH PSW                       ; save POINTER_BYTE
 	INR	E                          ; COL_E++
-	MOV	A,E
+	MOV A,E
 	CPI	$04                        ; if COL_E == 4,
 	JZ GET_NEXT_POINTER_BYTE
 	CPI	$08                        ; else if COL_E != 8,
@@ -894,12 +894,12 @@ ADVANCE_POINTER_TO_NEXT_SPACE:
                                    ; else
 	MVI	E, $00                     ; COL_E = 0
 	INR	D                          ; ROW_D++
-	MOV	A,D
+	MOV A,D
 	CPI	$08                        ; if ROW_D != 8,
-	JNZ	GET_NEXT_POINTER_BYTE
+	JNZ GET_NEXT_POINTER_BYTE
                                    ; else
 	MVI	B, $01                     ; NO_CANDIDATE_MOVE = 1
-	POP	PSW                        ; clear POINTER_BYTE from stack
+	POP PSW                        ; clear POINTER_BYTE from stack
 	RET                            ; RETURN
 
 INSPECT_NEXT_SPACE:
@@ -909,9 +909,9 @@ INSPECT_NEXT_SPACE:
 RETURN_LEGAL_SPACE:
 ; Store CANDIDATE_MOVE in RAM
 	LXI	H, $40A9
-	MOV	M,E                        ; CANDIDATE_MOVE_COL = COL_E
+	MOV M,E                        ; CANDIDATE_MOVE_COL = COL_E
 	INX	H
-	MOV	M,D                        ; CANDIDATE_MOVE_ROW = ROW_D
+	MOV M,D                        ; CANDIDATE_MOVE_ROW = ROW_D
 	MVI	B, $00                     ; NO_CANDIDATE_MOVE = 0
 	RET                            ; RETURN
 
@@ -962,14 +962,14 @@ CONTINUE_SCAN_FOR_OUTFLANKED_PIECES:
 	MVI	E, $01                     ; FLIP_PIECES = 1
 	CALL SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 ; Upon exit, D holds the next DIRECTION to be scanned
-	MOV	A,D
+	MOV A,D
 	CPI	$09                        ; if DIRECTION != 9,
 	JNZ CONTINUE_SCAN_FOR_OUTFLANKED_PIECES
                                    ; else
 ; Finally, actually play the piece on the board
 	CALL GET_SPACE_ON_ANALYSIS_BOARD
 	LDA	$408A                      ; A = CURRENT_PIECE
-	MOV	M,A                        ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
+	MOV M,A                        ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
 	RET                            ; RETURN
 
 GET_SPACE_ON_ANALYSIS_BOARD:
@@ -979,12 +979,12 @@ GET_SPACE_ON_ANALYSIS_BOARD:
 ; Output:
 ;   HL = ANALYSIS_BOARD_POINTER (H,L)
 	CALL GET_SPACE_ON_DISPLAY_BOARD
-	MOV	A,L
+	MOV A,L
 	ADI	$40
-	MOV	L,A
+	MOV L,A
 	MVI	A, $00
-	ADC	H
-	MOV	H,A                        ; ANALYSIS_BOARD_POINTER = DISPLAY_BOARD_POINTER + #0040
+	ADC H
+	MOV H,A                        ; ANALYSIS_BOARD_POINTER = DISPLAY_BOARD_POINTER + #0040
 	RET                            ; RETURN
 
 TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD:
@@ -1010,7 +1010,7 @@ COPY_BOARD_CORE:
 	MVI	B, $40                     ; COPY_SPACE_LOOP_COUNTER = 64
 
 COPY_SPACE:
-	MOV	A,M
+	MOV A,M
 	STAX D                         ; TARGET_BOARD(POINTER) = SOURCE_BOARD(POINTER)
 	INX	H                          ; SOURCE_BOARD_POINTER++
 	INX	D                          ; TARGET_BOARD_POINTER++
@@ -1024,10 +1024,10 @@ LOAD_CANDIDATE_MOVE_EVAL_SCORE:
 ;   BC = CANDIDATE_MOVE_EVAL_SCORE
 	PUSH H                         ; save HL
 	LXI	H, $4095
-	MOV	C,M
+	MOV C,M
 	INX	H
-	MOV	B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
-	POP	H                          ; restore HL
+	MOV B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
+	POP H                          ; restore HL
 	RET                            ; RETURN
 
 DRAW_ANALYSIS_BOARD:
@@ -1050,21 +1050,21 @@ DRAW_SPACE:
 	LDAX D                         ; SPACE_CONTENTS = BOARD(POINTER)
 	CALL DRAW_GAME_PIECE
 	INX	D                          ; BOARD_POINTER++
-	POP	H                          ; restore VRAM_POINTER
-	MOV	A,L
+	POP H                          ; restore VRAM_POINTER
+	MOV A,L
 ; Advance VRAM pointer 6 pixels horizontally
 ; (5 for the space + 1 for the grid line)
 	ADI	$06                        ; VRAM_POINTER = VRAM_POINTER + 6
-	MOV	L,A                        ; HL = VRAM_POINTER(x++,y)
+	MOV L,A                        ; HL = VRAM_POINTER(x++,y)
 	DCR	B                          ; if --COL_COUNTER != 0,
 	JNZ DRAW_SPACE
                                    ; else
-	POP	H                          ; restore VRAM_POINTER (start of row)
-	MOV	A,H
+	POP H                          ; restore VRAM_POINTER (start of row)
+	MOV A,H
 ; Advance VRAM pointer 6 pixels vertically
 ; (5 for the space + 1 for the grid line)
 	ADI	$06                        ; VRAM_POINTER += #0600
-	MOV	H,A                        ; HL = VRAM_POINTER(x,y++)
+	MOV H,A                        ; HL = VRAM_POINTER(x,y++)
 	DCR	C                          ; if --ROW_COUNTER != 0,
 	JNZ DRAW_ROW
                                    ; else
@@ -1137,7 +1137,7 @@ CLEAR_VRAM:
 	XRA	A
 
 ZERO_OUT_VRAM:
-	MOV	M,A                        ; VRAM(POINTER) = 0
+	MOV M,A                        ; VRAM(POINTER) = 0
 	DAD	B                          ; VRAM_POINTER = VRAM_POINTER + INCREMENTER
 	JNC ZERO_OUT_VRAM              ; while VRAM_POINTER < $0000 (carry not set)
                                    ; else
@@ -1151,8 +1151,8 @@ INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ;   B = NUM_OUTFLANKED_PIECES
 ;   D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
 	XRA	A
-	MOV	B,A                        ; NUM_OUTFLANKED_PIECES = 0
-	MOV	E,A                        ; FLIP_PIECES = 0
+	MOV B,A                        ; NUM_OUTFLANKED_PIECES = 0
+	MOV E,A                        ; FLIP_PIECES = 0
 
 SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ; Input:
@@ -1182,7 +1182,7 @@ SCAN_FOR_OUTFLANKED_PIECES_CORE:
 ; of pieces to flip in the current direction. Flip the pieces
 ; one by one until all of the outflanked pieces have been
 ; handled. Return the next direction to scan to the caller.
-	MOV	A,D                        ; CURR_DIRECTION = DIRECTION
+	MOV A,D                        ; CURR_DIRECTION = DIRECTION
 	PUSH H                         ; save MOVE_ROW, MOVE_COL
 	LXI	H, $0573                   ; HL = $0573, DIRECTION_TABLE(1)
 
@@ -1192,13 +1192,13 @@ FIND_DIRECTION_IN_DIRECTION_TABLE:
 	JZ EXEC_DIRECTION_TABLE
 
 	PUSH PSW                       ; save CURR_DIRECTION
-	MOV	A,L
+	MOV A,L
 	ADI	$06
-	MOV	L,A
+	MOV L,A
 	MVI	A, $00
-	ADC	H
-	MOV	H,A                        ; HL = HL + 6, DIRECTION_TABLE(++)
-	POP	PSW                        ; restore CURR_DIRECTION
+	ADC H
+	MOV H,A                        ; HL = HL + 6, DIRECTION_TABLE(++)
+	POP PSW                        ; restore CURR_DIRECTION
 	JMP FIND_DIRECTION_IN_DIRECTION_TABLE
 
 EXEC_DIRECTION_TABLE:
@@ -1207,75 +1207,75 @@ EXEC_DIRECTION_TABLE:
 	PCHL                           ; exec DIRECTION_TABLE(D)
 
 ; DIRECTION_TABLE(1) - UP
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	DCR	H                          ; MOVE_ROW--
 	NOP
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(2) - UP-RIGHT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	L                          ; MOVE_COL++
 	DCR	H                          ; MOVE_ROW--
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(3) - RIGHT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	L                          ; MOVE_COL++
 	NOP
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(4) - DOWN-RIGHT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	H                          ; MOVE_ROW++
 	INR	L                          ; MOVE_COL++
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(5) - DOWN
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	H                          ; MOVE_ROW++
 	NOP
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(6) - DOWN-LEFT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	H                          ; MOVE_ROW++
 	DCR	L                          ; MOVE_COL--
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(7) - LEFT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	DCR	L                          ; MOVE_COL--
 	NOP
 	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(8) - UP-LEFT
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	DCR	L                          ; MOVE_COL--
 	DCR	H                          ; MOVE_ROW++
-	JMP	SCAN_DIRECTION
+	JMP SCAN_DIRECTION
 
 ; DIRECTION_TABLE(9) - RETURN
 ; Reached when all 8 directions have been exhausted.
-	POP	H                          ; clear MOVE_ROW, MOVE_COL from stack
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; clear MOVE_ROW, MOVE_COL from stack
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	RET                            ; RETURN
 
 SCAN_DIRECTION:
 ; If board edges are found, advance the scan to the next direction.
-	MOV	A,H
+	MOV A,H
 	CPI	$FF                        ; if MOVE_ROW == -1,
 	JZ INCREMENT_DIRECTION_AND_CONTINUE_SCAN
 	CPI	$08                        ; else if MOVE_ROW == 8,
 	JZ INCREMENT_DIRECTION_AND_CONTINUE_SCAN
                                    ; else
-	MOV	A,L
+	MOV A,L
 	CPI	$FF                        ; if MOVE_COL == -1,
 	JZ INCREMENT_DIRECTION_AND_CONTINUE_SCAN
 	CPI	$08                        ; else if MOVE_COL == 8,
 	JZ INCREMENT_DIRECTION_AND_CONTINUE_SCAN
                                    ; else
 	LDA	$408A
-	MOV	C,A                        ; C = CURRENT_PIECE
+	MOV C,A                        ; C = CURRENT_PIECE
 	PUSH H                         ; save MOVE_ROW, MOVE_COL
 ; Scan either the DISPLAY_BOARD or ANALYSIS_BOARD as requested by caller.
 	LDA	$4084
@@ -1285,22 +1285,22 @@ SCAN_DIRECTION:
 	CALL GET_SPACE_ON_DISPLAY_BOARD
 
 EXAMINE_SPACE_CONTENTS:
-	MOV	A,M                        ; SPACE_CONTENTS = BOARD_POINTER (MOVE_ROW, MOVE_COL)
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	MOV A,M                        ; SPACE_CONTENTS = BOARD_POINTER (MOVE_ROW, MOVE_COL)
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	CPI	$00                        ; if SPACE_CONTENTS == 0 (BLANK),
 	JZ INCREMENT_DIRECTION_AND_CONTINUE_SCAN
-	CMP	C                          ; else if SPACE_CONTENTS != CURRENT_PIECE,
+	CMP C                          ; else if SPACE_CONTENTS != CURRENT_PIECE,
 	JNZ HANDLE_OPPONENT_PIECE
                                    ; else
-	MOV	A,B
+	MOV A,B
 	CPI	$00                        ; if NUM_OUTFLANKED_PIECES != 0,
 	JNZ OUTFLANK_COMPLETE
                                    ; else
 INCREMENT_DIRECTION_AND_CONTINUE_SCAN:
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	INR	D                          ; DIRECTION++
 	MVI	B, $00                     ; NUM_OUTFLANKED_PIECES = 0
-	MOV	A,D
+	MOV A,D
 	CPI	$09                        ; if DIRECTION != 9,
 	JNZ SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
                                    ; else
@@ -1313,14 +1313,14 @@ USE_ANALYSIS_BOARD:
 OUTFLANK_COMPLETE:
 ; Save NUM_OUTFLANKED_PIECES to RAM, though no other code
 ; appears to reference this value.
-	MOV	A,B
+	MOV A,B
 	STA	$4097                      ; NUM_OUTFLANKED_PIECES? (unused) = NUM_OUTFLANKED_PIECES
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	RET                            ; RETURN
 
 HANDLE_OPPONENT_PIECE:
 ; Flip or count piece depending on FLIP_PIECES setting.
-	MOV	A,E
+	MOV A,E
 	CPI	$01                        ; if FLIP_PIECES == 1,
 	JZ FLIP_SQUARE
                                    ; else
@@ -1333,7 +1333,7 @@ FLIP_SQUARE:
 	JNZ SCAN_FOR_OUTFLANKED_PIECES_CORE
                                    ; else
 	INR	D                          ; DIRECTION++
-	POP	H                          ; restore MOVE_ROW, MOVE_COL
+	POP H                          ; restore MOVE_ROW, MOVE_COL
 	RET                            ; RETURN
 
 GET_CANDIDATE_MOVE:
@@ -1357,21 +1357,21 @@ UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER:
 ;
 ; Ties update the best move, so moves scanned later win.
 	LXI	H, $408D
-	MOV	E,M
+	MOV E,M
 	INX	H
-	MOV	D,M                        ; DE = BEST_MOVE_EVAL_SCORE
+	MOV D,M                        ; DE = BEST_MOVE_EVAL_SCORE
 	XCHG                           ; HL = BEST_MOVE_EVAL_SCORE
-	MOV	A,H
+	MOV A,H
 	RLC                            ; if BEST_MOVE_EVAL_SCORE < 0,
 	JC BEST_MOVE_EVAL_SCORE_IS_NEGATIVE
                                    ; else
-	MOV	A,B
+	MOV A,B
 	RLC                            ; if CANDIDATE_MOVE_EVAL_SCORE < 0,
 	RC                             ; RETURN_WITH_NO_UPDATE
                                    ; else
 SCORES_HAVE_SAME_SIGN:
-	MOV	A,H
-	CMP	B                          ; if BEST_MOVE_EVAL_SCORE_HI == CANDIDATE_MOVE_EVAL_SCORE_HI,
+	MOV A,H
+	CMP B                          ; if BEST_MOVE_EVAL_SCORE_HI == CANDIDATE_MOVE_EVAL_SCORE_HI,
 	JZ COMPARE_SCORE_LO_BYTES
                                    ; else if BEST_MOVE_EVAL_SCORE < CANDIDATE_MOVE_EVAL_SCORE,
 	JM UPDATE_BEST_MOVE_EVAL_SCORE
@@ -1379,24 +1379,24 @@ SCORES_HAVE_SAME_SIGN:
 	RET                            ; RETURN_WITH_NO_UPDATE
 
 BEST_MOVE_EVAL_SCORE_IS_NEGATIVE:
-	MOV	A,B
+	MOV A,B
 	RLC                            ; if CANDIDATE_MOVE_EVAL_SCORE < 0,
 	JC SCORES_HAVE_SAME_SIGN
                                    ; else
 	JMP UPDATE_BEST_MOVE_EVAL_SCORE
 
 COMPARE_SCORE_LO_BYTES:
-	MOV	A,L
-	CMP	C                          ; if BEST_MOVE_EVAL_SCORE_LO == CANDIDATE_MOVE_EVAL_SCORE_LO,
+	MOV A,L
+	CMP C                          ; if BEST_MOVE_EVAL_SCORE_LO == CANDIDATE_MOVE_EVAL_SCORE_LO,
 	JZ UPDATE_BEST_MOVE_EVAL_SCORE
                                    ; else if BEST_MOVE_EVAL_SCORE_LO > CANDIDATE_MOVE_EVAL_SCORE_LO,
 	RNC                            ; RETURN_WITH_NO_UPDATE
                                    ; else
 UPDATE_BEST_MOVE_EVAL_SCORE:
 	LXI	H, $408D
-	MOV	M,C
+	MOV M,C
 	INX	H
-	MOV	M,B                        ; BEST_MOVE_EVAL_SCORE = CANDIDATE_MOVE_EVAL_SCORE
+	MOV M,B                        ; BEST_MOVE_EVAL_SCORE = CANDIDATE_MOVE_EVAL_SCORE
 	LDA	$40A9
 	STA	$408B                      ; MOVE_COL = CANDIDATE_MOVE_COL
 	LDA	$40AA
@@ -1429,13 +1429,13 @@ START_NEXT_EVAL_ROW:
 	MVI	E, $00                     ; COL_E = 0
 
 GET_NEXT_EVAL_SPACE:
-	MOV	A,M                        ; CURRENT_SPACE = ANALYSIS_BOARD (ROW_D,COL_E)
+	MOV A,M                        ; CURRENT_SPACE = ANALYSIS_BOARD (ROW_D,COL_E)
 	PUSH PSW                       ; save CURRENT_SPACE
 	LDA	$408A
-	MOV	B,A                        ; B = CURRENT_PIECE
-	POP	PSW                        ; restore CURRENT_SPACE
+	MOV B,A                        ; B = CURRENT_PIECE
+	POP PSW                        ; restore CURRENT_SPACE
 	PUSH D                         ; save ROW_D
-	CMP	B                          ; if CURRENT_SPACE == CURRENT_PIECE,
+	CMP B                          ; if CURRENT_SPACE == CURRENT_PIECE,
 	JZ ADD_SPACE_VALUE
 	CPI	$00                        ; else if CURRENT_SPACE == 0,
 	JZ NEXT_EVAL_SPACE
@@ -1444,28 +1444,28 @@ GET_NEXT_EVAL_SPACE:
 	CALL SUB_VALUE_FROM_MOVE_EVAL_SCORE
 
 NEXT_EVAL_SPACE:
-	POP	D                          ; restore ROW_D
+	POP D                          ; restore ROW_D
 	INX	H                          ; ANALYSIS_BOARD_POINTER++
 	INR	E                          ; COL_E++
-	MOV	A,E
+	MOV A,E
 	CPI	$08                        ; if COL_E != 8,
-	JNZ	GET_NEXT_EVAL_SPACE
+	JNZ GET_NEXT_EVAL_SPACE
                                    ; else
 	INR	D                          ; ROW_D++
-	MOV	A,D
+	MOV A,D
 	CPI	$08                        ; if ROW_D != 8,
-	JNZ	START_NEXT_EVAL_ROW
+	JNZ START_NEXT_EVAL_ROW
                                    ; else
 	LXI	H, $4095
-	MOV	C,M
+	MOV C,M
 	INX	H
-	MOV	B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
+	MOV B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
 	RET                            ; RETURN
 
 ADD_SPACE_VALUE:
 	CALL GET_SPACE_VALUE
 	CALL ADD_VALUE_TO_MOVE_EVAL_SCORE
-	JMP	NEXT_EVAL_SPACE
+	JMP NEXT_EVAL_SPACE
 
 GET_SPACE_VALUE:
 ; The BOARD_SPACE_VALUE_TABLE contains only 16 entries. Due to the
@@ -1484,26 +1484,26 @@ GET_SPACE_VALUE:
 ;   (3,1) -> (11,01) -> index 1101 = D (13)
 ;   (5,2) -> (2,2) -> (10,10) -> index 1010 = A (10)
 	PUSH H                         ; save ANALYSIS_BOARD_POINTER
-	MOV	B,D                        ; B = ROW_D
+	MOV B,D                        ; B = ROW_D
 	CALL GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS
-	MOV	D,C                        ; D = BOARD_SPACE_VALUE_TABLE_INDEX_HI_BITS
-	MOV	B,E                        ; B = COL_E
+	MOV D,C                        ; D = BOARD_SPACE_VALUE_TABLE_INDEX_HI_BITS
+	MOV B,E                        ; B = COL_E
 	CALL GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS
-	MOV	E,C                        ; E = BOARD_SPACE_VALUE_TABLE_INDEX_LO_BITS
-	MOV	A,D
+	MOV E,C                        ; E = BOARD_SPACE_VALUE_TABLE_INDEX_LO_BITS
+	MOV A,D
 	RLC
 	RLC
-	ADD	E
-	MOV	E,A                        ; E = BOARD_SPACE_VALUE_TABLE_INDEX = (HI_BITS << 2) + LO_BITS
+	ADD E
+	MOV E,A                        ; E = BOARD_SPACE_VALUE_TABLE_INDEX = (HI_BITS << 2) + LO_BITS
 	LXI	H, $001B                   ; HL = BOARD_SPACE_VALUE_TABLE(0) = $001B
-	MOV	A,E
-	ADD	L
-	MOV	L,A
+	MOV A,E
+	ADD L
+	MOV L,A
 	MVI	A, $00
-	ADC	H
-	MOV	H,A
-	MOV	A,M                        ; BOARD_SPACE_VALUE = BOARD_SPACE_VALUE_TABLE(E)
-	POP	H                          ; restore ANALYSIS_BOARD_POINTER
+	ADC H
+	MOV H,A
+	MOV A,M                        ; BOARD_SPACE_VALUE = BOARD_SPACE_VALUE_TABLE(E)
+	POP H                          ; restore ANALYSIS_BOARD_POINTER
 	RET                            ; RETURN
 
 GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS:
@@ -1513,17 +1513,17 @@ GET_BOARD_SPACE_VALUE_TABLE_INDEX_BITS:
 ;   C = coordinate reflected in 0..3
 ;       0,1,2,3,3,2,1,0
 	MVI	A, $03
-	CMP	B                          ; if ROW_D|COL_E > 3,
+	CMP B                          ; if ROW_D|COL_E > 3,
 	JM MODIFY_INDEX_BITS
                                    ; else
-	MOV	C,B                        ; BITS = ROW_D|COL_E
+	MOV C,B                        ; BITS = ROW_D|COL_E
 	RET                            ; RETURN
 
 MODIFY_INDEX_BITS:
 ; Reflects coordinates about the board's centerline.
 	MVI	A, $07
-	SUB	B
-	MOV	C,A                        ; BITS = 7 - ROW_D|COL_E
+	SUB B
+	MOV C,A                        ; BITS = 7 - ROW_D|COL_E
 	RET                            ; RETURN
 
 ADD_VALUE_TO_MOVE_EVAL_SCORE:
@@ -1546,10 +1546,10 @@ INCREMENT_MOVE_EVAL_SCORE:
 UPDATE_CANDIDATE_MOVE_EVAL_SCORE:
 	PUSH H                         ; save ANALYSIS_BOARD_POINTER
 	LXI	H, $4095
-	MOV	M,C
+	MOV M,C
 	INX	H
-	MOV	M,B                        ; CANDIDATE_MOVE_EVAL_SCORE = MOVE_EVAL_SCORE
-	POP	H                          ; restore ANALYSIS_BOARD_POINTER
+	MOV M,B                        ; CANDIDATE_MOVE_EVAL_SCORE = MOVE_EVAL_SCORE
+	POP H                          ; restore ANALYSIS_BOARD_POINTER
 	RET                            ; RETURN
 
 SUB_VALUE_FROM_MOVE_EVAL_SCORE:
@@ -1568,7 +1568,7 @@ CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT:
 	XRA	A
 	STA	$4084                      ; BOARD_SELECTION_FOR_SCAN = 0 (DISPLAY)
 	LXI	H, $4099                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER (0,0)
-	JMP	CREATE_MOVE_ASSESSMENT_CORE
+	JMP CREATE_MOVE_ASSESSMENT_CORE
 
 CREATE_ANALYSIS_BOARD_MOVE_ASSESSMENT:
 ; An opponent-perspective MOVE_ASSESSMENT is generated here, but
@@ -1608,40 +1608,40 @@ ASSESS_SPACE:
 ; It only checks whether the empty space would outflank pieces
 ; in any direction.
 	CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-	POP	B                          ; restore CURRENT_SPACE_ACCUMULATOR
-	MOV	A,D
+	POP B                          ; restore CURRENT_SPACE_ACCUMULATOR
+	MOV A,D
 	CPI	$09                        ; if DIRECTION == 9,
 	JZ ILLEGAL_SPACE
                                    ; else
 	MVI	B, $01                     ; CURRENT_SPACE_ACCUMULATOR = 1
-	POP	D                          ; restore BOARD_POINTER
+	POP D                          ; restore BOARD_POINTER
 
 ACCUMULATOR_HANDLER:
 ; Pack CURRENT_SPACE_ACCUMULATOR into MOVE_ASSESSMENT_ACCUMULATOR.
 ; After four spaces, write the completed byte and advance
 ; MOVE_ASSESSMENT_WRITE_POINTER.
 	PUSH H                         ; save ROW_H, COL_L
-	MOV	A,C
+	MOV A,C
 	CPI	$04                        ; if ACCUMULATOR_COUNTER != 4,
-	JNZ	LOAD_ACCUMULATOR
+	JNZ LOAD_ACCUMULATOR
                                    ; else
 	XRA	A                          ; TEMP_ACCUMULATOR = 0
 
 ADD_CURRENT_SPACE_ACCUMULATOR:
-	ADD	B                          ; TEMP_ACCUMULATOR = TEMP_ACCUMULATOR + CURRENT_SPACE_ACCUMULATOR
+	ADD B                          ; TEMP_ACCUMULATOR = TEMP_ACCUMULATOR + CURRENT_SPACE_ACCUMULATOR
 	DCR	C                          ; if --ACCUMULATOR_COUNTER != 0,
-	JNZ	SHIFT_ACCUMULATOR_BITS_AND_SAVE
+	JNZ SHIFT_ACCUMULATOR_BITS_AND_SAVE
                                    ; else
 	LHLD $4092
-	MOV	M,A                        ; MOVE_ASSESSMENT(WRITE_POINTER) = TEMP_ACCUMULATOR
+	MOV M,A                        ; MOVE_ASSESSMENT(WRITE_POINTER) = TEMP_ACCUMULATOR
 	INX	H
 	SHLD $4092                     ; MOVE_ASSESSMENT_WRITE_POINTER++
 	MVI	C, $04                     ; ACCUMULATOR_COUNTER = 4
 
 GET_NEXT_ASSESSMENT_SPACE:
-	POP	H                          ; restore ROW_H, COL_L
+	POP H                          ; restore ROW_H, COL_L
 	INR	L                          ; COL_L++
-	MOV	A,L
+	MOV A,L
 	CPI	$08                        ; if COL_L == 8,
 	JZ GET_NEXT_ASSESSMENT_ROW
                                    ; else
@@ -1652,7 +1652,7 @@ ASSESS_NEXT_SPACE:
 GET_NEXT_ASSESSMENT_ROW:
 	MVI	L, $00                     ; COL_L = 0
 	INR	H                          ; ROW_H++
-	MOV	A,H
+	MOV A,H
 	CPI	$08                        ; if ROW_H != 8,
 	JNZ ASSESS_NEXT_SPACE
                                    ; else
@@ -1660,20 +1660,20 @@ GET_NEXT_ASSESSMENT_ROW:
 
 ASSESSMENT_HANDLE_WHITE:
 	MVI	B, $03                     ; CURRENT_SPACE_ACCUMULATOR = 3
-	JMP	ACCUMULATOR_HANDLER
+	JMP ACCUMULATOR_HANDLER
 
 ASSESSMENT_HANDLE_BLACK:
 	MVI	B, $02                     ; CURRENT_SPACE_ACCUMULATOR = 2
-	JMP	ACCUMULATOR_HANDLER
+	JMP ACCUMULATOR_HANDLER
 
 ILLEGAL_SPACE:
 	MVI	B, $00                     ; CURRENT_SPACE_ACCUMULATOR = 0
-	POP	D                          ; restore BOARD_POINTER
-	JMP	ACCUMULATOR_HANDLER
+	POP D                          ; restore BOARD_POINTER
+	JMP ACCUMULATOR_HANDLER
 
 LOAD_ACCUMULATOR:
 	LDA	$4094                      ; TEMP_ACCUMULATOR = MOVE_ASSESSMENT_ACCUMULATOR
-	JMP	ADD_CURRENT_SPACE_ACCUMULATOR
+	JMP ADD_CURRENT_SPACE_ACCUMULATOR
 
 SHIFT_ACCUMULATOR_BITS_AND_SAVE:
 	RLC
@@ -1689,7 +1689,7 @@ START_NEXT_ASSESSMENT_ROW:
 	MVI	E, $00                     ; COL_E = 0
 
 GET_NEXT_MOVE_ASSESSMENT_BYTE:
-	MOV	A,M                        ; MOVE_ASSESSMENT_BYTE = MOVE_ASSESSMENT(POINTER)
+	MOV A,M                        ; MOVE_ASSESSMENT_BYTE = MOVE_ASSESSMENT(POINTER)
 
 EXAMINE_MOVE_ASSESSMENT_BITS:
 	RLC                            ; if MOVE_ASSESSMENT_HI_BIT = 1,
@@ -1699,37 +1699,37 @@ EXAMINE_MOVE_ASSESSMENT_BITS:
 
 ADD_CONTENTS_TO_ANALYSIS_BOARD:
 	PUSH D                         ; save ROW_D, COL_E
-	MOV	C,A                        ; CURR_MOVE_ASSESSMENT_BYTE = MOVE_ASSESSMENT_BYTE << 2
+	MOV C,A                        ; CURR_MOVE_ASSESSMENT_BYTE = MOVE_ASSESSMENT_BYTE << 2
 	XCHG                           ; HL = ROW_D, COL_E; DE = MOVE_ASSESSMENT_POINTER
 	CALL GET_SPACE_ON_ANALYSIS_BOARD
-	MOV	M,B                        ; ANALYSIS_BOARD (D,E) = SPACE_CONTENTS
+	MOV M,B                        ; ANALYSIS_BOARD (D,E) = SPACE_CONTENTS
 	XCHG                           ; HL = MOVE_ASSESSMENT_POINTER
-	POP	D                          ; restore ROW_D, COL_E
+	POP D                          ; restore ROW_D, COL_E
 	INR	E                          ; COL_E++
-	MOV	A,E
+	MOV A,E
 	CPI	$04                        ; if COL_E == 4,
 	JZ ADVANCE_MOVE_ASSESSMENT_POINTER
 	CPI	$08                        ; if COL_E != 8,
-	JNZ	CONTINUE_WITH_MOVE_ASSESSMENT_BYTE
+	JNZ CONTINUE_WITH_MOVE_ASSESSMENT_BYTE
                                    ; else
 	INR	D                          ; ROW_D++
 	INX	H                          ; MOVE_ASSESSMENT_POINTER++
-	MOV	A,D
+	MOV A,D
 	CPI	$08                        ; if ROW_D != 8,
-	JNZ	START_NEXT_ASSESSMENT_ROW
+	JNZ START_NEXT_ASSESSMENT_ROW
                                    ; else
 	RET                            ; RETURN
 
 CONTINUE_WITH_MOVE_ASSESSMENT_BYTE:
-	MOV	A,C                        ; MOVE_ASSESSMENT_BYTE = CURR_MOVE_ASSESSMENT_BYTE
-	JMP	EXAMINE_MOVE_ASSESSMENT_BITS
+	MOV A,C                        ; MOVE_ASSESSMENT_BYTE = CURR_MOVE_ASSESSMENT_BYTE
+	JMP EXAMINE_MOVE_ASSESSMENT_BITS
 
 SPACE_OCCUPIED:
 	RLC                            ; if MOVE_ASSESSMENT_LO_BIT = 1,
 	JC SPACE_IS_WHITE
                                    ; else
 	MVI	B, $05                     ; SPACE_CONTENTS = '■'
-	JMP	ADD_CONTENTS_TO_ANALYSIS_BOARD
+	JMP ADD_CONTENTS_TO_ANALYSIS_BOARD
 
 SPACE_IS_WHITE:
 	MVI	B, $03                     ; SPACE_CONTENTS = '+'
@@ -1746,7 +1746,7 @@ DRAW_GRID:
 	MVI	C, $09                     ; NUM_LINES = 9
 	LXI	H, $CD09                   ; HORI_LINE_VRAM_POINTER = $CD09
 	PUSH H
-	POP	D                          ; VERT_LINE_VRAM_POINTER = $CD09
+	POP D                          ; VERT_LINE_VRAM_POINTER = $CD09
 
 DRAW_NEXT_LINES:
 	PUSH H                         ; save HORI_LINE_VRAM_POINTER
@@ -1755,22 +1755,22 @@ DRAW_NEXT_LINES:
 
 DRAW_NEXT_PIXELS:
 	MVI	A, $01                     ; PIXEL_TYPE = 1
-	MOV	M,A                        ; HORI_LINE_VRAM(POINTER) = PIXEL_TYPE
+	MOV M,A                        ; HORI_LINE_VRAM(POINTER) = PIXEL_TYPE
 	STAX D                         ; VERT_LINE_VRAM(POINTER) = PIXEL_TYPE
 	INR	L                          ; HORI_LINE_VRAM_POINTER++
 	INR	D                          ; VERT_LINE_VRAM_POINTER += #0100
 	DCR	B                          ; if --GRID_LINE_LENGTH != 0,
 	JNZ DRAW_NEXT_PIXELS
                                    ; else
-	POP	D                          ; restore VERT_LINE_VRAM_POINTER
-	POP	H                          ; restore HORI_LINE_VRAM_POINTER
+	POP D                          ; restore VERT_LINE_VRAM_POINTER
+	POP H                          ; restore HORI_LINE_VRAM_POINTER
 ; Advance pointers by 6 to next lines, moving past the next 5-pixel cell.
-	MOV	A,H
+	MOV A,H
 	ADI	$06
-	MOV	H,A                        ; HORI_LINE_VRAM_POINTER += #0600
-	MOV	A,E
+	MOV H,A                        ; HORI_LINE_VRAM_POINTER += #0600
+	MOV A,E
 	ADI	$06
-	MOV	E,A                        ; VERT_LINE_VRAM_POINTER += #0006
+	MOV E,A                        ; VERT_LINE_VRAM_POINTER += #0006
 	DCR	C                          ; if --NUM_LINES != 0,
 	JNZ DRAW_NEXT_LINES
                                    ; else
@@ -1787,16 +1787,16 @@ ADD_STARTING_PIECES_TO_BOARDS_AND_DRAW:
 ; ■ +
 	MVI	A, $03
 	LXI	H, $405B
-	MOV	M,A                        ; ANALYSIS_BOARD(3,3) = '+'
+	MOV M,A                        ; ANALYSIS_BOARD(3,3) = '+'
 	MVI	A, $03
 	LXI	H, $4064
-	MOV	M,A                        ; ANALYSIS_BOARD(4,4) = '+'
+	MOV M,A                        ; ANALYSIS_BOARD(4,4) = '+'
 	MVI	A, $05
 	LXI	H, $405C
-	MOV	M,A                        ; ANALYSIS_BOARD(4,3) = '■'
+	MOV M,A                        ; ANALYSIS_BOARD(4,3) = '■'
 	MVI	A, $05
 	LXI	H, $4063
-	MOV	M,A                        ; ANALYSIS_BOARD(3,4) = '■'
+	MOV M,A                        ; ANALYSIS_BOARD(3,4) = '■'
 	CALL COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
 	CALL DRAW_DISPLAY_BOARD
 	RET                            ; RETURN
@@ -1811,12 +1811,12 @@ GET_SPACE_ON_DISPLAY_BOARD:
 ; H_ROW and L_COL are 3-bit values, so the byte offset is:
 ;   00rrrccc
 ; which exactly matches the DISPLAY_BOARD's memory map
-	MOV	A,H
+	MOV A,H
 	RLC
 	RLC
 	RLC                            ; A = H_ROW << 3
-	ADD	L
-	MOV	L,A                        ; OFFSET = H_ROW*8 + L_COL
+	ADD L
+	MOV L,A                        ; OFFSET = H_ROW*8 + L_COL
 	MVI	H, $40                     ; HL = $4000 + OFFSET
 	RET                            ; RETURN
 
@@ -1831,8 +1831,8 @@ FLIP_SQUARE_ON_ANALYSIS_BOARD:
 	PUSH H                         ; save H_ROW, L_COL
 	CALL GET_SPACE_ON_ANALYSIS_BOARD
 	LDA	$408A
-	MOV	M,A                        ; ANALYSIS_BOARD (H_ROW, L_COL) = CURRENT_PIECE
-	POP	H                          ; restore H_ROW, L_COL
+	MOV M,A                        ; ANALYSIS_BOARD (H_ROW, L_COL) = CURRENT_PIECE
+	POP H                          ; restore H_ROW, L_COL
 	RET                            ; RETURN
 
 WAIT_FOR_INPUT_RELEASE:
@@ -1845,9 +1845,9 @@ WAIT_FOR_INPUT_RELEASE:
 
 CHECK_IF_MOVE_IS_LEGAL:
 	LDA	$408C
-	MOV	H,A                        ; H_ROW = MOVE_ROW
+	MOV H,A                        ; H_ROW = MOVE_ROW
 	LDA	$408B
-	MOV	L,A                        ; L_COL = MOVE_COL
+	MOV L,A                        ; L_COL = MOVE_COL
 
 CHECK_IF_SPACE_IS_LEGAL_MOVE:
 ; Input:
@@ -1861,8 +1861,8 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
 ; opponent piece.
 	PUSH H                         ; save H_ROW, L_COL
 	CALL GET_SPACE_ON_DISPLAY_BOARD
-	MOV	A,M                        ; SPACE_CONTENTS = DISPLAY_BOARD(H_ROW,L_COL)
-	POP	H                          ; restore H_ROW, L_COL
+	MOV A,M                        ; SPACE_CONTENTS = DISPLAY_BOARD(H_ROW,L_COL)
+	POP H                          ; restore H_ROW, L_COL
 	CPI	$00                        ; if SPACE_CONTENTS != 0,
 	JNZ INVALID_MOVE
 	XRA	A
@@ -1872,7 +1872,7 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
 ; It only checks whether the empty space would outflank pieces
 ; in any direction. If it would, then MOVE_LEGAL is set to 1.
 	CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-	MOV	A,D
+	MOV A,D
 	CPI	$09                        ; if DIRECTION == 9,
 	JZ INVALID_MOVE
                                    ; else
@@ -1897,7 +1897,7 @@ CHECK_NEXT_ROW:
 
 CHECK_NEXT_SPACE:
 	CALL CHECK_IF_SPACE_IS_LEGAL_MOVE
-	MOV	A,B
+	MOV A,B
 	CPI	$00                        ; if MOVE_LEGAL != 0,
 	JNZ PLAYER_HAS_LEGAL_MOVE
 	DCR	L                          ; if --L_COL >= 0,
@@ -1926,19 +1926,19 @@ DRAW_MOVE_CURSORS:
 	CALL CLEAR_MOVE_CURSORS
 	LXI	H, $CA0A                   ; HL = VRAM_HORI_CURSOR_POINTER(0) = $CA0A
 	LDA	$408C
-	MOV	D,A                        ; D = MOVE_ROW
+	MOV D,A                        ; D = MOVE_ROW
 	LDA	$408B
-	MOV	E,A                        ; E = MOVE_COL
+	MOV E,A                        ; E = MOVE_COL
 
 SET_HORIZONTAL_CURSOR:
 	DCR	E                          ; if --MOVE_COL < 0,
 	JM DRAW_HORIZONTAL_CURSOR
                                    ; else
-	MOV	A,L
+	MOV A,L
 ; Cursor moves 6 pixels at a time to skip over 5-pixel cell
 ; and 1-pixel line.
 	ADI	$06                        ; VRAM_HORI_CURSOR_POINTER += #0006
-	MOV	L,A                        ; VRAM_HORI_CURSOR_POINTER(++)
+	MOV L,A                        ; VRAM_HORI_CURSOR_POINTER(++)
 	JMP SET_HORIZONTAL_CURSOR
 
 DRAW_HORIZONTAL_CURSOR:
@@ -1951,11 +1951,11 @@ SET_VERTICAL_CURSOR:
 	DCR	D                          ; if --MOVE_ROW < 0,
 	JM DRAW_VERTICAL_CURSOR
                                    ; else
-	MOV	A,H
+	MOV A,H
 ; Cursor moves 6 pixels at a time to skip over 5-pixel cell
 ; and 1-pixel line.
 	ADI	$06                        ; VRAM_VERT_CURSOR_POINTER += #0600
-	MOV	H,A                        ; VRAM_VERT_CURSOR_POINTER(++)
+	MOV H,A                        ; VRAM_VERT_CURSOR_POINTER(++)
 	JMP SET_VERTICAL_CURSOR
 
 DRAW_VERTICAL_CURSOR:
@@ -1973,11 +1973,11 @@ CLEAR_MOVE_CURSORS:
 	MVI	B, $34                     ; MOVE_CURSOR_LINE_LENGTH = 52
 	LXI	H, $CA06                   ; VRAM_HORI_CURSOR_POINTER = $CA06
 	PUSH H
-	POP	D                          ; VRAM_VERT_CURSOR_POINTER = $CA06
+	POP D                          ; VRAM_VERT_CURSOR_POINTER = $CA06
 
 BLANK_NEXT_PIXELS:
 	XRA	A                          ; PIXEL_TYPE = 0 (BLANK)
-	MOV	M,A                        ; VRAM_HORI_CURSOR(POINTER) = PIXEL_TYPE
+	MOV M,A                        ; VRAM_HORI_CURSOR(POINTER) = PIXEL_TYPE
 	STAX D                         ; VRAM_VERT_CURSOR(POINTER) = PIXEL_TYPE
 	INR	L                          ; VRAM_HORI_CURSOR_POINTER++
 	INR	D                          ; VRAM_VERT_CURSOR_POINTER += #0100
@@ -2008,7 +2008,7 @@ FLASH_BOARD:
 SWAP_BOARD:
 	CALL DRAW_ANALYSIS_BOARD
 	CALL CORE_DELAY                ; [30ms]
-	POP	PSW                        ; restore FLASH_LOOP_COUNTER
+	POP PSW                        ; restore FLASH_LOOP_COUNTER
 	DCR	A                          ; if --FLASH_LOOP_COUNTER != 0,
 	JNZ FLASH_BOARD
                                    ; else
@@ -2034,13 +2034,13 @@ FIRST_PASS_REMOVE_HIGH_RISK_SQUARES:
 	LXI	H, $409B                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER(1,0) = $409B
 
 REMOVE_HIGH_RISK_FROM_ROW:
-	MOV	A,M
+	MOV A,M
 	ANI	$CF
-	MOV	M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,1) = 0
+	MOV M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,1) = 0
 	INX	H                          ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER++
-	MOV	A,M
+	MOV A,M
 	ANI	$F3
-	MOV	M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,6) = 0
+	MOV M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,6) = 0
 	LXI	H, $40A5                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER(6,0) = $40A5
 	DCR	B                          ; if --ROW_LOOP_COUNTER != 0,
 	JNZ REMOVE_HIGH_RISK_FROM_ROW
@@ -2054,7 +2054,7 @@ DRAW_HORIZONTAL_MOVE_CURSOR:
 	MVI	B, $05                     ; MOVE_CURSOR_LENGTH = 5
 
 DRAW_NEXT_HORI_PIXEL:
-	MOV	M,A                        ; VRAM_HORI_CURSOR(POINTER) = CURRENT_PIECE
+	MOV M,A                        ; VRAM_HORI_CURSOR(POINTER) = CURRENT_PIECE
 	INR	L                          ; VRAM_HORI_CURSOR_POINTER++
 	DCR	B                          ; if --MOVE_CURSOR_LENGTH != 0,
 	JNZ DRAW_NEXT_HORI_PIXEL
@@ -2068,7 +2068,7 @@ DRAW_VERTICAL_MOVE_CURSOR:
 	MVI	B, $05                     ; MOVE_CURSOR_LENGTH = 5
 
 DRAW_NEXT_VERT_PIXEL:
-	MOV	M,A                        ; VRAM_VERT_CURSOR(POINTER) = CURRENT_PIECE
+	MOV M,A                        ; VRAM_VERT_CURSOR(POINTER) = CURRENT_PIECE
 	INR	H                          ; VRAM_VERT_CURSOR_POINTER += #0100
 	DCR	B                          ; if --MOVE_CURSOR_LENGTH != 0,
 	JNZ DRAW_NEXT_VERT_PIXEL
@@ -2097,10 +2097,10 @@ GET_CPU_OPENING_MOVE:
 	JMP GET_CPU_OPENING_MOVE
 
 PLAY_OPENING_MOVE:
-	MOV	A,M
+	MOV A,M
 	STA	$408B                      ; MOVE_COL = CPU_OPENING_MOVE_TABLE().COL
 	INX	H
-	MOV	A,M
+	MOV A,M
 	STA	$408C                      ; MOVE_ROW = CPU_OPENING_MOVE_TABLE().ROW
 	CALL PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
 	RET                            ; RETURN
@@ -2141,7 +2141,7 @@ PLAY_TONE:
 	MVI	M, $00                     ; CLEAR_SOUND_STATE
 	MVI	M, $88                     ; START_TONE
 	MVI	M, $00                     ; CLEAR_SOUND_STATE
-	MOV	M,B                        ; SET_TONE_FREQUENCY (Mame: 3500/(FREQUENCY_DIVISOR+1))
+	MOV M,B                        ; SET_TONE_FREQUENCY (Mame: 3500/(FREQUENCY_DIVISOR+1))
 	RET                            ; RETURN
 
 ; Piece and character graphics are stored as 5x5 and 5x7 bitmap
@@ -2216,21 +2216,21 @@ GET_AND_DRAW_NEXT_PIXEL:
 	MVI	A, $00                     ; PIXEL_TYPE = #00
 
 DRAW_NEXT_PIXEL:
-	MOV	M,A                        ; VRAM(POINTER) = PIXEL_TYPE
-	POP	PSW                        ; restore IMAGE_DATA
+	MOV M,A                        ; VRAM(POINTER) = PIXEL_TYPE
+	POP PSW                        ; restore IMAGE_DATA
 	INX	H                          ; VRAM_POINTER++
 	DCR	B                          ; if --PIXEL_COUNTER != 0,
-	JNZ	GET_AND_DRAW_NEXT_PIXEL
+	JNZ GET_AND_DRAW_NEXT_PIXEL
                                    ; else
 	INX	D                          ; IMAGE_DATA_POINTER++
-	POP	H                          ; restore VRAM_POINTER
+	POP H                          ; restore VRAM_POINTER
 	INR	H                          ; VRAM_POINTER += #0100
 	DCR	C                          ; if --ROW_COUNTER != 0,
 	JNZ DRAW_NEXT_ROW
                                    ; else
 	XRA	A                          ; A = 0
-	POP	D                          ; restore DE
-	POP	B                          ; restore BC
+	POP D                          ; restore DE
+	POP B                          ; restore BC
 	RET                            ; RETURN
 
 LOAD_WHITE_PIECE:
@@ -2282,11 +2282,11 @@ DRAW_MESSAGE:
 ; #8D is the message stop character. Once it is encountered
 ; in the string, this function exits.
 	XTHL                           ; save HL / pop RETURN_ADDRESS
-	MOV	B,M                        ; B = PARAM_1 (unused)
+	MOV B,M                        ; B = PARAM_1 (unused)
 	INX	H                          ; RETURN_ADDRESS++
-	MOV	D,M                        ; D = MESSAGES_POINTER_HI
+	MOV D,M                        ; D = MESSAGES_POINTER_HI
 	INX	H                          ; RETURN_ADDRESS++
-	MOV	E,M                        ; E = MESSAGES_POINTER_LO
+	MOV E,M                        ; E = MESSAGES_POINTER_LO
 	INX	H                          ; RETURN_ADDRESS++
 	XTHL                           ; push RETURN_ADDRESS / restore HL
 	LXI	H, $C002                   ; VRAM_POINTER = $C002
@@ -2297,7 +2297,7 @@ INIT_FIND_CHARACTER:
 	RZ                             ; RETURN
                                    ; else
 	PUSH D                         ; save MESSAGES_POINTER
-	MOV	B,A                        ; B = MESSAGE_FONT_TABLE_INDEX
+	MOV B,A                        ; B = MESSAGE_FONT_TABLE_INDEX
 	LXI	D, $0B09                   ; MESSAGE_FONT_TABLE_POINTER = $0B09 (0)
 
 FIND_CHARACTER_BY_INDEX:
@@ -2318,14 +2318,14 @@ DRAW_CHARACTER:
 ; 6 pixels to the right.
 	PUSH H                         ; save VRAM_POINTER
 	CALL DRAW_5x7_IMAGE
-	POP	H                          ; restore VRAM_POINTER
+	POP H                          ; restore VRAM_POINTER
 	INX	H
 	INX	H
 	INX	H
 	INX	H
 	INX	H
 	INX	H                          ; VRAM_POINTER += 6
-	POP	D                          ; restore MESSAGES_POINTER
+	POP D                          ; restore MESSAGES_POINTER
 	INX	D                          ; MESSAGES_POINTER++
 	JMP INIT_FIND_CHARACTER
 
@@ -2471,7 +2471,7 @@ START_SCORING_PASS:
 	MVI	B, $40                     ; SPACE_LOOP_COUNTER = 64
 
 SCORE_NEXT_SPACE:
-	MOV	A,C
+	MOV A,C
 	CPI	$03                        ; if SCORING_PASS_COUNTER == 3,
 	JZ SCORE_BLACK
 	CPI	$02                        ; else if SCORING_PASS_COUNTER == 2,
@@ -2485,7 +2485,7 @@ SCORE_NEXT_SPACE:
 
 SCORE_BLACK:
 	MVI	A, $05
-	CMP	M                          ; if DISPLAY_BOARD(POINTER) != '■',
+	CMP M                          ; if DISPLAY_BOARD(POINTER) != '■',
 	JNZ GET_NEXT_SCORE_SPACE
                                    ; else
 	PUSH PSW                       ; save PIECE_TYPE
@@ -2496,7 +2496,7 @@ SCORE_BLACK:
 
 SCORE_BLANK:
 	XRA	A
-	CMP	M                          ; if DISPLAY_BOARD(POINTER) != BLANK,
+	CMP M                          ; if DISPLAY_BOARD(POINTER) != BLANK,
 	JNZ GET_NEXT_SCORE_SPACE
                                    ; else
 	PUSH PSW                       ; save PIECE_TYPE
@@ -2504,7 +2504,7 @@ SCORE_BLANK:
 
 SCORE_WHITE:
 	MVI	A, $03
-	CMP	M                          ; if DISPLAY_BOARD(POINTER) != '+',
+	CMP M                          ; if DISPLAY_BOARD(POINTER) != '+',
 	JNZ GET_NEXT_SCORE_SPACE
                                    ; else
 	PUSH PSW                       ; save PIECE_TYPE
@@ -2515,7 +2515,7 @@ SCORE_WHITE:
 WRITE_PIECE_TO_ANALYSIS_BOARD:
 ; Write the scored piece to the next position in the
 ; ANALYSIS_BOARD, redraw that board, and play VERY_LOW_TONE.
-	POP	PSW                        ; restore PIECE_TYPE
+	POP PSW                        ; restore PIECE_TYPE
 	STAX D                         ; ANALYSIS_BOARD(POINTER) = PIECE_TYPE
 	INX	D                          ; ANALYSIS_BOARD_POINTER++
 	PUSH D                         ; save ANALYSIS_BOARD_POINTER
@@ -2524,9 +2524,9 @@ WRITE_PIECE_TO_ANALYSIS_BOARD:
 	CALL VERY_LOW_TONE
 	CALL DRAW_ANALYSIS_BOARD
 	CALL CORE_DELAY                ; [30ms]
-	POP	B                          ; restore SPACE_LOOP_COUNTER
-	POP	H                          ; restore DISPLAY_BOARD_POINTER
-	POP	D                          ; restore ANALYSIS_BOARD_POINTER
+	POP B                          ; restore SPACE_LOOP_COUNTER
+	POP H                          ; restore DISPLAY_BOARD_POINTER
+	POP D                          ; restore ANALYSIS_BOARD_POINTER
 
 GET_NEXT_SCORE_SPACE:
 	INX	H                          ; DISPLAY_BOARD_POINTER++
@@ -2550,7 +2550,7 @@ DRAW_SCORES:
 	LXI	H, $C00E                   ; VRAM_POINTER = $C00E
 
 DRAW_ONE_SCORE:
-	MOV	B,A                        ; B = +|■_COUNT
+	MOV B,A                        ; B = +|■_COUNT
 	ANI	$F0                        ; A = +|■_COUNT_TENS
 	RRC
 	RRC
@@ -2560,19 +2560,19 @@ DRAW_ONE_SCORE:
 	PUSH H                         ; save VRAM_POINTER
 	CALL DRAW_5x7_IMAGE
 ; Advance 6 pixels to the next digit.
-	POP	H                          ; restore VRAM_POINTER
+	POP H                          ; restore VRAM_POINTER
 	INX	H
 	INX	H
 	INX	H
 	INX	H
 	INX	H
 	INX	H                          ; VRAM_POINTER += 6
-	MOV	A,B                        ; A = +|■_COUNT
+	MOV A,B                        ; A = +|■_COUNT
 	ANI	$0F                        ; A = +|■_COUNT_ONES
 	CALL LOOKUP_DIGIT_IMAGE
 	PUSH H                         ; save VRAM_POINTER
 	CALL DRAW_5x7_IMAGE
-	POP	H                          ; restore VRAM_POINTER
+	POP H                          ; restore VRAM_POINTER
 	DCR	C                          ; if --SCORE_COUNTER == 0,
 	RZ                             ; RETURN
                                    ; else
@@ -2601,7 +2601,7 @@ FIND_DIGIT_BY_INDEX:
 	INX	D
 	INX	D
 	INX	D                          ; DIGIT_FONT_TABLE_POINTER += 7 (++)
-	POP	PSW                        ; restore DIGIT_FONT_TABLE_INDEX
+	POP PSW                        ; restore DIGIT_FONT_TABLE_INDEX
 	JMP FIND_DIGIT_BY_INDEX
 
 DRAW_TURN_INDICATOR:
@@ -2622,9 +2622,9 @@ DRAW_TURN_INDICATOR:
 	CALL DRAW_GAME_PIECE
 	LDA	$40FF                      ; A = GAME_MODE
 	CPI	$FE                        ; if GAME_MODE == 1P Sente,
-	RET	Z                          ; RETURN
+	RET Z                          ; RETURN
 	CPI	$FD                        ; else if GAME_MODE == 1P Gote,
-	RET	Z                          ; RETURN
+	RET Z                          ; RETURN
                                    ; else
 	LXI	H, $CA00                   ; VRAM_POINTER = $CA00 (P2_TURN_INDICATOR)
 
@@ -2899,9 +2899,9 @@ WIN_CHECK:
 	CPI	$00                        ; if ■_COUNT == 0,
 	JZ PLAYER_WINS
                                    ; else
-	MOV	B,A                        ; B = ■_COUNT
+	MOV B,A                        ; B = ■_COUNT
 	LDA	$4083                      ; A = +_COUNT
-	SUB	B                          ; if +_COUNT == ■_COUNT,
+	SUB B                          ; if +_COUNT == ■_COUNT,
 	RZ                             ; RETURN
                                    ; else if +_COUNT < ■_COUNT,
 	RM                             ; RETURN
@@ -2933,8 +2933,8 @@ PLAY_TONES:
 	DCR	D                          ; if --JINGLE_LOOP_COUNTER != 0,
 	JNZ PLAY_TONES
 
-	POP	H                          ; restore HL
-	POP	B                          ; restore BC
+	POP H                          ; restore HL
+	POP B                          ; restore BC
 	RET                            ; RETURN
 
 ; unused ROM space
