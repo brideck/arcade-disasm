@@ -23,8 +23,10 @@ SOURCE="${1:-$REPO_ROOT/ComputerOthello/cothello-disasm.asm}"
 OUTDIR="${2:-$REPO_ROOT/ComputerOthello/rom}"
 
 PREPROCESS="$SCRIPT_DIR/preprocess.py"
+VALIDATE="$SCRIPT_DIR/validate_inline_addrs.py"
 TMPDIR_Z80="$(mktemp -d)"
 Z80_ASM="$TMPDIR_Z80/intermediate.asm"
+LIST_FILE="$TMPDIR_Z80/intermediate.lst"
 FLAT_BIN="$OUTDIR/cothello-full.bin"
 CHIP13="$OUTDIR/13.ic13"
 CHIP12="$OUTDIR/12.ic12"
@@ -44,7 +46,7 @@ python3 "$PREPROCESS" "$SOURCE" "$Z80_ASM"
 
 # --- Step 2: Assemble ---
 echo "==> Assembling with z80asm..."
-z80asm -o "$FLAT_BIN" "$Z80_ASM"
+z80asm --list="$LIST_FILE" -o "$FLAT_BIN" "$Z80_ASM"
 ACTUAL=$(wc -c < "$FLAT_BIN")
 echo "    Output: $ACTUAL bytes"
 if [ "$ACTUAL" -ne 3072 ]; then
@@ -65,5 +67,9 @@ echo "    11.ic11  $(wc -c < "$CHIP11") bytes  (0x0800-0x0BFF)"
 echo "==> Packaging $ZIP..."
 (cd "$OUTDIR" && zip -q -j "$ZIP" 13.ic13 12.ic12 11.ic11)
 echo "    Done: $ZIP"
+
+# --- Step 5: Validate inline addresses ---
+echo "==> Validating inline addresses..."
+python3 "$VALIDATE" "$LIST_FILE" "$SOURCE"
 
 echo "==> Build complete."

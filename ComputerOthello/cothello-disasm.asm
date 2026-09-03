@@ -4,34 +4,37 @@ RESET:
 	DI
 	JMP STARTUP
 
-; PLUS_PIECE (WHITE)
+PLUS_PIECE:
+; (WHITE)
 	DB $00                         ; ----------
 	DB $20                         ; ----xx----
 	DB $70                         ; --xxxxxx--
 	DB $20                         ; ----xx----
 	DB $00                         ; ----------
 
-; SQUARE_PIECE (BLACK)
+SQUARE_PIECE:
+; (BLACK)
 	DB $00                         ; ----------
 	DB $70                         ; --xxxxxx--
 	DB $70                         ; --xxxxxx--
 	DB $70                         ; --xxxxxx--
 	DB $00                         ; ----------
 
-; BLANK_SPACE
+BLANK_SPACE:
 	DB $00                         ; ----------
 	DB $00                         ; ----------
 	DB $00                         ; ----------
 	DB $00                         ; ----------
 	DB $00                         ; ----------
 
-; CPU_OPENING_MOVE_TABLE (COL, ROW)
+CPU_OPENING_MOVE_TABLE:
+; (COL, ROW)
 	DB $03, $02
 	DB $02, $03
 	DB $05, $04
 	DB $04, $05
 
-; BOARD_SPACE_VALUE_TABLE
+BOARD_SPACE_VALUE_TABLE:
 ; Used by the CPU player to determine its next move
 ; FF 03 3C 28 28 3C 03 FF
 ; 03 01 0A 05 05 0A 01 03
@@ -60,35 +63,42 @@ RESET:
 
 ; MESSAGES
 
+MSG_COMPUTER_OTHELLO:
 ; コンピュータオセロ
 ; "COMPUTER OTHELLO" - Title displayed during attract sequence
 	DB $05, $10, $0D, $17, $0E, $18, $09, $02, $07, $12, $8D
 
-	DB $00, $00
+	DB $00, $00                    ; cushion for RST 7 address
 
 ; TIMER EXPIRED (RST 7 INTERRUPT)
-	JMP TIMER_EXPIRED_ADD_COIN_PROMPT
+	JMP TIMER_EXPIRED_ADD_COIN_PROMPT ; @org $0038
 
+MSG_INSERT_COIN:
 ; ￥100ドーゾ
 ; "INSERT ￥100" - Prompt displayed during attract sequence and timer expiration
 	DB $13, $14, $15, $15, $0B, $16, $18, $08, $16, $8D
 
+MSG_SELECT_GAME:
 ; セレクトドーゾ
 ; "SELECT GAME" - Prompt displayed after coin inserted during attract
 	DB $07, $11, $04, $0B, $0B, $16, $18, $08, $16, $8D
 
+MSG_PRESS_JUDGE:
 ; ハンテイドーゾ
 ; "PRESS JUDGE" - Prompt displayed when game is over
 	DB $0C, $10, $0A, $00, $0B, $16, $18, $08, $16, $8D
 
+MSG_PRESS_PASS:
 ; パスキードーゾ
 ; "PRESS PASS" - Prompt displayed when no player moves are possible
 	DB $0C, $17, $06, $03, $18, $0B, $16, $18, $08, $16, $8D
 
+MSG_PRESS_RESET:
 ; リセットドーゾ
 ; "PRESS RESET" - Prompt displayed after game has been scored
 	DB $0F, $07, $01, $0B, $0B, $16, $18, $08, $16, $8D
 
+MSG_CPU_PASSES:
 ; コンピュータパス
 ; "CPU PASSES" - Message indicating that the CPU player has had to pass
 	DB $05, $10, $0D, $17, $0E, $18, $09, $0C, $17, $06, $8D
@@ -146,15 +156,15 @@ CONTINUE_ATTRACT:
 	CALL CLEAR_MESSAGE
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $2B                    ; "COMPUTER OTHELLO"
+	DB $00, $2B                    ; @addr MSG_COMPUTER_OTHELLO
 	CALL LONG_DELAY                ; [1s]
 	CALL LONG_DELAY                ; [1s]
 	CALL CLEAR_MESSAGE
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $3B                    ; "INSERT ￥100"
-	LDA	$6000                      ; READ_INPUT
-	CPI	$7F                        ; Service:
+	DB $00, $3B                    ; @addr MSG_INSERT_COIN
+	LDA $6000                      ; READ_INPUT
+	CPI $7F                        ; Service:
 	JZ SET_SERVICE_MODE_FLAGS
                                    ; Default:
 ; Note that this toggles the piece before it calculates any moves, so
@@ -205,10 +215,10 @@ PROMPT_SELECT_GAME:
 	PUSH B                         ; save PSEUDORANDOM_OPENING_MOVE
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $45                    ; "SELECT GAME"
+	DB $00, $45                    ; @addr MSG_SELECT_GAME
 	POP B                          ; restore PSEUDORANDOM_OPENING_MOVE
 	EI
-	LDA	$6000                      ; READ_INPUT
+	LDA $6000                      ; READ_INPUT
 ; By the rules of Othello, black ('■') always moves first, but that is
 ; not the case here. 1P is always white ('+') and 2P (or the CPU) is
 ; always black ('■'). Sente and Gote are terms borrowed from Go. Here
@@ -304,9 +314,9 @@ PLAYER_TURN_CORE:
 	CALL CLEAR_MESSAGE
 	CALL DRAW_TURN_INDICATOR
 	CALL PLAYER_INPUT_LOOP
-	DB $01, $BD                    ; JUMP_ADDRESS = CLEAR_AND_PROMPT_FOR_JUDGE
-	LDA	$40FF
-	CPI	$FB                        ; if GAME_MODE == 2P Sente,
+	DB $01, $BD                    ; @addr CLEAR_AND_PROMPT_FOR_JUDGE
+	LDA $40FF
+	CPI $FB                        ; if GAME_MODE == 2P Sente,
 	JZ TOGGLE_2P_GAME_MODE
 	CPI	$F7                        ; else if GAME_MODE == 2P Gote,
 	JZ TOGGLE_2P_GAME_MODE
@@ -341,7 +351,7 @@ PROMPT_FOR_JUDGE:
                                    ; Default:
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $4F                    ; "PRESS JUDGE"
+	DB $00, $4F                    ; @addr MSG_PRESS_JUDGE
 	JMP PROMPT_FOR_JUDGE
 
 JUDGE_PRESSED_FINAL:
@@ -360,9 +370,9 @@ PROMPT_FOR_RESET:
 	EI
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $64                    ; "PRESS RESET"
-	LDA	$6000                      ; READ_INPUT
-	CPI	$DF                        ; Reset:
+	DB $00, $64                    ; @addr MSG_PRESS_RESET
+	LDA $6000                      ; READ_INPUT
+	CPI $DF                        ; Reset:
 	JZ RESET
                                    ; Default:
 	JMP PROMPT_FOR_RESET
@@ -453,10 +463,10 @@ CHECK_FOR_RESET:
 PASS_BUTTON_PROMPT:
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $59                    ; "PRESS PASS"
+	DB $00, $59                    ; @addr MSG_PRESS_PASS
 	CALL SHORT_DELAY               ; [0.37s]
-	MVI	A, $01
-	STA	$4098                      ; PASS_REQUIRED_FLAG = 1
+	MVI A, $01
+	STA $4098                      ; PASS_REQUIRED_FLAG = 1
 	JMP PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
 
 PASS_PRESSED:
@@ -627,7 +637,7 @@ COIN_PROMPT:
 	PUSH B                         ; save ESCAPE_FLAG
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused arg
-	DB $00, $3B                    ; "INSERT ￥100"
+	DB $00, $3B                    ; @addr MSG_INSERT_COIN
 	CALL SHORT_DELAY               ; [0.37s]
 	CALL CLEAR_MESSAGE
 	CALL CORE_DELAY                ; [30ms]
@@ -825,10 +835,10 @@ STILL_NO_LEGAL_MOVES:
 ; display the 'CPU PASSES' message, and advance to the other
 ; player's turn.
 	LXI	H, $4089
-	INR	M                          ; CONSECUTIVE_PASS_COUNTER++
+	INR M                          ; CONSECUTIVE_PASS_COUNTER++
 	CALL DRAW_MESSAGE
 	DB $01                         ; unused
-	DB $00, $6E                    ; "CPU PASSES"
+	DB $00, $6E                    ; @addr MSG_CPU_PASSES
 	CALL LONG_DELAY                ; [1s]
 	CALL LONG_DELAY                ; [1s]
 	RET                            ; RETURN
@@ -1184,7 +1194,7 @@ SCAN_FOR_OUTFLANKED_PIECES_CORE:
 ; handled. Return the next direction to scan to the caller.
 	MOV A,D                        ; CURR_DIRECTION = DIRECTION
 	PUSH H                         ; save MOVE_ROW, MOVE_COL
-	LXI	H, $0573                   ; HL = $0573, DIRECTION_TABLE(1)
+	LXI H, DIRECTION_TABLE         ; HL = DIRECTION_TABLE(1)
 
 FIND_DIRECTION_IN_DIRECTION_TABLE:
 ; Set DIRECTION_TABLE pointer to match caller's indicated direction.
@@ -1206,55 +1216,56 @@ EXEC_DIRECTION_TABLE:
 ; jumps into the common scan logic.
 	PCHL                           ; exec DIRECTION_TABLE(D)
 
-; DIRECTION_TABLE(1) - UP
+DIRECTION_TABLE:
+; (1) - UP
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	DCR	H                          ; MOVE_ROW--
+	DCR H                          ; MOVE_ROW--
 	NOP
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(2) - UP-RIGHT
+; (2) - UP-RIGHT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	INR	L                          ; MOVE_COL++
-	DCR	H                          ; MOVE_ROW--
+	INR L                          ; MOVE_COL++
+	DCR H                          ; MOVE_ROW--
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(3) - RIGHT
+; (3) - RIGHT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	INR	L                          ; MOVE_COL++
+	INR L                          ; MOVE_COL++
 	NOP
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(4) - DOWN-RIGHT
+; (4) - DOWN-RIGHT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	INR	H                          ; MOVE_ROW++
-	INR	L                          ; MOVE_COL++
+	INR H                          ; MOVE_ROW++
+	INR L                          ; MOVE_COL++
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(5) - DOWN
+; (5) - DOWN
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	INR	H                          ; MOVE_ROW++
+	INR H                          ; MOVE_ROW++
 	NOP
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(6) - DOWN-LEFT
+; (6) - DOWN-LEFT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	INR	H                          ; MOVE_ROW++
-	DCR	L                          ; MOVE_COL--
+	INR H                          ; MOVE_ROW++
+	DCR L                          ; MOVE_COL--
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(7) - LEFT
+; (7) - LEFT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	DCR	L                          ; MOVE_COL--
+	DCR L                          ; MOVE_COL--
 	NOP
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(8) - UP-LEFT
+; (8) - UP-LEFT
 	POP H                          ; restore MOVE_ROW, MOVE_COL
-	DCR	L                          ; MOVE_COL--
-	DCR	H                          ; MOVE_ROW++
+	DCR L                          ; MOVE_COL--
+	DCR H                          ; MOVE_ROW++
 	JMP SCAN_DIRECTION
 
-; DIRECTION_TABLE(9) - RETURN
+; (9) - RETURN
 ; Reached when all 8 directions have been exhausted.
 	POP H                          ; clear MOVE_ROW, MOVE_COL from stack
 	POP H                          ; restore MOVE_ROW, MOVE_COL
@@ -1495,7 +1506,7 @@ GET_SPACE_VALUE:
 	RLC
 	ADD E
 	MOV E,A                        ; E = BOARD_SPACE_VALUE_TABLE_INDEX = (HI_BITS << 2) + LO_BITS
-	LXI	H, $001B                   ; HL = BOARD_SPACE_VALUE_TABLE(0) = $001B
+	LXI H, BOARD_SPACE_VALUE_TABLE ; HL = BOARD_SPACE_VALUE_TABLE(0)
 	MOV A,E
 	ADD L
 	MOV L,A
@@ -2085,11 +2096,11 @@ PERFORM_CPU_OPENING_MOVE:
 ; Instead, the PROMPT_SELECT_GAME loop supplies a pseudo-random
 ; index into the table, and the selected opening move is played
 ; without checking its legality.
-	LDA	$40FE                      ; A = CPU_OPENING_MOVE_INDEX
-	LXI	H, $0013                   ; HL = CPU_OPENING_MOVE_TABLE(0)
+	LDA $40FE                      ; A = CPU_OPENING_MOVE_INDEX
+	LXI H, CPU_OPENING_MOVE_TABLE  ; HL = CPU_OPENING_MOVE_TABLE(0)
 
 GET_CPU_OPENING_MOVE:
-	DCR	A                          ; if --CPU_OPENING_MOVE_INDEX == 0,
+	DCR A                          ; if --CPU_OPENING_MOVE_INDEX == 0,
 	JZ PLAY_OPENING_MOVE
                                    ; else
 	INX	H
@@ -2234,11 +2245,11 @@ DRAW_NEXT_PIXEL:
 	RET                            ; RETURN
 
 LOAD_WHITE_PIECE:
-	LXI	D, $0004                   ; IMAGE_DATA_POINTER = PLUS_PIECE
+	LXI D, PLUS_PIECE              ; IMAGE_DATA_POINTER = PLUS_PIECE
 	JMP DRAW_IMAGE
 
 LOAD_BLACK_PIECE:
-	LXI	D, $0009                   ; IMAGE_DATA_POINTER = SQUARE_PIECE
+	LXI D, SQUARE_PIECE            ; IMAGE_DATA_POINTER = SQUARE_PIECE
 	JMP DRAW_IMAGE
 
 USE_IMAGE_PIXEL_VALUE:
@@ -2246,7 +2257,7 @@ USE_IMAGE_PIXEL_VALUE:
 	JMP DRAW_NEXT_PIXEL
 
 LOAD_BLANK:
-	LXI	D, $000E                   ; IMAGE_DATA_POINTER = BLANK_SPACE
+	LXI D, BLANK_SPACE             ; IMAGE_DATA_POINTER = BLANK_SPACE
 	JMP DRAW_IMAGE
 
 CLEAR_MESSAGE:
@@ -2298,19 +2309,19 @@ INIT_FIND_CHARACTER:
                                    ; else
 	PUSH D                         ; save MESSAGES_POINTER
 	MOV B,A                        ; B = MESSAGE_FONT_TABLE_INDEX
-	LXI	D, $0B09                   ; MESSAGE_FONT_TABLE_POINTER = $0B09 (0)
+	LXI D, MESSAGE_FONT_TABLE      ; MESSAGE_FONT_TABLE_POINTER = (0)
 
 FIND_CHARACTER_BY_INDEX:
-	DCR	B                          ; if --MESSAGE_FONT_TABLE_INDEX < 0,
+	DCR B                          ; if --MESSAGE_FONT_TABLE_INDEX < 0,
 	JM DRAW_CHARACTER
                                    ; else
-	INX	D
-	INX	D
-	INX	D
-	INX	D
-	INX	D
-	INX	D
-	INX	D                          ; MESSAGE_FONT_TABLE_POINTER += #07 (++)
+	INX D
+	INX D
+	INX D
+	INX D
+	INX D
+	INX D
+	INX D                          ; MESSAGE_FONT_TABLE_POINTER += #07 (++)
 	JMP FIND_CHARACTER_BY_INDEX
 
 DRAW_CHARACTER:
@@ -2326,10 +2337,10 @@ DRAW_CHARACTER:
 	INX	H
 	INX	H                          ; VRAM_POINTER += 6
 	POP D                          ; restore MESSAGES_POINTER
-	INX	D                          ; MESSAGES_POINTER++
+	INX D                          ; MESSAGES_POINTER++
 	JMP INIT_FIND_CHARACTER
 
-; DIGIT_FONT_TABLE
+DIGIT_FONT_TABLE:
 ; Used when displaying the final score.
 ; 0
 	DB $70                         ; --xxxxxx--
@@ -2585,7 +2596,7 @@ LOOKUP_DIGIT_IMAGE:
 ;   A = DIGIT_FONT_TABLE_INDEX
 ; Output:
 ;   DE = DIGIT_FONT_TABLE_POINTER
-	LXI	D, $09B1                   ; DIGIT_FONT_TABLE_POINTER = $09B1 (0)
+	LXI D, DIGIT_FONT_TABLE        ; DIGIT_FONT_TABLE_POINTER = (0)
 
 FIND_DIGIT_BY_INDEX:
 ; Digit 0 returns the initial table pointer.
@@ -2653,7 +2664,7 @@ INC_DECIMAL_COUNTER:
 	DAA                            ; make decimal adjustment to ■|+_COUNT
 	RET                            ; RETURN
 
-; MESSAGE_FONT_TABLE
+MESSAGE_FONT_TABLE:
 ; Some message strings use dakuten (゛) and handakuten (゜)
 ; marks. These are stored as separate glyphs which modify the
 ; preceding kana character, e.g. カ + ゛ = ガ and ハ + ゜ = パ.
