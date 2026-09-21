@@ -64,44 +64,37 @@ BOARD_SPACE_VALUE_TABLE:
 ; MESSAGES
 
 MSG_COMPUTER_OTHELLO:
-; コンピュータオセロ
-; "COMPUTER OTHELLO" - Title displayed during attract sequence
-    DB $05, $10, $0D, $17, $0E, $18, $09, $02, $07, $12, $8D
+; "CPU OTHELLO" - Title displayed during attract sequence
+    DB $01, $0C, $10, $11, $0B, $0F, $05, $03, $08, $08, $0B, $8D
 
-    DB $00, $00                    ; cushion for RST 7 address
+    DB $00                         ; cushion for RST 7 address
 
 ; TIMER EXPIRED (RST 7 INTERRUPT)
     JMP TIMER_EXPIRED_ADD_COIN_PROMPT ; @org $0038
 
 MSG_INSERT_COIN:
-; ￥100ドーゾ
-; "INSERT ￥100" - Prompt displayed during attract sequence and timer expiration
-    DB $13, $14, $15, $15, $0B, $16, $18, $08, $16, $8D
+; "INSERT COIN" - Prompt displayed during attract sequence and timer expiration
+    DB $06, $0A, $0E, $03, $0D, $0F, $11, $01, $0B, $06, $0A, $8D
 
 MSG_SELECT_GAME:
-; セレクトドーゾ
 ; "SELECT GAME" - Prompt displayed after coin inserted during attract
-    DB $07, $11, $04, $0B, $0B, $16, $18, $08, $16, $8D
+    DB $0E, $03, $08, $03, $01, $0F, $11, $04, $00, $09, $03, $8D
 
 MSG_PRESS_JUDGE:
-; ハンテイドーゾ
 ; "PRESS JUDGE" - Prompt displayed when game is over
-    DB $0C, $10, $0A, $00, $0B, $16, $18, $08, $16, $8D
+    DB $0C, $0D, $03, $0E, $0E, $11, $07, $10, $02, $04, $03, $8D
 
 MSG_PRESS_PASS:
-; パスキードーゾ
 ; "PRESS PASS" - Prompt displayed when no player moves are possible
-    DB $0C, $17, $06, $03, $18, $0B, $16, $18, $08, $16, $8D
+    DB $0C, $0D, $03, $0E, $0E, $11, $0C, $00, $0E, $0E, $8D
 
 MSG_PRESS_RESET:
-; リセットドーゾ
 ; "PRESS RESET" - Prompt displayed after game has been scored
-    DB $0F, $07, $01, $0B, $0B, $16, $18, $08, $16, $8D
+    DB $0C, $0D, $03, $0E, $0E, $11, $0D, $03, $0E, $03, $0F, $8D
 
 MSG_CPU_PASSES:
-; コンピュータパス
 ; "CPU PASSES" - Message indicating that the CPU player has had to pass
-    DB $05, $10, $0D, $17, $0E, $18, $09, $0C, $17, $06, $8D
+    DB $01, $0C, $10, $11, $0C, $00, $0E, $0E, $03, $0E, $8D
 
 STARTUP:
 ; Resets stack, clears memory, draws initial board, and starts attract mode
@@ -150,7 +143,7 @@ REREAD_COIN_SLOT:
     JZ COIN_INSERTED
 
 CONTINUE_ATTRACT:
-; Attract mode toggles messages between "COMPUTER OTHELLO" and "INSERT COIN."
+; Attract mode toggles messages between "CPU OTHELLO" and "INSERT COIN."
 ; Every time it toggles to "INSERT COIN," the computer plays a piece.
 ; There is no sound. After 7 moves are played, the program resets.
     CALL CLEAR_MESSAGE
@@ -215,7 +208,7 @@ PROMPT_SELECT_GAME:
     PUSH B                         ; save PSEUDORANDOM_OPENING_MOVE
     CALL DRAW_MESSAGE
     DB $01                         ; unused arg
-    DB $00, $45                    ; @addr MSG_SELECT_GAME
+    DB $00, $47                    ; @addr MSG_SELECT_GAME
     POP B                          ; restore PSEUDORANDOM_OPENING_MOVE
     EI
     LDA $6000                      ; READ_INPUT
@@ -314,7 +307,7 @@ PLAYER_TURN_CORE:
     CALL CLEAR_MESSAGE
     CALL DRAW_TURN_INDICATOR
     CALL PLAYER_INPUT_LOOP
-    DB $01, $BD                    ; @addr CLEAR_AND_PROMPT_FOR_JUDGE
+    DB $01, $C5                    ; @addr CLEAR_AND_PROMPT_FOR_JUDGE
     LDA $40FF
     CPI $FB                        ; if GAME_MODE == 2P Sente,
     JZ TOGGLE_2P_GAME_MODE
@@ -351,7 +344,7 @@ PROMPT_FOR_JUDGE:
                                    ; Default:
     CALL DRAW_MESSAGE
     DB $01                         ; unused arg
-    DB $00, $4F                    ; @addr MSG_PRESS_JUDGE
+    DB $00, $53                    ; @addr MSG_PRESS_JUDGE
     JMP PROMPT_FOR_JUDGE
 
 JUDGE_PRESSED_FINAL:
@@ -370,7 +363,7 @@ PROMPT_FOR_RESET:
     EI
     CALL DRAW_MESSAGE
     DB $01                         ; unused arg
-    DB $00, $64                    ; @addr MSG_PRESS_RESET
+    DB $00, $6A                    ; @addr MSG_PRESS_RESET
     LDA $6000                      ; READ_INPUT
     CPI $DF                        ; Reset:
     JZ RESET
@@ -463,7 +456,7 @@ CHECK_FOR_RESET:
 PASS_BUTTON_PROMPT:
     CALL DRAW_MESSAGE
     DB $01                         ; unused arg
-    DB $00, $59                    ; @addr MSG_PRESS_PASS
+    DB $00, $5F                    ; @addr MSG_PRESS_PASS
     CALL SHORT_DELAY               ; [0.37s]
     MVI A, $01
     STA $4098                      ; PASS_REQUIRED_FLAG = 1
@@ -583,7 +576,7 @@ WAIT_05_COIN_CLEAR:
     MVI C, $82                     ; CONTINUE_LOOP_COUNTER = 130
 
 CHECK_FOR_CONTINUE_LOOP:
-; Flash the 'INSERT ￥100' message and check the coin slot
+; Flash the 'INSERT COIN' message and check the coin slot
 ; for roughly one minute before resetting.
 ;
 ; Coin slot states #06, #03, and #05 are all treated as valid
@@ -838,7 +831,7 @@ STILL_NO_LEGAL_MOVES:
     INR M                          ; CONSECUTIVE_PASS_COUNTER++
     CALL DRAW_MESSAGE
     DB $01                         ; unused
-    DB $00, $6E                    ; @addr MSG_CPU_PASSES
+    DB $00, $76                    ; @addr MSG_CPU_PASSES
     CALL LONG_DELAY                ; [1s]
     CALL LONG_DELAY                ; [1s]
     RET                            ; RETURN
@@ -2326,7 +2319,13 @@ FIND_CHARACTER_BY_INDEX:
 
 DRAW_CHARACTER:
 ; After the character is drawn, the VRAM_POINTER is advanced
-; 6 pixels to the right.
+; 5 pixels to the right. This localization uses narrower
+; English glyphs with built-in blank rows/columns, so no extra
+; column between characters is needed.
+;
+; The original ROM advanced by 6 pixels because the Japanese
+; glyphs used the full 5x7 bitmap width. Reducing the spacing
+; increases the maximum message length from 10 to 12 characters.
     PUSH H                         ; save VRAM_POINTER
     CALL DRAW_5x7_IMAGE
     POP H                          ; restore VRAM_POINTER
@@ -2334,101 +2333,102 @@ DRAW_CHARACTER:
     INX H
     INX H
     INX H
-    INX H
-    INX H                          ; VRAM_POINTER += 6
+    INX H                          ; VRAM_POINTER += 5
     POP D                          ; restore MESSAGES_POINTER
     INX D                          ; MESSAGES_POINTER++
     JMP INIT_FIND_CHARACTER
 
 DIGIT_FONT_TABLE:
-; Used when displaying the final score.
+; Used when displaying the final score. This localization uses
+; narrower glyphs to match the look and feel of the updated
+; English message font.
 ; 0
-    DB $70                         ; --xxxxxx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
+    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
 
 ; 1
+    DB $00                         ; ----------
     DB $20                         ; ----xx----
     DB $60                         ; --xxxx----
-    DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $70                         ; --xxxxxx--
 
 ; 2
-    DB $70                         ; --xxxxxx--
-    DB $88                         ; xx------xx
-    DB $08                         ; --------xx
+    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
     DB $10                         ; ------xx--
     DB $20                         ; ----xx----
     DB $40                         ; --xx------
-    DB $F8                         ; xxxxxxxxxx
+    DB $F0                         ; xxxxxxxx--
 
 ; 3
-    DB $F8                         ; xxxxxxxxxx
+    DB $00                         ; ----------
+    DB $F0                         ; xxxxxxxx--
     DB $10                         ; ------xx--
-    DB $20                         ; ----xx----
+    DB $60                         ; --xxxx----
     DB $10                         ; ------xx--
-    DB $08                         ; --------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
 
 ; 4
-    DB $10                         ; ------xx--
-    DB $30                         ; ----xxxx--
-    DB $50                         ; --xx--xx--
-    DB $90                         ; xx----xx--
-    DB $F8                         ; xxxxxxxxxx
-    DB $10                         ; ------xx--
-    DB $10                         ; ------xx--
+    DB $00                         ; ----------
+    DB $20                         ; ----xx----
+    DB $60                         ; --xxxx----
+    DB $A0                         ; xx--xx----
+    DB $F0                         ; xxxxxxxx--
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
 
 ; 5
-    DB $F8                         ; xxxxxxxxxx
-    DB $80                         ; xx--------
+    DB $00                         ; ----------
     DB $F0                         ; xxxxxxxx--
-    DB $08                         ; --------xx
-    DB $08                         ; --------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
+    DB $80                         ; xx--------
+    DB $E0                         ; xxxxxx----
+    DB $10                         ; ------xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
 
 ; 6
-    DB $30                         ; ----xxxx--
-    DB $40                         ; --xx------
+    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
     DB $80                         ; xx--------
-    DB $F0                         ; xxxxxxxx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
+    DB $E0                         ; xxxxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
 
 ; 7
-    DB $F8                         ; xxxxxxxxxx
-    DB $08                         ; --------xx
+    DB $00                         ; ----------
+    DB $F0                         ; xxxxxxxx--
     DB $10                         ; ------xx--
     DB $20                         ; ----xx----
-    DB $40                         ; --xx------
+    DB $20                         ; ----xx----
     DB $40                         ; --xx------
     DB $40                         ; --xx------
 
 ; 8
-    DB $70                         ; --xxxxxx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $70                         ; --xxxxxx--
+    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
 
 ; 9
+    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
     DB $70                         ; --xxxxxx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $78                         ; --xxxxxxxx
-    DB $08                         ; --------xx
     DB $10                         ; ------xx--
     DB $60                         ; --xxxx----
 
@@ -2570,14 +2570,17 @@ DRAW_ONE_SCORE:
     CALL LOOKUP_DIGIT_IMAGE
     PUSH H                         ; save VRAM_POINTER
     CALL DRAW_5x7_IMAGE
-; Advance 6 pixels to the next digit.
+; Advance 5 pixels to the next digit. The localized digit font
+; has built-in spacing, matching the updated message font.
+;
+; The original ROM advanced by 6 pixels because the original
+; digits used the full 5x7 bitmap width.
     POP H                          ; restore VRAM_POINTER
     INX H
     INX H
     INX H
     INX H
-    INX H
-    INX H                          ; VRAM_POINTER += 6
+    INX H                          ; VRAM_POINTER += 5
     MOV A,B                        ; A = +|■_COUNT
     ANI $0F                        ; A = +|■_COUNT_ONES
     CALL LOOKUP_DIGIT_IMAGE
@@ -2590,6 +2593,8 @@ DRAW_ONE_SCORE:
     LXI H, $C02C                   ; VRAM_POINTER = $C02C
     LDA $4082                      ; A = ■_COUNT
     JMP DRAW_ONE_SCORE
+
+    DB $FF
 
 LOOKUP_DIGIT_IMAGE:
 ; Input:
@@ -2665,233 +2670,172 @@ INC_DECIMAL_COUNTER:
     RET                            ; RETURN
 
 MESSAGE_FONT_TABLE:
-; Some message strings use dakuten (゛) and handakuten (゜)
-; marks. These are stored as separate glyphs which modify the
-; preceding kana character, e.g. カ + ゛ = ガ and ハ + ゜ = パ.
-; 00 = イ
-    DB $08                         ; --------xx
-    DB $10                         ; ------xx--
-    DB $20                         ; ----xx----
+; In this localization, the English glyphs are adapted
+; from the public-domain 5x7 -misc-fixed- font distributed
+; with Markus Kuhn's UCS fonts.
+; 00 = A
     DB $60                         ; --xxxx----
-    DB $A0                         ; xx--xx----
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
-
-; 01 = ッ
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $A8                         ; xx--xx--xx
-    DB $A8                         ; xx--xx--xx
-    DB $08                         ; --------xx
-    DB $30                         ; ----xxxx--
-
-; 02 = オ
-    DB $10                         ; ------xx--
-    DB $F8                         ; xxxxxxxxxx
-    DB $10                         ; ------xx--
-    DB $30                         ; ----xxxx--
-    DB $50                         ; --xx--xx--
-    DB $90                         ; xx----xx--
-    DB $10                         ; ------xx--
-
-; 03 = キ
-    DB $20                         ; ----xx----
-    DB $F8                         ; xxxxxxxxxx
-    DB $20                         ; ----xx----
-    DB $F8                         ; xxxxxxxxxx
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
-
-; 04 = ク
-    DB $00                         ; ----------
-    DB $78                         ; --xxxxxxxx
-    DB $48                         ; --xx----xx
-    DB $88                         ; xx------xx
-    DB $08                         ; --------xx
-    DB $10                         ; ------xx--
-    DB $60                         ; --xxxx----
-
-; 05 = コ
-    DB $00                         ; ----------
-    DB $F8                         ; xxxxxxxxxx
-    DB $08                         ; --------xx
-    DB $08                         ; --------xx
-    DB $08                         ; --------xx
-    DB $08                         ; --------xx
-    DB $F8                         ; xxxxxxxxxx
-
-; 06 = ス
-    DB $00                         ; ----------
-    DB $F8                         ; xxxxxxxxxx
-    DB $08                         ; --------xx
-    DB $10                         ; ------xx--
-    DB $20                         ; ----xx----
-    DB $50                         ; --xx--xx--
-    DB $88                         ; xx------xx
-
-; 07 = セ
-    DB $40                         ; --xx------
-    DB $F8                         ; xxxxxxxxxx
-    DB $48                         ; --xx----xx
-    DB $50                         ; --xx--xx--
-    DB $40                         ; --xx------
-    DB $40                         ; --xx------
-    DB $38                         ; ----xxxxxx
-
-; 08 = ソ
-    DB $00                         ; ----------
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $48                         ; --xx----xx
-    DB $08                         ; --------xx
-    DB $10                         ; ------xx--
-    DB $60                         ; --xxxx----
-
-; 09 = タ
-    DB $00                         ; ----------
-    DB $78                         ; --xxxxxxxx
-    DB $48                         ; --xx----xx
-    DB $A8                         ; xx--xx--xx
-    DB $18                         ; ------xxxx
-    DB $10                         ; ------xx--
-    DB $60                         ; --xxxx----
-
-; 0A = テ
-    DB $70                         ; --xxxxxx--
-    DB $00                         ; ----------
-    DB $F8                         ; xxxxxxxxxx
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
-    DB $40                         ; --xx------
-
-; 0B = ト
-    DB $40                         ; --xx------
-    DB $40                         ; --xx------
-    DB $40                         ; --xx------
-    DB $60                         ; --xxxx----
-    DB $50                         ; --xx--xx--
-    DB $40                         ; --xx------
-    DB $40                         ; --xx------
-
-; 0C = ハ
-    DB $00                         ; ----------
-    DB $20                         ; ----xx----
-    DB $10                         ; ------xx--
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-
-; 0D = ヒ
-    DB $80                         ; xx--------
-    DB $80                         ; xx--------
-    DB $F8                         ; xxxxxxxxxx
-    DB $80                         ; xx--------
-    DB $80                         ; xx--------
-    DB $80                         ; xx--------
-    DB $78                         ; --xxxxxxxx
-
-; 0E = ュ
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $70                         ; --xxxxxx--
-    DB $10                         ; ------xx--
-    DB $10                         ; ------xx--
-    DB $F8                         ; xxxxxxxxxx
-
-; 0F = リ
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
+    DB $F0                         ; xxxxxxxx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
-    DB $10                         ; ------xx--
-    DB $20                         ; ----xx----
-    DB $40                         ; --xx------
+    DB $00                         ; ----------
 
-; 10 = ン
+; 01 = C
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
     DB $00                         ; ----------
-    DB $C0                         ; xxxx------
-    DB $00                         ; ----------
-    DB $08                         ; --------xx
-    DB $08                         ; --------xx
-    DB $10                         ; ------xx--
+
+; 02 = D
     DB $E0                         ; xxxxxx----
-
-; 11 = レ
-    DB $00                         ; ----------
-    DB $80                         ; xx--------
-    DB $80                         ; xx--------
-    DB $88                         ; xx------xx
     DB $90                         ; xx----xx--
-    DB $A0                         ; xx--xx----
-    DB $C0                         ; xxxx------
-
-; 12 = ロ
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $E0                         ; xxxxxx----
     DB $00                         ; ----------
-    DB $F8                         ; xxxxxxxxxx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $F8                         ; xxxxxxxxxx
 
-; 13 = ￥
-    DB $88                         ; xx------xx
-    DB $50                         ; --xx--xx--
-    DB $F8                         ; xxxxxxxxxx
-    DB $20                         ; ----xx----
-    DB $F8                         ; xxxxxxxxxx
-    DB $20                         ; ----xx----
-    DB $20                         ; ----xx----
+; 03 = E
+    DB $F0                         ; xxxxxxxx--
+    DB $80                         ; xx--------
+    DB $E0                         ; xxxxxx----
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $F0                         ; xxxxxxxx--
+    DB $00                         ; ----------
 
-; 14 = 1
-    DB $20                         ; ----xx----
+; 04 = G
     DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $80                         ; xx--------
+    DB $B0                         ; xx--xxxx--
+    DB $90                         ; xx----xx--
+    DB $70                         ; --xxxxxx--
+    DB $00                         ; ----------
+
+; 05 = H
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $F0                         ; xxxxxxxx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $00                         ; ----------
+
+; 06 = I
+    DB $70                         ; --xxxxxx--
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $70                         ; --xxxxxx--
+    DB $00                         ; ----------
 
-; 15 = 0
-    DB $F8                         ; xxxxxxxxxx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $88                         ; xx------xx
-    DB $F8                         ; xxxxxxxxxx
-
-; 16 = ゛
-    DB $20                         ; ----xx----
+; 07 = J
+    DB $10                         ; ------xx--
+    DB $10                         ; ------xx--
+    DB $10                         ; ------xx--
+    DB $10                         ; ------xx--
     DB $90                         ; xx----xx--
-    DB $40                         ; --xx------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
+    DB $60                         ; --xxxx----
     DB $00                         ; ----------
 
-; 17 = ゜
+; 08 = L
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $F0                         ; xxxxxxxx--
+    DB $00                         ; ----------
+
+; 09 = M
+    DB $90                         ; xx----xx--
+    DB $F0                         ; xxxxxxxx--
+    DB $F0                         ; xxxxxxxx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $00                         ; ----------
+
+; 0A = N
+    DB $90                         ; xx----xx--
+    DB $D0                         ; xxxx--xx--
+    DB $D0                         ; xxxx--xx--
+    DB $B0                         ; xx--xxxx--
+    DB $B0                         ; xx--xxxx--
+    DB $90                         ; xx----xx--
+    DB $00                         ; ----------
+
+; 0B = O
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
+    DB $00                         ; ----------
+
+; 0C = P
+    DB $E0                         ; xxxxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $E0                         ; xxxxxx----
+    DB $80                         ; xx--------
+    DB $80                         ; xx--------
+    DB $00                         ; ----------
+
+; 0D = R
+    DB $E0                         ; xxxxxx----
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
     DB $E0                         ; xxxxxx----
     DB $A0                         ; xx--xx----
-    DB $E0                         ; xxxxxx----
+    DB $90                         ; xx----xx--
+    DB $00                         ; ----------
+
+; 0E = S
+    DB $60                         ; --xxxx----
+    DB $90                         ; xx----xx--
+    DB $40                         ; --xx------
+    DB $20                         ; ----xx----
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
+    DB $00                         ; ----------
+
+; 0F = T
+    DB $70                         ; --xxxxxx--
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+    DB $00                         ; ----------
+
+; 10 = U
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
+    DB $00                         ; ----------
+
+; 11 = ' '
+    DB $00                         ; ----------
+    DB $00                         ; ----------
+    DB $00                         ; ----------
     DB $00                         ; ----------
     DB $00                         ; ----------
     DB $00                         ; ----------
     DB $00                         ; ----------
 
-; 18 = ー
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $F8                         ; xxxxxxxxxx
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
+    DB $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 CHECK_PLAYER_WIN:
 ; In 1-player games, checks whether 1P defeated the CPU.
