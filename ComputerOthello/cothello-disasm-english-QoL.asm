@@ -35,7 +35,7 @@ CPU_OPENING_MOVE_TABLE:
     DB $04, $05
 
 BOARD_SPACE_VALUE_TABLE:
-; Used by the CPU player to determine its next move
+; Used by the CPU player to determine its next move.
 ; FF 03 3C 28 28 3C 03 FF
 ; 03 01 0A 05 05 0A 01 03
 ; 3C 0A 1E 14 14 1E 0A 3C
@@ -65,7 +65,7 @@ BOARD_SPACE_VALUE_TABLE:
 
 MSG_COMPUTER_OTHELLO:
 ; "CPU OTHELLO" - Title displayed during attract sequence
-    DB $01, $0C, $10, $11, $0B, $0F, $05, $03, $08, $08, $0B, $8D
+    DB $01, $0D, $11, $14, $0C, $10, $05, $03, $09, $09, $0C, $8D
 
     DB $00                         ; cushion for RST 7 address
 
@@ -74,43 +74,51 @@ MSG_COMPUTER_OTHELLO:
 
 MSG_INSERT_COIN:
 ; "INSERT COIN" - Prompt displayed during attract sequence and timer expiration
-    DB $06, $0A, $0E, $03, $0D, $0F, $11, $01, $0B, $06, $0A, $8D
+    DB $06, $0B, $0F, $03, $0E, $10, $14, $01, $0C, $06, $0B, $8D
 
 MSG_SELECT_GAME:
 ; "SELECT GAME" - Prompt displayed after coin inserted during attract
-    DB $0E, $03, $08, $03, $01, $0F, $11, $04, $00, $09, $03, $8D
+    DB $0F, $03, $09, $03, $01, $10, $14, $04, $00, $0A, $03, $8D
 
-MSG_PRESS_JUDGE:
-; "PRESS JUDGE" - Prompt displayed when game is over
-    DB $0C, $0D, $03, $0E, $0E, $11, $07, $10, $02, $04, $03, $8D
+MSG_MUST_PLAY:
+; "MUST PLAY" - Message displayed when there is a legal move and Pass is pressed
+    DB $0A, $11, $0F, $10, $14, $0D, $09, $00, $13, $8D
 
-MSG_PRESS_PASS:
-; "PRESS PASS" - Prompt displayed when no player moves are possible
-    DB $0C, $0D, $03, $0E, $0E, $11, $0C, $00, $0E, $0E, $8D
+MSG_MUST_PASS:
+; "MUST PASS" - Message displayed when there are no legal moves for the active player
+    DB $0A, $11, $0F, $10, $14, $0D, $00, $0F, $0F, $8D
 
-MSG_PRESS_RESET:
-; "PRESS RESET" - Prompt displayed after game has been scored
-    DB $0C, $0D, $03, $0E, $0E, $11, $0D, $03, $0E, $03, $0F, $8D
+MSG_ILLEGAL_MOVE:
+; "ILLEGAL MOVE" - Message displayed when Set is pressed on a space that is not a legal move
+    DB $06, $09, $09, $03, $04, $00, $09, $14, $0A, $0C, $12, $03, $8D
 
 MSG_CPU_PASSES:
 ; "CPU PASSES" - Message indicating that the CPU player has had to pass
-    DB $01, $0C, $10, $11, $0C, $00, $0E, $0E, $03, $0E, $8D
+    DB $01, $0D, $11, $14, $0D, $00, $0F, $0F, $03, $0F, $8D
+
+MSG_JUDGE_OK:
+; "JUDGE OK?" - Confirmation prompt when Judge is pressed
+    DB $07, $11, $02, $04, $03, $14, $0C, $08, $15, $8D
+
+MSG_RESET_OK:
+; "RESET OK?" - Confirmation prompt when Reset is pressed
+    DB $0E, $03, $0F, $03, $10, $14, $0C, $08, $15, $8D
 
 STARTUP:
-; Resets stack, clears memory, draws initial board, and starts attract mode
+; Resets stack, clears memory, draws initial board, sets sensible state
+; defaults, and starts attract mode.
     LXI SP, $40FA                  ; INIT_STACK <= $40F9 (63 bytes reserved for stack)
     CALL INIT_GAME
-; Sets CURRENT_PIECE to '■' and the MOVE coordinates to (3,2), which is the
-; equivalent of CPU_OPENING_MOVE_TABLE(1). However, this doesn't get used by
-; anything before being changed in attract mode.
-    MVI A, $05
-    STA $408A                      ; CURRENT_PIECE = '■'
+; Initializes CURRENT_PIECE to '+'. This will be immediately toggled in attract
+; mode, so that '■' goes first there.
     MVI A, $03
-    STA $408B                      ; MOVE_COL = 3
-    MVI A, $02
-    STA $408C                      ; MOVE_ROW = 2
-    XRA A
-    STA $40FC                      ; GAME_SCORED_FLAG = 0
+    STA $408A                      ; CURRENT_PIECE = '+'
+    MVI A, $00
+    STA $40FC                      ; ACTIVE_PLAYER_SIDE = 0 (1P)
+    MVI A, $03                     ; A = #03
+    STA $40FB                      ; P1_PIECE = '+'
+    MVI A, $01
+    STA $40FF                      ; NUM_PLAYERS = 1
     MVI A, $07                     ; ATTRACT_MOVE_COUNT = 7
 
 ; The coin selector logic is a bit of a black box, so the following are
@@ -146,32 +154,25 @@ CONTINUE_ATTRACT:
 ; Attract mode toggles messages between "CPU OTHELLO" and "INSERT COIN." Every
 ; time it toggles to "INSERT COIN," the computer plays a piece. There is no
 ; sound. After 7 moves are played, the program resets.
-    CALL CLEAR_MESSAGE
-    CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
+    CALL CLEAR_AND_DRAW_MESSAGE
     DB $00, $2B                    ; @addr MSG_COMPUTER_OTHELLO
     CALL LONG_DELAY                ; [1s]
     CALL LONG_DELAY                ; [1s]
-    CALL CLEAR_MESSAGE
-    CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
+    CALL CLEAR_AND_DRAW_MESSAGE
     DB $00, $3B                    ; @addr MSG_INSERT_COIN
     LDA $6000                      ; READ_INPUT
     CPI $7F                        ; Service:
     JZ SET_SERVICE_MODE_FLAGS
-                                   ; Default:
+                                   ; else
 ; Note that this toggles the piece before it calculates any moves, so the side
 ; that STARTUP doesn't seed in CURRENT_PIECE will go first in attract mode.
     CALL TOGGLE_CURRENT_PIECE
     CALL CLEAR_MOVE_CURSORS
-    CALL DRAW_GRID
     MVI A, $01
     STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 1
-; Note how it doesn't use the MOVE coordinates that were set in STARTUP. It
-; also can't use FIRST_MOVE_CPU at all, since that is strictly for '■' going
-; first. Instead, it simply finds the best move every turn. For the first move,
-; since all four of the possible opening moves are equivalent, it uses the last
-; one scanned, which is (3,5).
+; FIRST_MOVE_CPU isn't used here. Instead, it simply finds the best move every
+; turn. For the first move, since all four of the possible opening moves are
+; equivalent, it uses the last one scanned, which is (4,5).
     CALL CPU_FIND_AND_PLAY_BEST_MOVE
     LDA $4088
     DCR A                          ; if --ATTRACT_MOVE_COUNT != 0,
@@ -181,22 +182,41 @@ CONTINUE_ATTRACT:
 
 SET_SERVICE_MODE_FLAGS:
 ; If Service B is enabled, set CPU_OPENING_MOVE_TABLE_INDEX = 4,
-; GAME_MODE = Service, and reenable sound. In this mode, both sides are
-; controlled by the CPU and all input prompts are disabled.
-    MVI B, $04                     ; B = 4
+; NUM_PLAYERS = 0, and CURRENT_PIECE = '■'; reenable sound; and reinitialize
+; the game to clear any changes made during attract mode. In service mode, both
+; sides are controlled by the CPU and all input prompts are disabled.
     XRA A
     STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
-    MVI A, $7F                     ; A = #7F
+    LXI SP, $40FA                  ; INIT_STACK <= $40F9
+    CALL INIT_GAME
+    MVI A, $05
+    STA $408A                      ; CURRENT_PIECE = '■'
+    MVI A, $00
+    STA $40FF                      ; NUM_PLAYERS = 0
+    MVI B, $04                     ; B = 4
     JMP FIRST_MOVE_CPU
 
 COIN_INSERTED:
-; Reset attract mode state, reenable sound, and prompt for game type selection.
-; Each time through the prompt loop changes what the CPU's first move will be
-; if 1P Gote is selected.
+; Reset attract mode state if needed, reenable sound, and prompt for game type
+; selection. Each time through, the prompt loop changes what the CPU's first
+; move will be if 1P Gote is selected.
+;
+; If ATTRACT_MOVE_COUNT is still 7, STARTUP has already initialized the board
+; and no attract-mode move has completed yet. Skip INIT_GAME to avoid
+; clearing/redrawing the board twice after Reset is pressed while time remains.
     LXI SP, $40FA                  ; INIT_STACK <= $40F9
+    LDA $4088
+    CPI $07                        ; if ATTRACT_MOVE_COUNT == 7,
+    JZ SKIP_ATTRACT_MODE_CLEAR
+                                   ; else
     CALL INIT_GAME
+
+SKIP_ATTRACT_MODE_CLEAR:
     XRA A
     STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+; Set so Black ('■') always goes first.
+    MVI A, $05
+    STA $408A                      ; CURRENT_PIECE = '■'
 
 RESET_PSEUDORANDOM_OPENING_MOVE:
     DI
@@ -206,192 +226,152 @@ PROMPT_SELECT_GAME:
     DI
     PUSH B                         ; save PSEUDORANDOM_OPENING_MOVE
     CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
     DB $00, $47                    ; @addr MSG_SELECT_GAME
     POP B                          ; restore PSEUDORANDOM_OPENING_MOVE
     EI
     LDA $6000                      ; READ_INPUT
-; By the rules of Othello, black ('■') always moves first, but that is not the
-; case here. 1P is always white ('+') and 2P (or the CPU) is always
-; black ('■'). Sente and Gote are terms borrowed from Go. Here they indicate
-; which side moves first.
+; Sente and Gote are terms borrowed from Go. Here they indicate which side
+; moves first.
     CPI $FE                        ; 1P Sente:
-    JZ FIRST_MOVE_WHITE
+    JZ SENTE_1P
     CPI $FD                        ; 1P Gote:
     JZ FIRST_MOVE_CPU
     CPI $FB                        ; 2P Sente:
-    JZ FIRST_MOVE_WHITE
+    JZ SENTE_2P
     CPI $F7                        ; 2P Gote:
-    JZ FIRST_MOVE_BLACK
-                                   ; Default:
+    JZ FIRST_MOVE_2P
     DCR B                          ; if --PSEUDORANDOM_OPENING_MOVE != 0,
     JNZ PROMPT_SELECT_GAME
                                    ; else
     JMP RESET_PSEUDORANDOM_OPENING_MOVE
 
-; Instead of having a distinct turn indicator value, when playing a 2P game the
-; GAME_MODE is toggled back and forth between #FB and #F7. This gets used to
-; determine which player's inputs to read, where to display the on-screen turn
-; indicator, etc.
+; Initialize state to reflect the selected game mode.
+; NUM_PLAYERS: the number of human-controlled players (0, 1, or 2)
+; ACTIVE_PLAYER_SIDE: 0 = P1 side, 1 = P2/CPU side
+; P1_PIECE: P1's piece color
 
-FIRST_MOVE_WHITE:
+SENTE_2P:
     DI
-    STA $40FF                      ; GAME_MODE = 1P Sente/2P Sente
-    MVI A, $03                     ; CURRENT_PIECE = '+'
+    MVI A, $02
+    STA $40FF                      ; NUM_PLAYERS = 2
+
+SENTE_1P:
+    DI
+    MVI A, $05                     ; A = #05
+    STA $40FB                      ; P1_PIECE = '■'
 
 FIRST_MOVE_COMMON:
-    STA $408A
     CALL WAIT_FOR_INPUT_RELEASE
     JMP PLAYER_TURN_CORE
 
-FIRST_MOVE_BLACK:
+FIRST_MOVE_2P:
     DI
-    STA $40FF                      ; GAME_MODE = 2P Gote
-    MVI A, $05                     ; CURRENT_PIECE = '■'
+    MVI A, $02
+    STA $40FF                      ; NUM_PLAYERS = 2
+    MVI A, $01
+    STA $40FC                      ; ACTIVE_PLAYER_SIDE = 1 (P2)
     JMP FIRST_MOVE_COMMON
 
 FIRST_MOVE_CPU:
 ; Input:
-;   A = GAME_MODE
-;     Service or 1P Gote
 ;   B = CPU_OPENING_MOVE_INDEX (1..4)
-;     is always 4 when GAME_MODE = Service
-;
-; INIT_GAME is always called here. This is required for the Service path
-; because execution reaches this code directly from attract mode. For 1P Gote,
-; however, the board was already initialized by COIN_INSERTED, making this
-; second INIT_GAME call redundant.
+;     is always 4 when in Service mode
     DI
-    STA $40FF                      ; GAME_MODE = A
     MOV A,B
     STA $40FE                      ; CPU_OPENING_MOVE_INDEX = B
-    LXI SP, $40FA                  ; INIT_STACK <= $40F9
-    CALL INIT_GAME
-    MVI A, $05
-    STA $408A                      ; CURRENT_PIECE = '■'
+    CALL CLEAR_MESSAGE
+
+    MVI A, $01
+    STA $40FC                      ; ACTIVE_PLAYER_SIDE = 1 (P2)
+    CALL DRAW_TURN_INDICATOR
     CALL PERFORM_CPU_OPENING_MOVE
     JMP EXIT_CPU_TURN
 
 CPU_TURN:
     DI
     CALL CLEAR_MESSAGE
-    LDA $4089
 ; If both players passed on their previous turns, then neither side has a legal
 ; move and the game is over.
+    LDA $4089
     CPI $02                        ; if CONSECUTIVE_PASS_COUNTER == 2,
-    JZ PROMPT_FOR_JUDGE_WITH_SERVICE_CHECK
+    JZ WAIT_THEN_JUDGE
                                    ; else
-    CALL TOGGLE_CURRENT_PIECE
     CALL CLEAR_MOVE_CURSORS
     CALL DRAW_TURN_INDICATOR
     CALL CPU_FIND_AND_PLAY_BEST_MOVE
 
 EXIT_CPU_TURN:
+    CALL TOGGLE_ACTIVE_PLAYER_SIDE
     LDA $40FF
-    CPI $7F                        ; if GAME_MODE == Service,
+    CPI $00                        ; if NUM_PLAYERS == 0,
     JZ CPU_TURN
                                    ; else
 PLAYER_TURN:
     DI
-    LDA $4089
 ; If both players passed on their previous turns, then neither side has a legal
 ; move and the game is over.
+    LDA $4089
     CPI $02                        ; if CONSECUTIVE_PASS_COUNTER == 2,
-    JZ CLEAR_AND_PROMPT_FOR_JUDGE
+    JZ WAIT_THEN_JUDGE
                                    ; else
-    CALL TOGGLE_CURRENT_PIECE
-
 PLAYER_TURN_CORE:
     CALL CLEAR_MOVE_CURSORS
     CALL CLEAR_MESSAGE
     CALL DRAW_TURN_INDICATOR
     CALL PLAYER_INPUT_LOOP
-    DB $01, $C5                    ; @addr CLEAR_AND_PROMPT_FOR_JUDGE
+    CALL TOGGLE_ACTIVE_PLAYER_SIDE
     LDA $40FF
-    CPI $FB                        ; if GAME_MODE == 2P Sente,
-    JZ TOGGLE_2P_GAME_MODE
-    CPI $F7                        ; else if GAME_MODE == 2P Gote,
-    JZ TOGGLE_2P_GAME_MODE
+    CPI $02                        ; if NUM_PLAYERS == 2,
+    JZ PLAYER_TURN
                                    ; else
     JMP CPU_TURN
 
-TOGGLE_2P_GAME_MODE:
-; Input:
-;   A = GAME_MODE
-;     2P Sente or 2P Gote
-    CMA
-    ADI $F3
-    STA $40FF                      ; GAME_MODE = 2P Sente (#FB) <-> 2P Gote (#F7)
-    JMP PLAYER_TURN
+TOGGLE_ACTIVE_PLAYER_SIDE:
+; Flips which side of the screen represents the active player and flips the
+; piece of the current player from White to Black and vice versa.
+    LDA $40FC
+    XRI $01
+    STA $40FC                      ; ACTIVE_PLAYER_SIDE = 0 <--> 1
+    CALL TOGGLE_CURRENT_PIECE
+    RET                            ; RETURN
 
-PROMPT_FOR_JUDGE_WITH_SERVICE_CHECK:
-; In Service mode, automatically score the game. Otherwise make 1P press the
-; Judge button.
-    LDA $40FF
-    CPI $7F                        ; if GAME_MODE = Service,
-    JZ JUDGE_PRESSED_FINAL
-                                   ; else
-CLEAR_AND_PROMPT_FOR_JUDGE:
-    CALL CLEAR_MOVE_CURSORS
-    CALL CLEAR_MESSAGE
-
-PROMPT_FOR_JUDGE:
-    EI
-    LDA $6000                      ; READ_INPUT
-    CPI $BF                        ; Judge:
-    JZ JUDGE_PRESSED_FINAL
-                                   ; Default:
-    CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
-    DB $00, $53                    ; @addr MSG_PRESS_JUDGE
-    JMP PROMPT_FOR_JUDGE
+WAIT_THEN_JUDGE:
+; When the caller has detected one of the endgame states, the game waits for 1
+; second and then performs the Judge routine. After scoring is complete, the
+; game waits for 6 seconds and then automatically resets.
+;
+; This is a QoL update. The original ROM prompted the player to press the Judge
+; button before scoring could begin and then prompted the player to press the
+; Reset button when scoring was completed.
+; 
+; Possible endgame states include two consecutive passes, every space on the
+; board being filled, or all of the pieces of one side being eliminated.
+    CALL LONG_DELAY                ; [1s]
 
 JUDGE_PRESSED_FINAL:
     DI
-    CALL CLEAR_MESSAGE
-    CALL CLEAR_MOVE_CURSORS
     CALL SCORE_GAME
     CALL VERY_LONG_DELAY           ; [6s]
-; In Service mode, automatically reset after scoring. Otherwise make 1P press
-; the Reset button.
-    LDA $40FF
-    CPI $7F                        ; if GAME_MODE = Service,
-    JZ RESET
-                                   ; else
-PROMPT_FOR_RESET:
-    EI
-    CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
-    DB $00, $6A                    ; @addr MSG_PRESS_RESET
-    LDA $6000                      ; READ_INPUT
-    CPI $DF                        ; Reset:
-    JZ RESET
-                                   ; Default:
-    JMP PROMPT_FOR_RESET
+    JMP RESET
 
 PLAYER_INPUT_LOOP:
 ; Handles player input during a human player's turn. The Pass and Set buttons
-; end the turn when their use is permitted. The Judge and Reset buttons end the
-; game immediately. The Arrow buttons update the location of the move cursors.
+; end the turn when their use is permitted. The Judge and Reset buttons trigger
+; a confirmation prompt before ending the game immediately. The Arrow buttons
+; update the location of the move cursors.
+;
+; The confirmation prompts are a QoL update that help prevent players from
+; accidentally ending a game in progress.
     DI
     XRA A
     STA $408B                      ; MOVE_COL = 0
     XRA A
     STA $408C                      ; MOVE_ROW = 0
-    XRA A
-    STA $4098                      ; PASS_REQUIRED_FLAG = 0
     CALL DRAW_MOVE_CURSORS
-    CALL DRAW_GRID
     CALL CHECK_IF_PLAYER_MUST_PASS
-; If the player doesn't have any legal moves, then prompt them to press the
-; Pass button. Unlike most prompts in the game, this doesn't suspend normal
-; input handling. The player can still press any button and they will function
-; normally, but since there are no legal moves they will be unable to set a
-; piece anywhere.
     MOV A,B
-    CPI $00                        ; if PLAYER_MUST_PASS != 0,
-    JNZ PASS_BUTTON_PROMPT
-                                   ; else
+    STA $4098                      ; PASS_REQUIRED_FLAG = PLAYER_MUST_PASS
+
 PLAYER_INPUT_LOOP_CORE:
     DI
     LDA $4098
@@ -399,7 +379,9 @@ PLAYER_INPUT_LOOP_CORE:
     JZ PASS_BUTTON_PROMPT
                                    ; else
 PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT:
-    CALL CLEAR_MESSAGE
+; In the original ROM, the "PRESS PASS" message was cleared and redrawn every
+; iteration of the input loop, causing it to flicker. This QoL update keeps the
+; message visible until the pass condition is resolved.
     EI
     LDA $6000                      ; READ_INPUT
 ; Both players' Pass buttons are mapped to the same value. There's no need to
@@ -410,115 +392,135 @@ PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT:
 ; Both players' Arrow buttons are mapped to the same values. The controls are
 ; mirrored on opposite sides of the screen, so 'Right' for P1 and 'Left' for P2
 ; both move the horizontal cursor in the same direction.
-    CPI $FD                        ; Right/Left Arrow:
+    CPI $FD                        ; P1 Right/P2 Left Arrow:
     JZ P1_RIGHT_P2_LEFT_PRESSED
 ; Likewise, 'Down' for P1 and 'Up' for P2 both move the vertical cursor in the
 ; same direction.
-    CPI $FE                        ; Up/Down Arrow:
+    CPI $FE                        ; P1 Up/P2 Down Arrow:
     JZ P1_DOWN_P2_UP_PRESSED
-                                   ; Default:
-; The Judge button is skipped if GAME_SCORED_FLAG is set. This is meaningless
-; in practice, since control never returns to the player input loop after
-; SCORE_GAME has begun.
-    LDA $40FC
-    CPI $01                        ; if GAME_SCORED_FLAG != 1,
-    JZ CHECK_FOR_RESET
-                                   ; else
-; The Judge and Reset buttons are immediate game-ending actions. There is no
-; confirmation prompt.
-    LDA $6000                      ; READ_INPUT
+; A QoL update adds confirmation prompts when either the Judge or Reset buttons
+; are pressed. Pressing the same button again confirms the action. Any other
+; button clears the prompt and restarts the player's turn.
     CPI $BF                        ; Judge:
-    JZ JUDGE_PRESSED
-                                   ; Default:
-CHECK_FOR_RESET:
-    LDA $6000                      ; READ_INPUT
+    JZ CLEAR_AND_ESCAPABLE_PROMPT_FOR_JUDGE
     CPI $DF                        ; Reset:
-    JZ RESET
-                                   ; Default:
+    JZ CLEAR_AND_ESCAPABLE_PROMPT_FOR_RESET
+    LDA $40FC                      ; else
 ; Unlike the Pass and Arrow buttons, the Set buttons are treated as distinct
-; inputs. The current value of GAME_MODE determines which player's Set button
-; is accepted. Both inputs ultimately lead to the SET_PRESSED function.
-    LDA $40FF
-    CPI $FB                        ; if GAME_MODE == 2P Sente,
+; inputs. The current value of ACTIVE_PLAYER_SIDE determines which player's Set
+; button is accepted. Both inputs ultimately lead to the SET_PRESSED function.
+    CPI $00                        ; if ACTIVE_PLAYER_SIDE == 0 (P1),
     JZ CHECK_P1_SET_PRESSED
-    CPI $F7                        ; else if GAME_MODE != 2P Gote,
-    JNZ CHECK_P1_SET_PRESSED
                                    ; else
     LDA $6000                      ; READ_INPUT
     CPI $F7                        ; P2_Set:
     JZ SET_PRESSED
-                                   ; Default:
+                                   ; else
     JMP PLAYER_INPUT_LOOP_CORE
 
 PASS_BUTTON_PROMPT:
+; PASS_REQUIRED_FLAG indicates that the active player has no legal moves and
+; must pass. Unlike most prompts in the game, this one does not suspend normal
+; input handling. The player can still press any button and they will function
+; normally, but since there are no legal moves they will be unable to set a
+; piece anywhere.
     CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
-    DB $00, $5F                    ; @addr MSG_PRESS_PASS
-    CALL SHORT_DELAY               ; [0.37s]
-    MVI A, $01
-    STA $4098                      ; PASS_REQUIRED_FLAG = 1
+    DB $00, $5D                    ; @addr MSG_MUST_PASS
     JMP PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
 
 PASS_PRESSED:
     DI
     CALL WAIT_FOR_INPUT_RELEASE
-; Run CHECK_IF_PLAYER_MUST_PASS again, even though checking PASS_REQUIRED_FLAG
-; should probably suffice. Restart the player's turn if passing is not allowed,
-; otherwise update the pass counter and end the player's turn.
-    CALL CHECK_IF_PLAYER_MUST_PASS
-    MOV A,B
-    CPI $00                        ; if PLAYER_MUST_PASS == 0,
-    JZ PLAYER_INPUT_LOOP
+; If passing is not allowed, a QoL update displays a brief "MUST PLAY" message
+; before restarting the player's turn. Otherwise, update the pass counter and
+; end the player's turn.
+    LDA $4098
+    CPI $00                        ; if PASS_REQUIRED_FLAG == 0,
+    JZ MUST_PLAY
                                    ; else
     LXI H, $4089
     INR M                          ; CONSECUTIVE_PASS_COUNTER++
 
 EXIT_INPUT_LOOP:
-; Ends the player's current turn. The caller placed a 2-byte inline Judge
-; target after the CALL, so normal exits must skip over it.
-    XTHL                           ; save HL / pop RETURN_ADDRESS
-    INX H                          ; RETURN_ADDRESS++
-    INX H                          ; RETURN_ADDRESS++
-    XTHL                           ; push RETURN_ADDRESS / restore HL
-    RET                            ; return to RETURN_ADDRESS
+; Ends the player's current turn.
+    RET                            ; RETURN
 
-JUDGE_PRESSED:
-; Replace PLAYER_INPUT_LOOP's return address with the inline Judge target.
-; Judge is handled outside PLAYER_INPUT_LOOP because it can also be invoked
-; from non-input contexts. When called here, CLEAR_AND_PROMPT_FOR_JUDGE will
-; not prompt because the Judge button has already been pressed and inputs are
-; not cleared, so execution falls through to JUDGE_PRESSED_FINAL.
-;
-; Jumping directly to JUDGE_PRESSED_FINAL instead would appear to produce the
-; same behavior.
-    DI
-    XTHL                           ; save HL / pop RETURN_ADDRESS
-    MOV D,M                        ; D = JUMP_ADDRESS_HI
-    INX H                          ; RETURN_ADDRESS++
-    MOV E,M                        ; E = JUMP_ADDRESS_LO
-    XCHG                           ; HL = JUMP_ADDRESS
-    XTHL                           ; push JUMP_ADDRESS / restore HL
-    RET                            ; return to JUMP_ADDRESS (CLEAR_AND_PROMPT_FOR_JUDGE)
+MUST_PLAY:
+    CALL CLEAR_AND_DRAW_MESSAGE
+    DB $00, $53                    ; @addr MSG_MUST_PLAY
+    CALL LONG_DELAY                ; [1s]
+    CALL CLEAR_MESSAGE
+    JMP PLAYER_INPUT_LOOP_CORE
 
 CHECK_P1_SET_PRESSED:
     LDA $6000                      ; READ_INPUT
     CPI $EF                        ; P1 Set:
     JZ SET_PRESSED
-                                   ; Default:
+                                   ; else
     JMP PLAYER_INPUT_LOOP_CORE
 
 SET_PRESSED:
     DI
-; Restart the player's turn if the attempted move is illegal, otherwise apply
+; If the attempted move is illegal, a QoL update displays a brief
+; "ILLEGAL MOVE" message before restarting the player's turn. Otherwise, apply
 ; the move and end the player's turn.
     CALL CHECK_IF_MOVE_IS_LEGAL
     MOV A,B
     CPI $00                        ; if MOVE_LEGAL == 0,
-    JZ PLAYER_INPUT_LOOP
+    JZ ILLEGAL_MOVE_MESSAGE
                                    ; else
     CALL PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
     CALL WAIT_FOR_INPUT_RELEASE
     JMP EXIT_INPUT_LOOP
+
+ILLEGAL_MOVE_MESSAGE:
+    CALL CLEAR_AND_DRAW_MESSAGE
+    DB $00, $67                    ; @addr MSG_ILLEGAL_MOVE
+    CALL LONG_DELAY                ; [1s]
+    CALL CLEAR_MESSAGE
+    JMP PLAYER_INPUT_LOOP_CORE
+
+CLEAR_AND_ESCAPABLE_PROMPT_FOR_JUDGE:
+; Clear the board UI, wait for the original Judge press to be released, then
+; ask for confirmation.
+    CALL CLEAR_MOVE_CURSORS
+    CALL CLEAR_MESSAGE
+    CALL WAIT_FOR_INPUT_RELEASE
+
+ESCAPABLE_PROMPT_FOR_JUDGE:
+    CALL DRAW_MESSAGE
+    DB $00, $7F                    ; @addr MSG_JUDGE_OK
+    EI
+    LDA $6000                      ; READ_INPUT
+    CPI $BF                        ; Judge:
+    JZ JUDGE_PRESSED_FINAL
+; Any other button cancels the prompt. Return through PLAYER_TURN_CORE so the
+; confirmation message is cleared and the turn display is restored.
+    CPI $FF                        ; Any Button:
+    JNZ PLAYER_TURN_CORE
+                                   ; else
+    JMP ESCAPABLE_PROMPT_FOR_JUDGE
+
+CLEAR_AND_ESCAPABLE_PROMPT_FOR_RESET:
+; Clear the board UI, wait for the original Reset press to be released, then
+; ask for confirmation.
+    CALL CLEAR_MOVE_CURSORS
+    CALL CLEAR_MESSAGE
+    CALL WAIT_FOR_INPUT_RELEASE
+
+ESCAPABLE_PROMPT_FOR_RESET:
+    CALL DRAW_MESSAGE
+    DB $00, $89                    ; @addr MSG_RESET_OK
+    EI
+    LDA $6000                      ; READ_INPUT
+    CPI $DF                        ; Reset:
+    JZ RESET
+; Any other button cancels the prompt. Return through PLAYER_TURN_CORE so the
+; confirmation message is cleared and the turn display is restored.
+    CPI $FF                        ; Any Button:
+    JNZ PLAYER_TURN_CORE
+                                   ; else
+    JMP ESCAPABLE_PROMPT_FOR_RESET
 
 ; The move cursors each only move in one direction and wrap around at the board
 ; edge.
@@ -559,6 +561,7 @@ TIMER_EXPIRED_ADD_COIN_PROMPT:
     PUSH H
     PUSH D
     PUSH B
+    CALL CLEAR_MESSAGE
 
 WAIT_05_COIN_CLEAR:
 ; Waits for coin slot state #05 to clear before proceeding. Based on code
@@ -569,11 +572,11 @@ WAIT_05_COIN_CLEAR:
     CPI $05                        ; #05:
     JZ WAIT_05_COIN_CLEAR
                                    ; else
-    MVI C, $82                     ; CONTINUE_LOOP_COUNTER = 130
+    MVI C, $1E                     ; CONTINUE_LOOP_COUNTER = 30
 
 CHECK_FOR_CONTINUE_LOOP:
-; Flash the 'INSERT COIN' message and check the coin slot for roughly one
-; minute before resetting.
+; Slowly blink the 'INSERT COIN' message and check the coin slot for roughly
+; one minute before resetting.
 ;
 ; Coin slot states #06, #03, and #05 are all treated as valid continue states.
 ; Their exact hardware meaning is unknown.
@@ -588,7 +591,7 @@ CHECK_FOR_CONTINUE_LOOP:
     ANI $07
     CPI $05                        ; #05:
     JZ ESCAPE
-                                   ; Default:
+                                   ; else
     JMP RESET
 
 CHECK_COIN_SLOT_FOR_CONTINUE_COIN:
@@ -600,35 +603,19 @@ CHECK_COIN_SLOT_FOR_CONTINUE_COIN:
     CPI $03                        ; #03:
     JZ SET_ESCAPE
     CPI $05                        ; #05:
-    JZ SET_ESCAPE
-; The Judge button is still functional during the continue screen unless
-; GAME_SCORED_FLAG is set. This occurs when the game has already ended and
-; SCORE_GAME has started when the timer expires. Since interrupts are disabled
-; while scoring, the game is always fully scored before entering the continue
-; loop.
-;
-; If a new coin is inserted in this state, the only remaining action is to
-; prompt the player to push the Reset button.
-;
-; Note: Once scoring has completed, entering the continue loop serves little
-; practical purpose. The program could instead reset immediately.
-    LDA $40FC
-    CPI $01                        ; if GAME_SCORED_FLAG == 1,
-    JZ COIN_PROMPT
-                                   ; else
+    JZ SET_ESCAPE 
+; The Judge button is still functional during the continue screen.
     LDA $6000                      ; READ_INPUT
     CPI $BF                        ; Judge:
     JZ JUDGE_PRESSED_AT_CONTINUE
-                                   ; Default:
-COIN_PROMPT:
+                                   ; else
     PUSH B                         ; save ESCAPE_FLAG
     CALL DRAW_MESSAGE
-    DB $01                         ; unused arg
     DB $00, $3B                    ; @addr MSG_INSERT_COIN
-    CALL SHORT_DELAY               ; [0.37s]
+    CALL LONG_DELAY                ; [1s]
     CALL CLEAR_MESSAGE
-    CALL CORE_DELAY                ; [30ms]
-    POP B                          ; restore ESCAPE_FLAG
+    CALL LONG_DELAY                ; [1s]
+    POP B	                       ; restore ESCAPE_FLAG
     RET                            ; RETURN
 
 SET_ESCAPE:
@@ -636,8 +623,6 @@ SET_ESCAPE:
     RET                            ; RETURN
 
 JUDGE_PRESSED_AT_CONTINUE:
-    CALL CLEAR_MOVE_CURSORS
-    CALL CLEAR_MESSAGE
     CALL SCORE_GAME
     CALL VERY_LONG_DELAY           ; [6s]
     JMP RESET
@@ -657,21 +642,16 @@ VERY_LONG_DELAY:
     JMP DELAY_LOOP
 
 LONG_DELAY:
-; 1 second delay used twice in succession after the CPU passes and to cycle
-; messages during attract mode.
+; 1 second delay used as the standard duration when informational messages are displayed, as
+; the blink duration on the continue screen, and as the built-in delay between
+; reaching an endgame state and scoring the game.
 ;
-; Note: LONG_DELAY is always called twice consecutively. A dedicated 2-second
-; delay routine would have reduced code size slightly.
+; Also used twice in succession after the CPU passes and to cycle messages
+; during attract mode.
 ; 742,487 cycles
     PUSH B                         ; save BC
     MVI B, $1E                     ; DELAY_LOOP_COUNTER = 30
     JMP DELAY_LOOP
-
-SHORT_DELAY:
-; 0.37 second delay used to flash the 'PRESS PASS' and continue messages.
-; 278,417 cycles
-    PUSH B                         ; save BC
-    MVI B, $0A                     ; DELAY_LOOP_COUNTER = 10
 
 DELAY_LOOP:
     CALL CORE_DELAY
@@ -685,9 +665,9 @@ DOUBLE_DELAY:
 
 CORE_DELAY:
 ; 23,171 cycles
-; 30 ms delay that serves as the basis for all longer delays. Also used
-; directly to flash the board after a move is made and when adding pieces to
-; the board during SCORE_GAME.
+; 30 ms delay that serves as the basis for all longer delays. Also used directly to flash the
+; board after a move is made and when adding pieces to the board during
+; SCORE_GAME.
     PUSH H                         ; save HL
     LXI H, $0600                   ; OUTER_LOOP_COUNTER = 6, INNER_LOOP_COUNTER = 256/0
 
@@ -702,12 +682,12 @@ INNER_LOOP:
     RET                            ; RETURN
 
 CPU_FIND_AND_PLAY_BEST_MOVE:
-; Creates a MOVE_ASSESSMENT (a packed 16-byte representation of the board's
-; contents) of the current board status. On the first pass, it marks the
-; X-squares as illegal moves, so they won't be considered during move
-; evaluation. Each legal move is attempted on the ANALYSIS_BOARD and the
-; resulting position is scored using the BOARD_SPACE_VALUE_TABLE. The move that
-; leads to the best score is the one that is selected.
+; Creates a MOVE_ASSESSMENT, a packed 16-byte representation of the board's
+; current contents. On the first pass, it marks the X-squares as illegal moves,
+; so they won't be considered during move evaluation. Each legal move is
+; attempted on the ANALYSIS_BOARD and the resulting position is scored using
+; the BOARD_SPACE_VALUE_TABLE. The move that leads to the best score is the one
+; that is selected.
 ;
 ; If no legal moves are found on the first pass, a second pass is performed,
 ; this time with the X-squares under consideration.
@@ -721,8 +701,6 @@ CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
     STA $408C                      ; MOVE_ROW = 0
     LXI H, $8000
     SHLD $408D                     ; BEST_MOVE_EVAL_SCORE = -32,768
-    MVI A, $01
-    STA $408F                      ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
     CALL CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
     LDA $4086
     CPI $01                        ; if AI_FIRST_PASS_FLAG != 1,
@@ -731,8 +709,6 @@ CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
     CALL FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
 
 BEGIN_MOVE_SEARCH:
-    XRA A
-    STA $4090                      ; UNUSED? = 0
     LXI D, $0000                   ; ROW_D, COL_E = (0,0)
     CALL FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL
     MOV A,B
@@ -740,16 +716,6 @@ BEGIN_MOVE_SEARCH:
     JZ NO_LEGAL_MOVES
                                    ; else
     CALL TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
-; Builds an opponent-perspective move map for the first candidate on each pass,
-; but it does not appear to be used in move evaluation. This code is not
-; repeated for the second and subsequent candidates.
-    MVI A, $02
-    STA $408F                      ; CPU_PERSPECTIVE_FLAG? = 2 (unused)
-    CALL TOGGLE_CURRENT_PIECE
-    CALL CREATE_ANALYSIS_BOARD_MOVE_ASSESSMENT
-    MVI A, $01
-    STA $408F                      ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
-    CALL TOGGLE_CURRENT_PIECE
 
 EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH:
     CALL GENERATE_CANDIDATE_MOVE_EVAL_SCORE
@@ -786,15 +752,17 @@ NO_LEGAL_MOVES:
     JMP CPU_FIND_AND_PLAY_BEST_MOVE_CORE
 
 PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
-; A move (MOVE_COL, MOVE_ROW) has been previously selected by either the player
-; or the CPU. This adds it to the ANALYSIS_BOARD.
+; Add a move (MOVE_COL, MOVE_ROW) to the ANALYSIS_BOARD that has been
+; previously selected by either the player or the CPU.
 ;
 ; The new piece is flashed on the screen 3 times, followed by the newly
 ; outflanked pieces flashing 3 times. The DISPLAY_BOARD is then updated with
 ; all of the changes.
+;
+; If the board is now full or one side has been completely eliminated as a
+; result of the move, end the game and call the scoring routine.
     XRA A
     STA $4089                      ; CONSECUTIVE_PASS_COUNTER = 0
-    CALL DRAW_GRID
     CALL COPY_DISPLAY_BOARD_TO_ANALYSIS_BOARD
 
     LDA $408C
@@ -813,16 +781,44 @@ PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
     CALL SCAN_AND_FLIP_OUTFLANKED_PIECES
     CALL FLASH_BOARD_CHANGE
     CALL COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
+
+; QoL improvement to track the total number of pieces on the board. If all 64
+; spaces are occupied, the game is automatically ended and scored without
+; requiring presses of the Pass button(s) and the Judge button.
+    LXI H, $4080
+    INR M                          ; PIECE_COUNT++
+    MOV A,M
+    CPI $40                        ; if PIECE_COUNT == 64,
+    JZ WAIT_THEN_JUDGE
+                                   ; else
+; QoL improvement to check if one side has been completely eliminated from the
+; board. If so, the game is automatically ended and scored.
+    LXI H, $4000                   ; DISPLAY_BOARD_POINTER = $4000
+    MVI B, $40                     ; SPACE_LOOP_COUNTER = 64
+
+    LDA $408A                      ; A = CURRENT_PIECE
+    XRI $06                        ; A = OPPONENT_PIECE ('+' <-> '■')
+
+CHECK_NEXT_SPACE_IS_OPPONENT:
+    CMP M                          ; if DISPLAY_BOARD(POINTER) != OPPONENT_PIECE,
+    JNZ GET_NEXT_SPACE
+                                   ; else
     RET                            ; RETURN
 
+GET_NEXT_SPACE:
+    INX H                          ; DISPLAY_BOARD_POINTER++
+    DCR B                          ; if --SPACE_LOOP_COUNTER != 0,
+    JNZ CHECK_NEXT_SPACE_IS_OPPONENT
+                                   ; else
+    JMP WAIT_THEN_JUDGE
+
 STILL_NO_LEGAL_MOVES:
-; If no legal moves are found on either pass, record a pass, display the
+; If no legal moves are found on either search pass, record a pass, display the
 ; 'CPU PASSES' message, and advance to the other player's turn.
     LXI H, $4089
     INR M                          ; CONSECUTIVE_PASS_COUNTER++
-    CALL DRAW_MESSAGE
-    DB $01                         ; unused
-    DB $00, $76                    ; @addr MSG_CPU_PASSES
+    CALL CLEAR_AND_DRAW_MESSAGE
+    DB $00, $74                    ; @addr MSG_CPU_PASSES
     CALL LONG_DELAY                ; [1s]
     CALL LONG_DELAY                ; [1s]
     RET                            ; RETURN
@@ -865,7 +861,7 @@ FIND_COL_E_BITS:
     JNZ ADVANCE_POINTER_1_COL
                                    ; else
 ; MOVE_ASSESSMENT_POINTER is now set to (D,E), so begin scanning for a legal
-; move.
+; move from there.
     POP D                          ; restore ROW_D, COL_E
     JMP INSPECT_SPACE
 
@@ -949,6 +945,7 @@ TRY_CANDIDATE_MOVE:
 SCAN_AND_FLIP_OUTFLANKED_PIECES:
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
+;
 ; Scan all 8 directions from the selected move on the ANALYSIS_BOARD, flipping
 ; all of the resulting outflanked pieces. Once all directions have been
 ; processed, place the new piece on the board.
@@ -958,12 +955,12 @@ CONTINUE_SCAN_FOR_OUTFLANKED_PIECES:
     CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
     MVI E, $01                     ; FLIP_PIECES = 1
     CALL SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-; Upon exit, D holds the next DIRECTION to be scanned
+; Upon exit, D holds the next DIRECTION to be scanned.
     MOV A,D
     CPI $09                        ; if DIRECTION != 9,
     JNZ CONTINUE_SCAN_FOR_OUTFLANKED_PIECES
                                    ; else
-; Finally, actually play the piece on the board
+; Finally, actually play the piece on the board.
     CALL GET_SPACE_ON_ANALYSIS_BOARD
     LDA $408A                      ; A = CURRENT_PIECE
     MOV M,A                        ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
@@ -1067,25 +1064,18 @@ DRAW_SPACE:
 
 TOGGLE_CURRENT_PIECE:
     LDA $408A
-    CPI $03                        ; if CURRENT_PIECE == '+',
-    JZ SET_CURRENT_PIECE_BLACK
-                                   ; else
-    MVI A, $03
-    STA $408A                      ; CURRENT_PIECE = '+'
-    RET                            ; RETURN
-
-SET_CURRENT_PIECE_BLACK:
-    MVI A, $05
-    STA $408A                      ; CURRENT_PIECE = '■'
+    XRI $06                        ; CURRENT_PIECE = '+' <-> '■'
+    STA $408A
     RET                            ; RETURN
 
 CLEAR_WORK_RAM:
 ; Output:
 ;   RAM from $4000-$40EF = 0
+;
 ; Preserves top of stack (so calls through INIT_GAME can return) as well as
-; GAME_SCORED_FLAG, ATTRACT_MODE_SUPPRESS_SOUND, CPU_OPENING_MOVE_INDEX, and
-; GAME_MODE. These values are required by code that executes after INIT_GAME
-; returns, so need to be preserved.
+; P1_PIECE, ACTIVE_PLAYER_SIDE, ATTRACT_MODE_SUPPRESS_SOUND,
+; CPU_OPENING_MOVE_INDEX, and NUM_PLAYERS. These values are required by code
+; that executes after INIT_GAME returns, so need to be preserved.
     LXI H, $4000                   ; RAM_POINTER = $4000
     MVI C, $F0                     ; CLEAR_RAM_LOOP_COUNTER = 240
 
@@ -1306,10 +1296,6 @@ USE_ANALYSIS_BOARD:
     JMP EXAMINE_SPACE_CONTENTS
 
 OUTFLANK_COMPLETE:
-; Save NUM_OUTFLANKED_PIECES to RAM, though no other code appears to reference
-; this value.
-    MOV A,B
-    STA $4097                      ; NUM_OUTFLANKED_PIECES? (unused) = NUM_OUTFLANKED_PIECES
     POP H                          ; restore MOVE_ROW, MOVE_COL
     RET                            ; RETURN
 
@@ -1324,7 +1310,7 @@ HANDLE_OPPONENT_PIECE:
 
 FLIP_SQUARE:
     CALL FLIP_SQUARE_ON_ANALYSIS_BOARD
-    DCR B                          ; if --NUM_OUTFLANKED_PIECES != 0,
+    DCR B	                       ; if --NUM_OUTFLANKED_PIECES != 0,
     JNZ SCAN_FOR_OUTFLANKED_PIECES_CORE
                                    ; else
     INR D                          ; DIRECTION++
@@ -1335,7 +1321,7 @@ GET_CANDIDATE_MOVE:
 ; Output:
 ;   DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
 ;
-; Retrieve stored CANDIDATE_MOVE
+; Retrieve stored CANDIDATE_MOVE.
     LHLD $40A9                     ; HL = stored CANDIDATE_MOVE
     XCHG                           ; DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
     RET                            ; RETURN
@@ -1556,22 +1542,6 @@ DECREMENT_MOVE_EVAL_SCORE:
     RET                            ; RETURN
 
 CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT:
-    LXI D, $4000                   ; DE = DISPLAY_BOARD_POINTER (0,0)
-    XRA A
-    STA $4084                      ; BOARD_SELECTION_FOR_SCAN = 0 (DISPLAY)
-    LXI H, $4099                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER (0,0)
-    JMP CREATE_MOVE_ASSESSMENT_CORE
-
-CREATE_ANALYSIS_BOARD_MOVE_ASSESSMENT:
-; An opponent-perspective MOVE_ASSESSMENT is generated here, but
-; GENERATE_CANDIDATE_MOVE_EVAL_SCORE only uses the contents of ANALYSIS_BOARD
-; directly and does not consult this MOVE_ASSESSMENT.
-    LXI D, $4040                   ; DE = ANALYSIS_BOARD_POINTER (0,0)
-    MVI A, $01
-    STA $4084                      ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
-    LXI H, $40AB                   ; HL = ANALYSIS_BOARD_MOVE_ASSESSMENT_POINTER (0,0)
-
-CREATE_MOVE_ASSESSMENT_CORE:
 ; Creates a 16-byte packed representation of the board. Each byte holds four
 ; two-bit values representing a set of four adjacent spaces. Empty spaces are
 ; scanned to determine whether playing there would outflank opponent pieces.
@@ -1581,6 +1551,10 @@ CREATE_MOVE_ASSESSMENT_CORE:
 ;   1 = Empty and legal
 ;   2 = Contains black piece ('■')
 ;   3 = Contains white piece ('+')
+    LXI D, $4000                   ; DE = DISPLAY_BOARD_POINTER (0,0)
+    XRA A
+    STA $4084                      ; BOARD_SELECTION_FOR_SCAN = 0 (DISPLAY)
+    LXI H, $4099                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER (0,0)
     SHLD $4092                     ; MOVE_ASSESSMENT_WRITE_POINTER = BOARD_MOVE_ASSESSMENT_POINTER
     MVI C, $04                     ; ACCUMULATOR_COUNTER = 4
     LXI H, $0000                   ; ROW_H, COL_L = (0,0)
@@ -1787,6 +1761,9 @@ ADD_STARTING_PIECES_TO_BOARDS_AND_DRAW:
     MOV M,A                        ; ANALYSIS_BOARD(3,4) = '■'
     CALL COPY_ANALYSIS_BOARD_TO_DISPLAY_BOARD
     CALL DRAW_DISPLAY_BOARD
+; Initialize the total number of pieces on the board to 4.
+    MVI A, $04
+    STA $4080                      ; PIECE_COUNT = 4
     RET                            ; RETURN
 
 GET_SPACE_ON_DISPLAY_BOARD:
@@ -1798,7 +1775,7 @@ GET_SPACE_ON_DISPLAY_BOARD:
 ;
 ; H_ROW and L_COL are 3-bit values, so the byte offset is:
 ;   00rrrccc
-; which exactly matches the DISPLAY_BOARD's memory map
+; which exactly matches the DISPLAY_BOARD's memory map.
     MOV A,H
     RLC
     RLC
@@ -2006,24 +1983,29 @@ FIRST_PASS_REMOVE_HIGH_RISK_SQUARES:
 ; Zeroes the four X-squares in the MOVE_ASSESSMENT if they are unoccupied,
 ; marking them as illegal moves. This prevents the CPU from considering them as
 ; moves on the first pass.
-;
-; But this also causes those squares to appear empty when the ANALYSIS_BOARD is
-; reconstructed from the MOVE_ASSESSMENT. As a result, first-pass evaluation
-; can miss otherwise-legal corner captures or other outflanked pieces that
-; depend on actual occupancy of an X-square. A better implementation would
-; somehow only mark these spaces as illegal if they didn't already contain
-; pieces.
     MVI B, $02                     ; ROW_LOOP_COUNTER = 2
     LXI H, $409B                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER(1,0) = $409B
 
 REMOVE_HIGH_RISK_FROM_ROW:
     MOV A,M
+    ANI $20                        ; if X-square is occupied (hi bit != 0),
+    JNZ SKIP_X_SQUARE_1
+                                   ; else
+; Reload X-square (x,1) and mark it as an illegal move.
+    MOV A,M
     ANI $CF
     MOV M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,1) = 0
+SKIP_X_SQUARE_1:
     INX H                          ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER++
+    MOV A,M
+    ANI $08                        ; if X-square is occupied (hi bit != 0),
+    JNZ SKIP_X_SQUARE_6
+                                   ; else
+; Reload X-square (x,6) and mark it as an illegal move.
     MOV A,M
     ANI $F3
     MOV M,A                        ; DISPLAY_BOARD_MOVE_ASSESSMENT(x,6) = 0
+SKIP_X_SQUARE_6:
     LXI H, $40A5                   ; HL = DISPLAY_BOARD_MOVE_ASSESSMENT_POINTER(6,0) = $40A5
     DCR B                          ; if --ROW_LOOP_COUNTER != 0,
     JNZ REMOVE_HIGH_RISK_FROM_ROW
@@ -2124,7 +2106,7 @@ PLAY_TONE:
     MOV M,B                        ; SET_TONE_FREQUENCY (Mame: 3500/(FREQUENCY_DIVISOR+1))
     RET                            ; RETURN
 
-; Piece and character graphics are stored as 5x5 and 5x7 bitmap images
+; Piece and character graphics are stored as 5x5 and 5x6 bitmap images
 ; respectively. Each row of the image is stored in one byte, with the five
 ; most-significant bits representing the pixels from left to right.
 
@@ -2145,20 +2127,12 @@ DRAW_GAME_PIECE:
                                    ; else
     JMP LOAD_BLANK
 
-DRAW_5x7_IMAGE:
+DRAW_5x6_IMAGE:
 ; Input:
 ;   DE = FONT_TABLE_POINTER
 ;   HL = VRAM_POINTER
 ;
 ; Used for drawing messages and the digits in the final game score.
-    MVI A, $01                     ; PIXEL_TYPE = 1
-    PUSH B                         ; save BC
-    PUSH D                         ; save DE
-    MVI C, $07                     ; ROW_COUNTER = 7
-    JMP DRAW_IMAGE
-
-DRAW_5x6_IMAGE:
-; Unused in this ROM.
     MVI A, $01                     ; PIXEL_TYPE = 1
     PUSH B                         ; save BC
     PUSH D                         ; save DE
@@ -2248,11 +2222,14 @@ CLEAR_NEXT_PIXEL:
     DCR C                          ; if --COL_COUNTER != 0,
     JNZ CLEAR_NEXT_PIXEL
                                    ; else
-    INR H                          ; VRAM_POINTER_HI++
+    INR H	                       ; VRAM_POINTER_HI++
     DCR B                          ; if --ROW_COUNTER != 0,
     JNZ CLEAR_NEXT_ROW
                                    ; else
     RET                            ; RETURN
+
+CLEAR_AND_DRAW_MESSAGE:
+    CALL CLEAR_MESSAGE
 
 DRAW_MESSAGE:
 ; Looks up the supplied message by its pointer, reads it one character at a
@@ -2260,8 +2237,6 @@ DRAW_MESSAGE:
 ; the message space. #8D is the message stop character. Once it is encountered
 ; in the string, this function exits.
     XTHL                           ; save HL / pop RETURN_ADDRESS
-    MOV B,M                        ; B = PARAM_1 (unused)
-    INX H                          ; RETURN_ADDRESS++
     MOV D,M                        ; D = MESSAGES_POINTER_HI
     INX H                          ; RETURN_ADDRESS++
     MOV E,M                        ; E = MESSAGES_POINTER_LO
@@ -2287,8 +2262,7 @@ FIND_CHARACTER_BY_INDEX:
     INX D
     INX D
     INX D
-    INX D
-    INX D                          ; MESSAGE_FONT_TABLE_POINTER += #07 (++)
+    INX D                          ; MESSAGE_FONT_TABLE_POINTER += #06 (++)
     JMP FIND_CHARACTER_BY_INDEX
 
 DRAW_CHARACTER:
@@ -2300,13 +2274,13 @@ DRAW_CHARACTER:
 ; full 5x7 bitmap width. Reducing the spacing increases the maximum message
 ; length from 10 to 12 characters.
     PUSH H                         ; save VRAM_POINTER
-    CALL DRAW_5x7_IMAGE
+    CALL DRAW_5x6_IMAGE
     POP H                          ; restore VRAM_POINTER
     INX H
     INX H
     INX H
     INX H
-    INX H                          ; VRAM_POINTER += 5
+    INX H                          ; VRAM_POINTER += 6
     POP D                          ; restore MESSAGES_POINTER
     INX D                          ; MESSAGES_POINTER++
     JMP INIT_FIND_CHARACTER
@@ -2315,7 +2289,6 @@ DIGIT_FONT_TABLE:
 ; Used when displaying the final score. This localization uses narrower glyphs
 ; to match the look and feel of the updated English message font.
 ; 0
-    DB $00                         ; ----------
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
@@ -2324,7 +2297,6 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 ; 1
-    DB $00                         ; ----------
     DB $20                         ; ----xx----
     DB $60                         ; --xxxx----
     DB $20                         ; ----xx----
@@ -2333,7 +2305,6 @@ DIGIT_FONT_TABLE:
     DB $70                         ; --xxxxxx--
 
 ; 2
-    DB $00                         ; ----------
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $10                         ; ------xx--
@@ -2342,7 +2313,6 @@ DIGIT_FONT_TABLE:
     DB $F0                         ; xxxxxxxx--
 
 ; 3
-    DB $00                         ; ----------
     DB $F0                         ; xxxxxxxx--
     DB $10                         ; ------xx--
     DB $60                         ; --xxxx----
@@ -2351,7 +2321,6 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 ; 4
-    DB $00                         ; ----------
     DB $20                         ; ----xx----
     DB $60                         ; --xxxx----
     DB $A0                         ; xx--xx----
@@ -2360,7 +2329,6 @@ DIGIT_FONT_TABLE:
     DB $20                         ; ----xx----
 
 ; 5
-    DB $00                         ; ----------
     DB $F0                         ; xxxxxxxx--
     DB $80                         ; xx--------
     DB $E0                         ; xxxxxx----
@@ -2369,7 +2337,6 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 ; 6
-    DB $00                         ; ----------
     DB $60                         ; --xxxx----
     DB $80                         ; xx--------
     DB $E0                         ; xxxxxx----
@@ -2378,7 +2345,6 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 ; 7
-    DB $00                         ; ----------
     DB $F0                         ; xxxxxxxx--
     DB $10                         ; ------xx--
     DB $20                         ; ----xx----
@@ -2387,7 +2353,6 @@ DIGIT_FONT_TABLE:
     DB $40                         ; --xx------
 
 ; 8
-    DB $00                         ; ----------
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
@@ -2396,7 +2361,6 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 ; 9
-    DB $00                         ; ----------
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
@@ -2405,34 +2369,34 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 SCORE_GAME:
-; Removes the move cursors and clears the ANALYSIS_BOARD before making a
-; three-pass scoring loop.
+; Clears the message area, the move cursors, and the ANALYSIS_BOARD before
+; making a three-pass scoring loop.
 ;
-; Pass 1 scans the DISPLAY_BOARD for black pieces ('■'). Each black piece
-; increments black's score and is copied into the ANALYSIS_BOARD, filling
-; spaces from upper-left to lower-right.
+; Pass 1 scans the DISPLAY_BOARD for P2's pieces. Each such piece increments
+; P2's score and is copied into the ANALYSIS_BOARD, filling spaces from
+; upper-left to lower-right.
 ;
 ; Pass 2 scans for blank spaces and copies them into the next available
 ; ANALYSIS_BOARD spaces.
 ;
-; Pass 3 scans for white pieces ('+'). Each white piece increments white's
-; score and is copied into the next available ANALYSIS_BOARD space.
+; Pass 3 scans for P1's pieces. Each such piece increments P1's score and is
+; copied into the next available ANALYSIS_BOARD space.
 ;
-; As a result, the ANALYSIS_BOARD ends up sorted into black pieces, then
-; blanks, then white pieces.
+; As a result, the ANALYSIS_BOARD ends up sorted into P2's pieces, then blanks,
+; then P1's pieces.
 ;
 ; Each space drawn to the ANALYSIS_BOARD, including blanks, is accompanied by
 ; the VERY_LOW_TONE.
 ;
 ; The final scores are displayed in the message area and a winner is
 ; determined.
+    CALL CLEAR_MESSAGE
     CALL CLEAR_MOVE_CURSORS
+    CALL CLEAR_TURN_INDICATORS
     XRA A
-    STA $4082                      ; ■_COUNT = 0
+    STA $4082                      ; P1_COUNT = 0
     XRA A
-    STA $4083                      ; +_COUNT = 0
-    MVI A, $01
-    STA $40FC                      ; GAME_SCORED_FLAG = 1
+    STA $4083                      ; P2_COUNT = 0
     LXI H, $4040                   ; ANALYSIS_BOARD_POINTER = $4040
     MVI B, $40                     ; SPACE_LOOP_COUNTER = 64
 
@@ -2445,7 +2409,7 @@ CLEAR_NEXT_SPACE:
     CALL DRAW_ANALYSIS_BOARD
     LXI D, $4040                   ; ANALYSIS_BOARD_POINTER = $4040
 ; Selects what this pass is looking for:
-;   3 = Black ('■'), 2 = Blanks, 1 = White ('+'), 0 = done
+;   3 = P2, 2 = Blanks, 1 = P1, 0 = done
     MVI C, $03                     ; SCORING_PASS_COUNTER = 3
 
 START_SCORING_PASS:
@@ -2455,25 +2419,26 @@ START_SCORING_PASS:
 SCORE_NEXT_SPACE:
     MOV A,C
     CPI $03                        ; if SCORING_PASS_COUNTER == 3,
-    JZ SCORE_BLACK
+    JZ SCORE_P2
     CPI $02                        ; else if SCORING_PASS_COUNTER == 2,
     JZ SCORE_BLANK
     CPI $01                        ; else if SCORING_PASS_COUNTER == 1,
-    JZ SCORE_WHITE
+    JZ SCORE_P1
                                    ; else
     CALL DRAW_SCORES
     CALL CHECK_PLAYER_WIN
     RET                            ; RETURN
 
-SCORE_BLACK:
-    MVI A, $05
-    CMP M                          ; if DISPLAY_BOARD(POINTER) != '■',
+SCORE_P2:
+    LDA $40FB
+    XRI $06                        ; PIECE_TYPE = P2_PIECE
+    CMP M                          ; if DISPLAY_BOARD(POINTER) != P2_PIECE,
     JNZ GET_NEXT_SCORE_SPACE
                                    ; else
     PUSH PSW                       ; save PIECE_TYPE
-    LDA $4082                      ; A = ■_COUNT
+    LDA $4083                      ; A = P2_COUNT
     CALL INC_DECIMAL_COUNTER
-    STA $4082                      ; ■_COUNT = A
+    STA $4083                      ; P2_COUNT = A
     JMP WRITE_PIECE_TO_ANALYSIS_BOARD
 
 SCORE_BLANK:
@@ -2484,15 +2449,15 @@ SCORE_BLANK:
     PUSH PSW                       ; save PIECE_TYPE
     JMP WRITE_PIECE_TO_ANALYSIS_BOARD
 
-SCORE_WHITE:
-    MVI A, $03
-    CMP M                          ; if DISPLAY_BOARD(POINTER) != '+',
+SCORE_P1:
+    LDA $40FB                      ; PIECE_TYPE = P1_PIECE
+    CMP M                          ; if DISPLAY_BOARD(POINTER) != P1_PIECE,
     JNZ GET_NEXT_SCORE_SPACE
                                    ; else
     PUSH PSW                       ; save PIECE_TYPE
-    LDA $4083                      ; A = +_COUNT
+    LDA $4082                      ; A = P1_COUNT
     CALL INC_DECIMAL_COUNTER
-    STA $4083                      ; +_COUNT = A
+    STA $4082                      ; P1_COUNT = A
 
 WRITE_PIECE_TO_ANALYSIS_BOARD:
 ; Write the scored piece to the next position in the ANALYSIS_BOARD, redraw
@@ -2521,26 +2486,27 @@ GET_NEXT_SCORE_SPACE:
 DRAW_SCORES:
 ; Draw the white ('+') and black ('■') pieces in the message space, then draw
 ; their two-digit BCD counts beside them.
-    MVI A, $03                     ; SPACE_CONTENTS = '+'
+    LDA $40FB                      ; SPACE_CONTENTS = P1_PIECE
     LXI H, $C208                   ; VRAM_POINTER = $C208
     CALL DRAW_GAME_PIECE
-    MVI A, $05                     ; SPACE_CONTENTS = '■'
+    LDA $40FB
+    XRI $06                        ; SPACE_CONTENTS = P2_PIECE
     LXI H, $C226                   ; VRAM_POINTER = $C226
     CALL DRAW_GAME_PIECE
     MVI C, $02                     ; SCORE_COUNTER = 2
-    LDA $4083                      ; A = +_COUNT
-    LXI H, $C00E                   ; VRAM_POINTER = $C00E
+    LDA $4082                      ; A = P1_COUNT
+    LXI H, $C10E                   ; VRAM_POINTER = $C10E
 
 DRAW_ONE_SCORE:
-    MOV B,A                        ; B = +|■_COUNT
-    ANI $F0                        ; A = +|■_COUNT_TENS
+    MOV B,A                        ; B = P1|P2_COUNT
+    ANI $F0                        ; A = P1|P2_COUNT_TENS
     RRC
     RRC
     RRC
-    RRC                            ; +|■_COUNT_TENS >> 4
+    RRC                            ; P1|P2_COUNT_TENS >> 4
     CALL LOOKUP_DIGIT_IMAGE
     PUSH H                         ; save VRAM_POINTER
-    CALL DRAW_5x7_IMAGE
+    CALL DRAW_5x6_IMAGE
 ; Advance 5 pixels to the next digit. The localized digit font has built-in
 ; spacing, matching the updated message font.
 ;
@@ -2552,17 +2518,17 @@ DRAW_ONE_SCORE:
     INX H
     INX H
     INX H                          ; VRAM_POINTER += 5
-    MOV A,B                        ; A = +|■_COUNT
-    ANI $0F                        ; A = +|■_COUNT_ONES
+    MOV A,B                        ; A = P1|P2_COUNT
+    ANI $0F                        ; A = P1|P2_COUNT_ONES
     CALL LOOKUP_DIGIT_IMAGE
     PUSH H                         ; save VRAM_POINTER
-    CALL DRAW_5x7_IMAGE
+    CALL DRAW_5x6_IMAGE
     POP H                          ; restore VRAM_POINTER
     DCR C                          ; if --SCORE_COUNTER == 0,
     RZ                             ; RETURN
                                    ; else
-    LXI H, $C02C                   ; VRAM_POINTER = $C02C
-    LDA $4082                      ; A = ■_COUNT
+    LXI H, $C12C                   ; VRAM_POINTER = $C12C
+    LDA $4083                      ; A = P2_COUNT
     JMP DRAW_ONE_SCORE
 
 LOOKUP_DIGIT_IMAGE:
@@ -2584,8 +2550,7 @@ FIND_DIGIT_BY_INDEX:
     INX D
     INX D
     INX D
-    INX D
-    INX D                          ; DIGIT_FONT_TABLE_POINTER += 7 (++)
+    INX D                          ; DIGIT_FONT_TABLE_POINTER += 6 (++)
     POP PSW                        ; restore DIGIT_FONT_TABLE_INDEX
     JMP FIND_DIGIT_BY_INDEX
 
@@ -2593,22 +2558,28 @@ DRAW_TURN_INDICATOR:
 ; Blanks out the previous side marker, then draws a black ('■') or white ('+')
 ; piece beside the board to show the active side.
 ;
-; The markers are outside the move cursor track. Since 1P is always white, '+'
-; is drawn near the 1P controls and '■' is drawn near the 2P controls.
+; The markers are outside the move cursor track. The 1P indicator is drawn near
+; the 1P controls and the 2P indicator is drawn near the 2P controls.
 ;
-; In 1-player games, only the '+' marker is displayed.
-    LDA $408A                      ; A = CURRENT_PIECE
-    CPI $03                        ; if CURRENT_PIECE == '+',
-    JZ DRAW_WHITE_INDICATOR
+; In 1-player games, only the 1P indicator is displayed, and not during the
+; CPU's turns.
+    LDA $40FC
+    ORA A                          ; if ACTIVE_PLAYER_SIDE == 1 (P2),
+    JNZ DRAW_P2_INDICATOR
                                    ; else
+    XRA A                          ; SPACE_CONTENTS = BLANK
+    LXI H, $CA00                   ; VRAM_POINTER = $CA00 (P2_TURN_INDICATOR)
+    CALL DRAW_GAME_PIECE
+    LXI H, $F800                   ; VRAM_POINTER = $F800 (P1_TURN_INDICATOR)
+    JMP DRAW_INDICATOR
+
+DRAW_P2_INDICATOR:
     XRA A                          ; SPACE_CONTENTS = BLANK
     LXI H, $F800                   ; VRAM_POINTER = $F800 (P1_TURN_INDICATOR)
     CALL DRAW_GAME_PIECE
-    LDA $40FF                      ; A = GAME_MODE
-    CPI $FE                        ; if GAME_MODE == 1P Sente,
-    RET Z                          ; RETURN
-    CPI $FD                        ; else if GAME_MODE == 1P Gote,
-    RET Z                          ; RETURN
+    LDA $40FF
+    CPI $01                        ; if NUM_PLAYERS == 1,
+    RZ                             ; RETURN
                                    ; else
     LXI H, $CA00                   ; VRAM_POINTER = $CA00 (P2_TURN_INDICATOR)
 
@@ -2617,24 +2588,25 @@ DRAW_INDICATOR:
     CALL DRAW_GAME_PIECE
     RET                            ; RETURN
 
-DRAW_WHITE_INDICATOR:
+CLEAR_TURN_INDICATORS:
     XRA A                          ; SPACE_CONTENTS = BLANK
+    LXI H, $F800                   ; VRAM_POINTER = $F800 (P1_TURN_INDICATOR)
+    CALL DRAW_GAME_PIECE
     LXI H, $CA00                   ; VRAM_POINTER = $CA00 (P2_TURN_INDICATOR)
     CALL DRAW_GAME_PIECE
-    LXI H, $F800                   ; VRAM_POINTER = $F800 (P1_TURN_INDICATOR)
-    JMP DRAW_INDICATOR
+    RET                            ; RETURN
 
 INC_DECIMAL_COUNTER:
 ; Input:
-;   A = ■_COUNT|+_COUNT
+;   A = P1_COUNT|P2_COUNT
 ; Output:
 ;   A++
 ;
 ; Increments a BCD value while scoring the game.
     STC                            ; set carry bit
     CMC                            ; clear carry bit
-    ADI $01                        ; ■|+_COUNT++
-    DAA                            ; make decimal adjustment to ■|+_COUNT
+    ADI $01                        ; P1|P2_COUNT++
+    DAA                            ; make decimal adjustment to P1|P2_COUNT
     RET                            ; RETURN
 
 MESSAGE_FONT_TABLE:
@@ -2647,7 +2619,6 @@ MESSAGE_FONT_TABLE:
     DB $F0                         ; xxxxxxxx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
-    DB $00                         ; ----------
 
 ; 01 = C
     DB $60                         ; --xxxx----
@@ -2656,7 +2627,6 @@ MESSAGE_FONT_TABLE:
     DB $80                         ; xx--------
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
-    DB $00                         ; ----------
 
 ; 02 = D
     DB $E0                         ; xxxxxx----
@@ -2665,7 +2635,6 @@ MESSAGE_FONT_TABLE:
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $E0                         ; xxxxxx----
-    DB $00                         ; ----------
 
 ; 03 = E
     DB $F0                         ; xxxxxxxx--
@@ -2674,7 +2643,6 @@ MESSAGE_FONT_TABLE:
     DB $80                         ; xx--------
     DB $80                         ; xx--------
     DB $F0                         ; xxxxxxxx--
-    DB $00                         ; ----------
 
 ; 04 = G
     DB $60                         ; --xxxx----
@@ -2683,7 +2651,6 @@ MESSAGE_FONT_TABLE:
     DB $B0                         ; xx--xxxx--
     DB $90                         ; xx----xx--
     DB $70                         ; --xxxxxx--
-    DB $00                         ; ----------
 
 ; 05 = H
     DB $90                         ; xx----xx--
@@ -2692,7 +2659,6 @@ MESSAGE_FONT_TABLE:
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
-    DB $00                         ; ----------
 
 ; 06 = I
     DB $70                         ; --xxxxxx--
@@ -2701,7 +2667,6 @@ MESSAGE_FONT_TABLE:
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $70                         ; --xxxxxx--
-    DB $00                         ; ----------
 
 ; 07 = J
     DB $10                         ; ------xx--
@@ -2710,135 +2675,142 @@ MESSAGE_FONT_TABLE:
     DB $10                         ; ------xx--
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
-    DB $00                         ; ----------
 
-; 08 = L
+; 08 = K
+    DB $90                         ; xx----xx--
+    DB $A0                         ; xx--xx----
+    DB $C0                         ; xxxx------
+    DB $C0                         ; xxxx------
+    DB $A0                         ; xx--xx----
+    DB $90                         ; xx----xx--
+
+; 09 = L
     DB $80                         ; xx--------
     DB $80                         ; xx--------
     DB $80                         ; xx--------
     DB $80                         ; xx--------
     DB $80                         ; xx--------
     DB $F0                         ; xxxxxxxx--
-    DB $00                         ; ----------
 
-; 09 = M
+; 0A = M
     DB $90                         ; xx----xx--
     DB $F0                         ; xxxxxxxx--
     DB $F0                         ; xxxxxxxx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
-    DB $00                         ; ----------
 
-; 0A = N
+; 0B = N
     DB $90                         ; xx----xx--
     DB $D0                         ; xxxx--xx--
     DB $D0                         ; xxxx--xx--
     DB $B0                         ; xx--xxxx--
     DB $B0                         ; xx--xxxx--
     DB $90                         ; xx----xx--
-    DB $00                         ; ----------
 
-; 0B = O
+; 0C = O
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
-    DB $00                         ; ----------
 
-; 0C = P
+; 0D = P
     DB $E0                         ; xxxxxx----
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $E0                         ; xxxxxx----
     DB $80                         ; xx--------
     DB $80                         ; xx--------
-    DB $00                         ; ----------
 
-; 0D = R
+; 0E = R
     DB $E0                         ; xxxxxx----
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $E0                         ; xxxxxx----
     DB $A0                         ; xx--xx----
     DB $90                         ; xx----xx--
-    DB $00                         ; ----------
 
-; 0E = S
+; 0F = S
     DB $60                         ; --xxxx----
     DB $90                         ; xx----xx--
     DB $40                         ; --xx------
     DB $20                         ; ----xx----
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
-    DB $00                         ; ----------
 
-; 0F = T
+; 10 = T
     DB $70                         ; --xxxxxx--
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
     DB $20                         ; ----xx----
-    DB $00                         ; ----------
 
-; 10 = U
+; 11 = U
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $90                         ; xx----xx--
     DB $60                         ; --xxxx----
+
+; 12 = V
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $90                         ; xx----xx--
+    DB $60                         ; --xxxx----
+    DB $60                         ; --xxxx----
+
+; 13 = Y
+    DB $50                         ; --xx--xx--
+    DB $50                         ; --xx--xx--
+    DB $50                         ; --xx--xx--
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+    DB $20                         ; ----xx----
+
+; 14 = ' '
+    DB $00                         ; ----------
+    DB $00                         ; ----------
+    DB $00                         ; ----------
+    DB $00                         ; ----------
+    DB $00                         ; ----------
     DB $00                         ; ----------
 
-; 11 = ' '
+; 15 = ?
+    DB $20                         ; ----xx----
+    DB $50                         ; --xx--xx--
+    DB $10                         ; ------xx--
+    DB $20                         ; ----xx----
     DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
-    DB $00                         ; ----------
+    DB $20                         ; ----xx----
 
 CHECK_PLAYER_WIN:
 ; In 1-player games, checks whether 1P defeated the CPU. If so, play the
 ; victory jingle. Ties, CPU wins, and all 2-player games return without playing
 ; anything.
+;
+; A QoL update reduces the duration of the victory jingle from ~9 seconds to ~3
+; seconds.
     LDA $40FF
-    CPI $FE                        ; if GAME_MODE == 1P Sente,
-    JZ WIN_CHECK
-    CPI $FD                        ; else if GAME_MODE == 1P Gote,
+    CPI $01                        ; if NUM_PLAYERS == 1,
     JZ WIN_CHECK
                                    ; else
     RET                            ; RETURN
 
 WIN_CHECK:
-    LDA $4082
-    CPI $00                        ; if ■_COUNT == 0,
-    JZ PLAYER_WINS
-                                   ; else
-    MOV B,A                        ; B = ■_COUNT
-    LDA $4083                      ; A = +_COUNT
-    SUB B                          ; if +_COUNT == ■_COUNT,
+    LDA $4083
+    MOV B,A                        ; B = P2_COUNT (CPU_COUNT)
+    LDA $4082                      ; A = P1_COUNT (HUMAN_COUNT)
+    SUB B                          ; if HUMAN_COUNT == CPU_COUNT,
     RZ                             ; RETURN
-                                   ; else if +_COUNT < ■_COUNT,
+                                   ; else if HUMAN_COUNT < CPU_COUNT,
     RM                             ; RETURN
                                    ; else
-PLAYER_WINS:
-    CALL PLAY_VICTORY_JINGLE
-    RET                            ; RETURN
-
-PLAY_VICTORY_JINGLE:
-; The jingle that plays when the player defeats the CPU in a 1-player game. It
-; plays for ~9 seconds before it finally stops.
-;
-; Preserves BC and HL, though this seems unnecessary. The only used call path
-; is at the end of SCORE_GAME.
-    PUSH B                         ; save BC
-    PUSH H                         ; save HL
-    MVI D, $32                     ; JINGLE_LOOP_COUNTER = 50
+    MVI D, $10                     ; JINGLE_LOOP_COUNTER = 16
 
 PLAY_TONES:
 ; All three tones are used. PLAY_TONE is called every ~60ms, so each new tone
@@ -2853,6 +2825,4 @@ PLAY_TONES:
     DCR D                          ; if --JINGLE_LOOP_COUNTER != 0,
     JNZ PLAY_TONES
 
-    POP H                          ; restore HL
-    POP B                          ; restore BC
     RET                            ; RETURN

@@ -4,7 +4,7 @@ Quality-of-Life Improvements
 ----------------------------
 The prompts for Judge and Reset have been removed when a game is completed. The game detects when it's in the appropriate state for either action and automatically triggers it after a wait of appropriate length.
 
-Prompts to confirm pressing Judge and Reset while a game is in progress have been added. This is to prevent a player from accidentally ending their game unexpectedly.
+Prompts to confirm pressing Judge and Reset while a game is in progress have been added. This is to prevent a player from accidentally ending their game unexpectedly. Take the action by pushing the button again or dismiss the prompt by pushing anything else instead.
 
 The "PRESS PASS" prompt no longer flickers, but just stays visible until the button is pressed. The text of the prompt has been updated to "MUST PASS."
 

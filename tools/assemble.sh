@@ -19,8 +19,19 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-SOURCE="${1:-$REPO_ROOT/ComputerOthello/cothello-disasm.asm}"
-OUTDIR="${2:-$REPO_ROOT/ComputerOthello/rom}"
+SOURCE_ARG="${1:-$REPO_ROOT/ComputerOthello/cothello-disasm.asm}"
+OUTDIR_ARG="${2:-$REPO_ROOT/ComputerOthello/rom}"
+
+# Normalize SOURCE to absolute path if needed
+if [[ "$SOURCE_ARG" = /* ]]; then
+    SOURCE="$SOURCE_ARG"
+else
+    SOURCE="$(cd "$(dirname "$SOURCE_ARG")" && pwd)/$(basename "$SOURCE_ARG")"
+fi
+
+# Ensure OUTDIR exists and normalize to absolute path
+mkdir -p "$OUTDIR_ARG"
+OUTDIR="$(cd "$OUTDIR_ARG" && pwd)"
 
 PREPROCESS="$SCRIPT_DIR/preprocess.py"
 VALIDATE="$SCRIPT_DIR/validate_inline_addrs.py"
@@ -38,7 +49,6 @@ trap cleanup EXIT
 
 echo "==> Source:  $SOURCE"
 echo "==> Output:  $OUTDIR"
-mkdir -p "$OUTDIR"
 
 # --- Step 1: Preprocess (8080 → Z80 mnemonics) ---
 echo "==> Preprocessing..."
@@ -48,10 +58,17 @@ python3 "$PREPROCESS" "$SOURCE" "$Z80_ASM"
 echo "==> Assembling with z80asm..."
 z80asm --list="$LIST_FILE" -o "$FLAT_BIN" "$Z80_ASM"
 ACTUAL=$(wc -c < "$FLAT_BIN")
-echo "    Output: $ACTUAL bytes"
-if [ "$ACTUAL" -ne 3072 ]; then
-    echo "ERROR: Expected 3072 bytes (3x 1K chips), got $ACTUAL" >&2
+
+if [ "$ACTUAL" -gt 3072 ]; then
+    OVER=$((ACTUAL - 3072))
+    echo "ERROR: ROM overflow! Output is $ACTUAL bytes (exceeds 3072 by $OVER bytes)" >&2
     exit 1
+elif [ "$ACTUAL" -lt 3072 ]; then
+    PAD=$((3072 - ACTUAL))
+    echo "    Output: $ACTUAL bytes ($PAD bytes free, padding with 0xFF to 3072 bytes)"
+    python3 -c "import sys; sys.stdout.buffer.write(b'\xFF' * $PAD)" >> "$FLAT_BIN"
+else
+    echo "    Output: $ACTUAL bytes (0 bytes free)"
 fi
 
 # --- Step 3: Split into chip images ---
