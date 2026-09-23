@@ -4,8 +4,89 @@ Front:
 BLOCK FEVER
 
 スイッチを切換えるだけで、プレイヤー自身がお好みの 3種類のゲームを選択できます。
-Simply switch the selector to choose from three different games to your liking.
+Simply by flipping a switch, players can choose from three different games to their liking.
 
 
 Back:
 
+1台で3種類のブロックゲームが楽しめます。
+On one machine, you can enjoy three types of block game.
+
+ブロックフィーバー
+BLOCK FEVER
+
+■ 3種類のゲーム内容
+■ Contents of the 3 Game Types
+
+ゲームA
+Game A
+点滅している4つのハンディブロックを消すと得点になりますが、残っているブロックが少しずつ降りてきます。
+You score points when you clear the four flashing handicap blocks, but the remaining blocks gradually descend.
+ラケットとブロックの間が狭くなってきますのでスリルに満ちたゲーム展開が味わえます。
+As the space between the paddle and the blocks grows narrower, the game becomes increasingly thrilling.
+
+ゲームB
+Game B
+ブロック全体が左から右へ平行移動していきます。
+The entire block formation shifts horizontally from left to right.
+１番凹んだ所をうまくねらって集中攻撃するのがポイントです。
+The key is to aim for the deepest indentation and concentrate your attacks there.
+ブロックが動くことによって、高度なゲーム展開が楽しめます。
+The moving blocks make for more advanced gameplay.
+
+ゲームC
+Game C
+静止しているブロックのコーナーをねらい１番凹んだ所を集中攻撃します。
+Aim for the corners of the stationary blocks and concentrate your attacks on the deepest indentation.
+ボールがブロックを突抜けると中でボールがフィーバーし得点があがっていきます。
+When the ball breaks through the blocks, it goes into a fever among them, and your score keeps increasing.
+
+■ ボールスピード・ラケットの大きさ
+■ Ball Speed / Paddle Size
+ボールスピードは低・中・高速の3スピード、ラケットの大きさは大・中・小の3段階に変化します。
+Ball speed varies among three speeds—low, medium, and high—and paddle size among three levels—large, medium, and small.
+
+■ 最高得点は4ケタで表示
+■ High score displayed in four digits
+ブロックが全部消えると再び全ブロックが画面に現れ最高得点にチャレンジできます。
+When all the blocks are cleared, the full formation reappears on the screen so you can challenge for the high score.
+
+■ 1人でも2人でもプレイできます。
+■ Playable by one or two people.
+1人用は片方で、また2人用は対面のキーボードを使用し、交互に画面がセットされます。
+For one-player play, one side is used; for two-player play, the controls on opposite sides are used, with the screen alternating between players.
+
+■ 全面強化ガラスを使用
+■ Uses tempered glass over the full surface
+水やよごれはサッと一拭き、また強化ガラスを使用していますからショックにも強く安全設計です。
+Water and dirt come off with a quick wipe, while the tempered-glass surface resists impact and is designed for safety.
+
+■ 仕様
+■ Specifications
+寸法　（巾）800×（奥行）500×（高さ）600mm
+Dimensions: (Width) 800 × (Depth) 500 × (Height) 600 mm
+重量　43kg
+Weight: 43 kg
+使用コイン　100円硬貨（1～15枚記憶式）
+Coin used: 100-yen coin (stores 1-15 credits)
+サービス　ボール 3～6球（調整可能）
+Service setting: 3-6 balls (adjustable)
+電源電圧　単相AC100V　50/60Hz
+Power supply: Single-phase AC 100V, 50/60 Hz
+消費電力　58W
+Power consumption: 58 W
+▽型式認可済　第95－1545号
+▽ Type Approval No.95-1545
+
+任天堂レジャーシステム
+Nintendo Leisure System
+
+本社 〒101 東京都千代田区神田須田町1-22  TEL 03(254)1647
+Head Office  1-22 Kanda-Sudachō, Chiyoda-ku, Tokyo 101  TEL: 03 (254) 1647
+関西支社 〒542 大阪市南区長堀橋筋1丁目32　TEL 06(245)4155
+Kansai Branch  1-32 Nagahoribashisuji, Minami-ku, Osaka 542  TEL: 06 (245) 4155
+名古屋営業所 〒451 名古屋市西区菊井町29番地  TEL 052(571)1068
+Nagoya Sales Office  29 Yabushita-chō, Nishi-ku, Nagoya 451  TEL: 052 (571) 1068
+
+S53 10.18–300
+1978.10.18 ~300 copies?
