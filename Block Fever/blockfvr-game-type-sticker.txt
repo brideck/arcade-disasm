@@ -1,0 +1,20 @@
+3種類のブロックゲームが楽しめます。
+Enjoy three types of block game.
+
+任天堂
+Nintendo
+
+ゲームA
+Game A
+点滅しているブロックに当たると、ブロック全体が降りてきます。
+When the ball hits a flashing block, the entire block formation moves downward.
+
+ゲームB
+Game B
+ブロック全体が左から右へ動きます。
+The entire block formation moves from left to right.
+
+ゲームC
+Game C
+ブロックが動かないスタンダードタイプです。
+This is the standard type in which the blocks do not move.
