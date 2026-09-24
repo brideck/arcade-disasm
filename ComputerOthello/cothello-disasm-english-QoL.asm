@@ -74,7 +74,7 @@ MSG_COMPUTER_OTHELLO:
 
 MSG_INSERT_COIN:
 ; "INSERT COIN" - Prompt displayed during attract sequence and timer expiration
-    DB $06, $0B, $0F, $03, $0E, $10, $14, $01, $0C, $06, $0B, $8D
+    DB $06, $0B, $0F, $03, $0E, $10, $14, $01, $0C, $06, $0B, $14, $8D
 
 MSG_SELECT_GAME:
 ; "SELECT GAME" - Prompt displayed after coin inserted during attract
@@ -226,7 +226,7 @@ PROMPT_SELECT_GAME:
     DI
     PUSH B                         ; save PSEUDORANDOM_OPENING_MOVE
     CALL DRAW_MESSAGE
-    DB $00, $47                    ; @addr MSG_SELECT_GAME
+    DB $00, $48                    ; @addr MSG_SELECT_GAME
     POP B                          ; restore PSEUDORANDOM_OPENING_MOVE
     EI
     LDA $6000                      ; READ_INPUT
@@ -425,7 +425,7 @@ PASS_BUTTON_PROMPT:
 ; normally, but since there are no legal moves they will be unable to set a
 ; piece anywhere.
     CALL DRAW_MESSAGE
-    DB $00, $5D                    ; @addr MSG_MUST_PASS
+    DB $00, $5E                    ; @addr MSG_MUST_PASS
     JMP PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
 
 PASS_PRESSED:
@@ -447,7 +447,7 @@ EXIT_INPUT_LOOP:
 
 MUST_PLAY:
     CALL CLEAR_AND_DRAW_MESSAGE
-    DB $00, $53                    ; @addr MSG_MUST_PLAY
+    DB $00, $54                    ; @addr MSG_MUST_PLAY
     CALL LONG_DELAY                ; [1s]
     CALL CLEAR_MESSAGE
     JMP PLAYER_INPUT_LOOP_CORE
@@ -475,7 +475,7 @@ SET_PRESSED:
 
 ILLEGAL_MOVE_MESSAGE:
     CALL CLEAR_AND_DRAW_MESSAGE
-    DB $00, $67                    ; @addr MSG_ILLEGAL_MOVE
+    DB $00, $68                    ; @addr MSG_ILLEGAL_MOVE
     CALL LONG_DELAY                ; [1s]
     CALL CLEAR_MESSAGE
     JMP PLAYER_INPUT_LOOP_CORE
@@ -489,7 +489,7 @@ CLEAR_AND_ESCAPABLE_PROMPT_FOR_JUDGE:
 
 ESCAPABLE_PROMPT_FOR_JUDGE:
     CALL DRAW_MESSAGE
-    DB $00, $7F                    ; @addr MSG_JUDGE_OK
+    DB $00, $80                    ; @addr MSG_JUDGE_OK
     EI
     LDA $6000                      ; READ_INPUT
     CPI $BF                        ; Judge:
@@ -510,7 +510,7 @@ CLEAR_AND_ESCAPABLE_PROMPT_FOR_RESET:
 
 ESCAPABLE_PROMPT_FOR_RESET:
     CALL DRAW_MESSAGE
-    DB $00, $89                    ; @addr MSG_RESET_OK
+    DB $00, $8A                    ; @addr MSG_RESET_OK
     EI
     LDA $6000                      ; READ_INPUT
     CPI $DF                        ; Reset:
@@ -561,7 +561,6 @@ TIMER_EXPIRED_ADD_COIN_PROMPT:
     PUSH H
     PUSH D
     PUSH B
-    CALL CLEAR_MESSAGE
 
 WAIT_05_COIN_CLEAR:
 ; Waits for coin slot state #05 to clear before proceeding. Based on code
@@ -818,7 +817,7 @@ STILL_NO_LEGAL_MOVES:
     LXI H, $4089
     INR M                          ; CONSECUTIVE_PASS_COUNTER++
     CALL CLEAR_AND_DRAW_MESSAGE
-    DB $00, $74                    ; @addr MSG_CPU_PASSES
+    DB $00, $75                    ; @addr MSG_CPU_PASSES
     CALL LONG_DELAY                ; [1s]
     CALL LONG_DELAY                ; [1s]
     RET                            ; RETURN
