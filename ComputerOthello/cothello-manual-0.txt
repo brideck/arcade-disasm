@@ -13,13 +13,13 @@ Operation Manual
 Caution
 
 1．CPU基板ユニットは絶対に直射日光にはあてないでください。LSI（メモリー）が不良になります。
-1. Do not under any circumstances expose the CPU board unit to direct sunlight. The LSI (memory) may become defective.
+1. Do not under any circumstances expose the CPU board unit to direct sunlight. The LSI (memory) will become defective.
 
 2．本機に使用しておりますLSIやICはMOS型FETを基本素子とした半導体集積回路ですので、CPU基板ユニット、LED基板ユニット等基板単体の保管、持ち運び、移送の時必ず導電袋かアルミ箔に包んでください。
-2. The LSIs and ICs used in this unit are semiconductor integrated circuits based on MOS-type FETs. Therefore, when storing, handling, or transporting individual boards such as the CPU board unit or LED board unit, be sure to wrap them in a conductive bag or aluminum foil.
+2. The LSIs and ICs used in this machine are semiconductor integrated circuits based on MOS-type FETs. When storing, handling, or transporting individual boards such as the CPU board unit or LED board unit, be sure to wrap them in a conductive bag or aluminum foil.
 
 3．強力な突発雑音（ノイズ）や電源異常等でコンピュータが動作しなくなったり、テレビ画面上の表示が乱れた場合は一度メイン電源を切ってから雑音源を除去し、再びメイン電源を投入してください。
-3. If the computer stops operating due to strong sudden noise (interference) or power abnormalities, or if the display on the television screen becomes distorted, turn off the main power once, eliminate the source of the noise, and then turn the main power back on.
+3. If the computer stops operating due to a strong sudden noise (interference) a power-supply abnormality, or similar cause, or if the display on the television screen becomes distorted, turn off the main power once, eliminate the source of the noise, and then turn the main power back on.
 
 --
 
@@ -42,7 +42,7 @@ Table of Contents
   2-3 Ground Connection of the Equipment                     p.4
 
 3. 調整箇所と調整方法
-3. Adjustment Points and Methods
+3. Adjustment Points and Procedures
 
   3-1 CPU基板ユニット（COG-CPU）                             5頁
   3-1 CPU Board Unit (COG-CPU)                               p.5
@@ -197,7 +197,7 @@ Table of Contents
 2-3 機器のアース接続
 2-3 Ground Connection of the Equipment
 
-  ① 温気の多い所に据え付ける場合は、万一の感電防止のためアースを取り付けてください。
+  ① 湿気の多い所に据え付ける場合は、万一の感電防止のためアースを取り付けてください。
   ① If the unit is installed in a location with high humidity, attach a ground connection to prevent electric shock in case of an accident.
 
     アース端子（端子己表示）
@@ -925,13 +925,13 @@ Part No.    Part Name                      Unit Price (Yen)   Notes
    ○ Prices are subject to change.    June 1978
 
    ○ ご使用前に、この「取扱説明書」をよくお読みください。
-   ○ Before use, please read this “operation manual” carefully.
+   ○ Before use, please read this Operation Manual carefully.
 
      なお、この「取扱説明書」は大切に保管してください。
-     Also, please keep this "operation manual" in a safe place.
+     Also, please keep this Operation Manual in a safe place.
 
    ○ サービスは、お買い上げの販売店へお問い合わせ願います。
-   ○ For service, please contact the dealer from whom you purchased the unit.
+   ○ For service, please contact the dealer from whom you purchased the machine.
 
         任天堂レジャーシステム
         Nintendo Leisure System
