@@ -1,0 +1,63 @@
+# Atari Breakout (TTL) — Hardware Architecture & Implementation Quirks Reference
+# Target for comparison against Super Breakout (M6502) and Nintendo Block Fever (8080)
+
+## 1. Ball Dynamics & Position Counters
+- Coordinates & Free-running Counters:
+  - Ball X and Y positions are driven by discrete hardware counters clocked with raster scan timing.
+  - Ball does not truly "teleport" or re-seed its (X, Y) coordinates upon drain.
+- The "Ghost Ball" Serve Mechanism:
+  - Ball Drain: When the ball crosses below the paddle baseline (H < 32 into vertical sync / off-screen), the hardware latches a Ball Blank / Out flip-flop.
+  - Video display and collision detection are disabled, but the position counters continue free-running off-screen along their existing trajectory.
+  - Serve Trigger: Pressing Serve (or auto-serve timeout) sets a SERVE_REQUEST flag.
+  - Spawn Window: When the invisible free-running ball naturally wraps around and crosses below the Serve Line (103 H) moving DOWNWARD (V-DIR = Down), the ball display is un-blanked, collisions re-enable, and vertical speed resets to 1px/frame.
+  - Result: Variable delay between pressing Serve and ball appearance; initial horizontal spawn position and X-direction appear semi-random.
+
+## 2. Collision Mechanics & Physics
+- Paddle Collision & Zones:
+  - Paddle width: 16px (resets to 16px on each new ball serve; shrinks to 8px upon hitting top boundary 208-215 H).
+  - 4 Discrete Hit Zones:
+    - Inner Left / Inner Right (center segments): Shallow deflection angle (horizontal speed = 1px/frame).
+    - Outer Left / Outer Right (edge segments): Steep deflection angle (horizontal speed = 2px/frame).
+  - Forced Horizontal Direction:
+    - Striking the left half forces horizontal direction LEFT regardless of incoming angle.
+    - Striking the right half forces horizontal direction RIGHT regardless of incoming angle.
+- Brick Collision & "Diagonal Ghosting" Quirk:
+  - No side/horizontal collision detection on bricks.
+  - Collision circuit tests ball video against brick RAM/video and only triggers a Vertical Deflection (V-DIR inverts).
+  - Horizontal velocity and direction are unaffected by brick hits.
+  - Diagonal Pass-Through / Phasing: A ball moving diagonally (Up-Left or Up-Right at 2-3px speed) can destroy a corner brick, invert vertical direction to Down, and on the next frame pass directly through the interior of the brick below it without destroying that lower brick.
+- Top Boundary:
+  - Ball deflects at 208-215 H.
+  - First contact with top boundary triggers paddle shrinkage (16px -> 8px) for the active ball.
+
+## 3. Playfield & Scoring Structure
+- Bricks:
+  - 14 columns x 8 rows (112 bricks total).
+  - Brick dimensions: 14px W x 3px H (2px column gaps, 1px row gaps; span 153-183 H).
+  - 2-Row Pairing & Points:
+    - Rows 1 & 2 (bottom): Yellow — 1 point (vert speed unchanged)
+    - Rows 3 & 4: Green — 3 points (vert speed unchanged)
+    - Rows 5 & 6: Orange — 5 points (triggers vert speed increase to 3px)
+    - Rows 7 & 8 (top): Red — 7 points (triggers vert speed increase to 3px)
+  - Full Wall Total: 14 x 2 x (1 + 3 + 5 + 7) = 448 points.
+  - Maximum Score: 2 walls max per player = 896 points.
+
+## 4. Multi-Player & Wall Reset Logic
+- Independent State per Player:
+  - Player 1 and Player 2 maintain separate brick field RAM (each player has their own remaining bricks).
+  - Separate scores and ball counts.
+  - Turn swaps occur on ball drain.
+- The 448-Point Wall Reset Bug (Global Latch Leak):
+  - In TTL, a score of 448 (clearing the 1st wall) arms a "Wall 2 Pending" flip-flop.
+  - The actual brick RAM refill is gated on: `WALL_2_PENDING AND PADDLE_HIT`.
+  - The pending flag was implemented as a global circuit latch rather than banked in per-player state RAM.
+  - Bug: If Player 1 clears the first wall (score reaches 448) but drains the ball before hitting it with their paddle, turn switches to Player 2. When Player 2 serves and hits the ball with their paddle, the global latch triggers, resetting Player 2's brick field to a full wall instead.
+
+## 5. Attract Mode & Display
+- Attract Mode:
+  - Paddle is replaced with a solid floor spanning the entire bottom boundary.
+  - Ball continuously rebounds indefinitely without draining.
+  - Sound is muted.
+  - Brick RAM write-enable is inhibited (bricks are indestructible).
+- Active Player Indicator:
+  - Active player score flashes at a ~250ms interval.

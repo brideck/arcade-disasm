@@ -1,0 +1,70 @@
+Screen Dimensions:
+ 240 H x 228 W
+
+Top Boundary:
+ 8px at 208-215 H
+
+Sides:
+ 4px at 0-3 W
+ 4px at 224-227 W
+ (Due to video logic, ball deflects at 0 W & 224 W)
+
+Display:
+ Scores at 180-193 H
+  Player 1 Score at 20-63 W
+  Player 2 Score at 148-191 W
+  Digits are 12px by 14 px
+ Status at 194-207 H
+  Player # at 4-15 W
+  Ball # at 132-143 W
+ Active Player's Score flashes with 250ms interval
+
+Bricks:
+ 31px at 153-183 H
+  14x8 array of bricks
+    14px wide, 2px column gaps
+    3px tall, 1px row gaps
+ Score Values are 1, 3, 5, 7
+
+Serve Line:
+ 103 H
+
+Paddle:
+ 4px at 32-35 H
+ 16px or 8x wide
+ Shrinks when ball hits top boundary
+
+Ball:
+ 2px H x 4px W
+ 3 speeds both hori & vert
+  1px, 2px, 3px / frame
+ Vert speed changes
+  4th volley - 1px -> 2px
+  8th volley - 2px -> 1px
+  12th volley - 1px -> 2px
+  Bricks (tiers 5-8) -> 3px
+ Hori speed changes
+  Center of paddle -> 1px
+  Edges of paddle -> 2px
+  8th volley -> 3px
+
+Switches:
+ 3 or 5 balls per credit
+ Upright vs Cocktail (screen flip)
+ 1 or 2 credits per coin
+ Free Game (+1 credit) at 100/200/300/400/500/600/700/800 points
+
+Sounds:
+ Paddle Hit (10ms) / Free Game (1.2s) = 2KHz [B6]
+ Side Hit (25ms) = 1KHz [B5]
+ Brick Hit (10ms) = 500Hz [B4]
+  ticks once per point scored, but can be overflowed/overloaded as it only holds up to 15 ticks
+
+System:
+ max 15 credits
+ new wall appears when score = 448 and the ball hits the paddle, so there are no additional walls
+
+Attract Mode:
+ paddle becomes floor
+ no sound
+ bricks don't break
