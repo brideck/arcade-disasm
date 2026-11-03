@@ -1,0 +1,76 @@
+各種スイッチの設定と音量調整の方法
+How to Configure the Various Switches and Adjust the Volume
+
+ご注意
+Precautions
+
+1．CPU基板の交換時およびコネクターの抜き差し時は必ず電源を切ってください。
+1. Always turn off the power before replacing the CPU board or connecting/disconnecting connectors.
+
+2．基板内のIC、LSIなどにはテスター等で触れないでください。
+2. Do not touch the ICs, LSI devices, etc. on the board with a tester or similar instrument.
+
+3．CPU基板の持ち運び、移送の時は必ず導電袋かアルミ箔に包んでください。
+3. When carrying or transporting the CPU board, always wrap it in a conductive bag or aluminum foil.
+
+4．CPU基板は直射日光にはあてないでください。
+4. Do not expose the CPU board to direct sunlight.
+
+各種設定スイッチ
+Various Configuration Switches
+
+音量調整ボリウム
+Volume Adjustment Control
+
+T.B.F. CPU　P1-500779 —— P1基板
+                        P1 PCB
+     　　　　　P2-500780 —— P2基板
+                        P2 PCB
+
+リプレー得点の設定がP1、P2で変わりますので右表を参照してください。
+The Replay Score setting differs for P1 and P2, so refer to the table on the right.
+
+ ｜ 選択内容　｜　スイッチ状態　｜　機能
+ | Setting  | Switch Position | Function
+
+A｜リプレー機能｜ON｜リプレーあり
+A | Replay Function | ON | Replay enabled
+                   ｜OFF｜リプレーなし
+                    | OFF | Replay disabled
+
+B ｜  リプレー得点  ｜ B  ｜ C  ｜        P1基板       ｜       P2基板
+B | Replay Score |  B  |  C  |        P1 PCB       |       P2 PCB
+                 ｜ ON ｜ ON ｜1000点以上           ｜1600点以上
+                 |  ON |  ON | 1000 points or more | 1600 points or more
+                 ｜ OFF｜ ON ｜800 〃               ｜1200 〃
+                 | OFF |  ON | 800 points or more  | 1200 points or more
+C ｜             ｜ ON ｜ OFF｜600 〃               ｜800 〃
+C |              |  ON | OFF | 600 points or more  | 800 points or more
+                 ｜ OFF｜ OFF｜400 〃               ｜400 〃
+                 | OFF | OFF | 400 points or more  | 400 points or more
+
+D ｜    ボール数      ｜ D  ｜ E  ｜    ボール数
+D | Number of Balls |  D  |  E  | Number of Balls
+                    ｜ ON ｜ ON ｜       6
+                    ｜ OFF｜ ON ｜       5
+E ｜                ｜ ON ｜ OFF｜       4
+                    ｜ OFF｜ OFF｜       3
+
+F ｜　 ハンディブロックモード   ｜ ON ｜最初4ブロック
+F | Handicap Block Mode |  ON | 4 blocks from the start
+                        ｜OFF ｜最初2ブロック
+                        | OFF | 2 blocks from the start
+
+G　｜     ハンディブロック降下リミット      ｜ ON ｜8ブロック降下
+G | Handicap Block Descent Limit |  ON | Descends 8 blocks
+                                 ｜OFF ｜4ブロック降下
+                                 | OFF | Descends 4 blocks
+
+H ｜　ラケットモード  ｜ ON ｜試験用ラケット
+H | Paddle Mode | ON  | Test Paddle
+                ｜OFF ｜ゲーム用ラケット
+                | OFF | Game Paddle
+
+注意：各スイッチ類の設定を変更した場合は必ず電源を入れ直してください。
+Note: Be sure to cycle the power after changing any switch settings.
+
