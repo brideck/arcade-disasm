@@ -9,7 +9,7 @@ arcade games.
 * [Computer Othello](ComputerOthello/README.md) (Nintendo, 1978): fully
   disassembled and annotated, with English-localized, QoL, and improved-AI
   builds.
-* [Block Fever](<Block Fever>/) (Nintendo, 1978): first-pass disassembly
+* [Block Fever](BlockFever/) (Nintendo, 1978): first-pass disassembly
   complete.
 
 ## License
