@@ -1,10 +1,16 @@
+Computer Othello
+================
+Reverse-engineered disassembly of Nintendo's Computer Othello (1978), which runs on an Intel 8080. The source builds the original Japanese ROM, an English localization, and the QoL and AI variants described below.
+
 cothello-disasm-QoL introduces a number of improvements, fixes, and optimizations to the code.
+
+cothello-disasm-AI builds on the QoL version and adds a stronger CPU opponent (see "CPU AI" below). To make room for it, the Judge and Reset confirmation prompts were removed.
 
 Quality-of-Life Improvements
 ----------------------------
 The prompts for Judge and Reset have been removed when a game is completed. The game detects when it's in the appropriate state for either action and automatically triggers it after a wait of appropriate length.
 
-Prompts to confirm pressing Judge and Reset while a game is in progress have been added. This is to prevent a player from accidentally ending their game unexpectedly. Take the action by pushing the button again or dismiss the prompt by pushing anything else instead.
+Prompts to confirm pressing Judge and Reset while a game is in progress have been added. This is to prevent a player from accidentally ending their game unexpectedly. Take the action by pushing the button again or dismiss the prompt by pushing anything else instead. (QoL version only. The AI version omits these prompts, so Judge and Reset act immediately, as in the original game.)
 
 The "PRESS PASS" prompt no longer flickers, but just stays visible until the button is pressed. The text of the prompt has been updated to "MUST PASS."
 
@@ -62,4 +68,15 @@ Note: This change revamped the internal state model. The original game uses a mu
 
 Bug Fixes
 ---------
-Preserve occupied X-squares during first-pass CPU evaluation. The original ROM marked X-squares as illegal by zeroing their move-assessment bits unconditionally. If an X-square was already occupied, this caused the reconstructed analysis board to omit that piece, which could distort candidate evaluation and change the CPU’s chosen move.
+Preserve occupied X-squares during first-pass CPU evaluation. The original ROM marked X-squares as illegal by zeroing their move-assessment bits unconditionally. If an X-square was already occupied, this caused the reconstructed analysis board to omit that piece, which could distort candidate evaluation and change the CPU’s chosen move. (Included in both the QoL and AI versions.)
+
+
+CPU AI
+------
+Available in the AI version only. The CPU now looks one move ahead. After trying each of its candidate moves, it finds the opponent's best reply and scores the move by how good that reply is for the opponent. It then plays the move that leaves the opponent with the weakest reply. The original ROM scored only the position directly after the CPU's own move.
+
+This approach was chosen after a round-robin contest between the original AI, this 1-ply lookahead, a variant of it that also frees X-squares once their corner is taken, and the EDAX Othello engine at levels 1 and 2. Of the Computer Othello variants, plain 1-ply lookahead performed best.
+
+The AI version is the QoL version with the following differences:
+* The Judge and Reset confirmation prompts are removed (along with their messages and the glyphs D, J, K, and ? that only they used), to free ROM space for the lookahead.
+* The lookahead routines are added to the CPU's move selection.

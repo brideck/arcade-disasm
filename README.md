@@ -1,8 +1,18 @@
 # arcade-disasm
 Commented disassemblies and notes for old arcade games
 
-This repository contains a reverse-engineered disassembly of
-Nintendo's Computer Othello (1978).
+This repository contains reverse-engineered disassemblies of classic
+arcade games.
+
+## Games
+
+* [Computer Othello](ComputerOthello/README.md) (Nintendo, 1978): fully
+  disassembled and annotated, with English-localized, QoL, and improved-AI
+  builds.
+* [Block Fever](<Block Fever>/) (Nintendo, 1978): first-pass disassembly
+  complete.
+
+## License
 
 The original game code is © Nintendo and is not licensed under
 this repository.
