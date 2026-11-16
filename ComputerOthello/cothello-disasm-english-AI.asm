@@ -1,5 +1,11 @@
     ORG 0000H
 
+; Boolean convention:
+;   FALSE = 0
+;   TRUE  = 1
+;
+; Many game-state flags use this convention.
+
 RESET:
     DI
     JMP STARTUP
@@ -161,7 +167,7 @@ CONTINUE_ATTRACT:
     CALL TOGGLE_CURRENT_PIECE
     CALL CLEAR_MOVE_CURSORS
     MVI A, $01
-    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 1
+    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = TRUE
 ; FIRST_MOVE_CPU isn't used here. Instead, it simply finds the best move every
 ; turn. For the first move, since all four of the possible opening moves are
 ; equivalent, it uses the last one scanned, which is (4,5).
@@ -178,7 +184,7 @@ SET_SERVICE_MODE_FLAGS:
 ; the game to clear any changes made during attract mode. In service mode, both
 ; sides are controlled by the CPU and all input prompts are disabled.
     XRA A
-    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = FALSE
     LXI SP, $40FA                  ; INIT_STACK <= $40F9
     CALL INIT_GAME
     MVI A, $05
@@ -205,7 +211,7 @@ COIN_INSERTED:
 
 SKIP_ATTRACT_MODE_CLEAR:
     XRA A
-    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = FALSE
 ; Set so Black ('■') always goes first.
     MVI A, $05
     STA $408A                      ; CURRENT_PIECE = '■'
@@ -223,7 +229,7 @@ PROMPT_SELECT_GAME:
     EI
     LDA $6000                      ; READ_INPUT
 ; Sente and Gote are terms borrowed from Go. Here they indicate which side
-; moves first.
+; plays first. Sente means P1 will play first.
     CPI $FE                        ; 1P Sente:
     JZ SENTE_1P
     CPI $FD                        ; 1P Gote:
@@ -249,7 +255,7 @@ SENTE_2P:
 
 SENTE_1P:
     DI
-    MVI A, $05                     ; A = #05
+    MVI A, $05
     STA $40FB                      ; P1_PIECE = '■'
 
 FIRST_MOVE_COMMON:
@@ -348,12 +354,8 @@ JUDGE_PRESSED_FINAL:
 
 PLAYER_INPUT_LOOP:
 ; Handles player input during a human player's turn. The Pass and Set buttons
-; end the turn when their use is permitted. The Judge and Reset buttons trigger
-; a confirmation prompt before ending the game immediately. The Arrow buttons
-; update the location of the move cursors.
-;
-; The confirmation prompts are a QoL update that help prevent players from
-; accidentally ending a game in progress.
+; end the turn when their use is permitted. The Judge and Reset buttons end the
+; game immediately. The Arrow buttons update the location of the move cursors.
     DI
     XRA A
     STA $408B                      ; MOVE_COL = 0
@@ -455,7 +457,7 @@ SET_PRESSED:
 ; the move and end the player's turn.
     CALL CHECK_IF_MOVE_IS_LEGAL
     MOV A,B
-    CPI $00                        ; if MOVE_LEGAL == 0,
+    CPI $00                        ; if MOVE_LEGAL == FALSE,
     JZ ILLEGAL_MOVE_MESSAGE
                                    ; else
     CALL PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
@@ -630,28 +632,35 @@ INNER_LOOP:
 CPU_FIND_AND_PLAY_BEST_MOVE:
 ; Creates a MOVE_ASSESSMENT, a packed 16-byte representation of the board's
 ; current contents. On the first pass, it marks the X-squares as illegal moves,
-; so they won't be considered during move evaluation. Each legal move is
-; attempted on the ANALYSIS_BOARD and the resulting position is scored using
-; the BOARD_SPACE_VALUE_TABLE. The move that leads to the best score is the one
-; that is selected.
+; so they won't be considered during move evaluation.
+;
+; Each legal move is attempted on the ANALYSIS_BOARD. The resulting position is
+; then examined from the opponent's perspective by BEGIN_OPPONENT_MOVE_SEARCH,
+; which finds the opponent's strongest immediate response. That response is
+; converted back to the active player's perspective and used as the candidate
+; move's EVAL_SCORE using the BOARD_SPACE_VALUE_TABLE. The move with the best
+; resulting score is selected.
 ;
 ; If no legal moves are found on the first pass, a second pass is performed,
 ; this time with the X-squares under consideration.
+;
+; CANDIDATE_MOVE_COL is initialized to #80 as a sentinel meaning that no legal
+; move has yet been found. Valid board coordinates are only 0..7.
     LXI H, $40A9
-    MVI M, $80                     ; CANDIDATE_MOVE_COL = #80 (invalid, negative)
-    MVI A, $01                     ; AI_FIRST_PASS_FLAG = 1
+    MVI M, $80                     ; CANDIDATE_MOVE_COL = #80 (sentinel, no legal move stored)
+    MVI A, $01                     ; AI_FIRST_PASS_FLAG = TRUE
 
 CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
     STA $4085
     XRA A
     STA $408B                      ; MOVE_COL = 0
     STA $408C                      ; MOVE_ROW = 0
-    STA $4091                      ; INNER_LOOP = 0
+    STA $4091                      ; INNER_LOOP = FALSE
     LXI H, $8000
     SHLD $408D                     ; BEST_MOVE_EVAL_SCORE = -32,768
     CALL CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
     LDA $4085
-    CPI $01                        ; if AI_FIRST_PASS_FLAG != 1,
+    CPI $01                        ; if AI_FIRST_PASS_FLAG == FALSE,
     JNZ BEGIN_MOVE_SEARCH
                                    ; else
     CALL FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
@@ -661,7 +670,7 @@ BEGIN_MOVE_SEARCH:
 CONTINUE_MOVE_SEARCH:
     CALL FIND_NEXT_CANDIDATE_MOVE_IN_DISPLAY_FROM_ROW_COL
     MOV A,B
-    CPI $01                        ; if NO_CANDIDATE_MOVE == 1,
+    CPI $01                        ; if NO_CANDIDATE_MOVE == TRUE,
     JZ NO_MORE_MOVES
                                    ; else
     CALL TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
@@ -695,29 +704,50 @@ NO_MORE_MOVES:
 
 NO_LEGAL_MOVES:
     LDA $4085
-    CPI $01                        ; if AI_FIRST_PASS_FLAG != 1,
+    CPI $01                        ; if AI_FIRST_PASS_FLAG == FALSE,
     JNZ STILL_NO_LEGAL_MOVES
                                    ; else
-    DCR A                          ; AI_FIRST_PASS_FLAG = 0
+    DCR A                          ; AI_FIRST_PASS_FLAG = FALSE
     JMP CPU_FIND_AND_PLAY_BEST_MOVE_CORE
 
 BEGIN_OPPONENT_MOVE_SEARCH:
+; Given an ANALYSIS_BOARD_MOVE_ASSESSMENT representing the board after a
+; candidate move by the ACTIVE_PLAYER, search every legal reply available to
+; the opponent.
+;
+; CURRENT_PIECE is expected to already be set to the opponent's piece. Each
+; possible reply is applied to ANALYSIS_BOARD, evaluated from the opponent's
+; perspective, and compared against BEST_INNER_MOVE_EVAL_SCORE. Because the
+; opponent is assumed to choose its strongest greedy response, this loop keeps
+; the highest opponent EVAL_SCORE found.
+;
+; EXIT_INNER_LOOP later negates that score before returning it to the outer
+; candidate search, converting the result back to the ACTIVE_PLAYER's
+; perspective for comparison against its other possible moves.
+;
+; OPPONENT_MOVE_COL/ROW track the current reply candidate. INNER_LOOP tells the
+; shared score-update routine to write BEST_INNER_MOVE_EVAL_SCORE instead of
+; the outer BEST_MOVE_EVAL_SCORE.
+;
+; OPPONENT_MOVE_COL is initialized to #80 as a sentinel value meaning
+; "no legal move found yet." Since valid coordinates are only 0..7, any
+; negative value is impossible as a real board position.
     MVI A, $01
-    STA $4091                      ; INNER_LOOP = 1
+    STA $4091                      ; INNER_LOOP = TRUE
     LXI H, $8000
     SHLD $408F                     ; BEST_INNER_MOVE_EVAL_SCORE = -32,768
     LXI H, $4086
-    MVI M, $80                     ; OPPONENT_MOVE_COL = #80 (invalid, negative)
+    MVI M, $80                     ; OPPONENT_MOVE_COL = #80 (sentinel, no legal move stored)
     LXI D, $0000                   ; ROW_D, COL_E = (0,0)
 CONTINUE_OPPONENT_MOVE_SEARCH:
     CALL FIND_NEXT_CANDIDATE_MOVE_IN_ANALYSIS_FROM_ROW_COL
     MOV A,B
-    CPI $01                        ; if NO_CANDIDATE_MOVE == 1,
+    CPI $01                        ; if NO_CANDIDATE_MOVE == TRUE,
     JZ NO_MORE_OPPONENT_MOVES
                                    ; else
     CALL POPULATE_ANALYSIS_BOARD_FROM_ANALYSIS_BOARD_MOVE_ASSESSMENT
     CALL TRY_OPPONENT_MOVE
-    CALL GENERATE_CANDIDATE_MOVE_EVAL_SCORE
+    CALL GENERATE_ANALYSIS_BOARD_EVAL_SCORE
     CALL UPDATE_BEST_INNER_MOVE_EVAL_SCORE_IF_BETTER
     CALL GET_OPPONENT_MOVE
     INR E                          ; COL_E++
@@ -738,7 +768,7 @@ NO_MORE_OPPONENT_MOVES:
     ORA A                          ; if OPPONENT_MOVE_COL != #80,
     JP EXIT_INNER_LOOP
                                    ; else
-    CALL GENERATE_CANDIDATE_MOVE_EVAL_SCORE
+    CALL GENERATE_ANALYSIS_BOARD_EVAL_SCORE
     CALL UPDATE_BEST_INNER_MOVE_EVAL_SCORE_IF_BETTER
 
 EXIT_INNER_LOOP:
@@ -747,7 +777,8 @@ EXIT_INNER_LOOP:
     INX H
     MOV B,M                        ; BC = BEST_INNER_MOVE_EVAL_SCORE
 
-    ; Convert opponent's score into active player's score for proper comparison
+    ; Convert opponent's score into active player's score through inversion for
+    ; proper comparison in the calling move search.
     XRA A
     SUB C
     MOV C,A
@@ -756,7 +787,7 @@ EXIT_INNER_LOOP:
     MOV B,A                        ; BC = -BC
 
     XRA A
-    STA $4091                      ; INNER_LOOP = 0
+    STA $4091                      ; INNER_LOOP = FALSE
     RET                            ; RETURN
 
 PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
@@ -842,8 +873,8 @@ FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL:
 ;   D = ROW_D (0..7)
 ;   E = COL_E (0..7)
 ; Output:
-;   B = NO_CANDIDATE_MOVE (0/1)
-;     if 0,
+;   B = NO_CANDIDATE_MOVE (TRUE/FALSE)
+;     if FALSE,
 ;       set CANDIDATE_MOVE_COL, CANDIDATE_MOVE_ROW
 ;
 ; Advances to (D,E) and then scans the MOVE_ASSESSMENT to find the next legal
@@ -904,7 +935,7 @@ ADVANCE_POINTER_TO_NEXT_SPACE:
     CPI $08                        ; if ROW_D != 8,
     JNZ GET_NEXT_POINTER_BYTE
                                    ; else
-    MVI B, $01                     ; NO_CANDIDATE_MOVE = 1
+    MVI B, $01                     ; NO_CANDIDATE_MOVE = TRUE
     POP PSW                        ; clear POINTER_BYTE from stack
     RET                            ; RETURN
 
@@ -914,7 +945,7 @@ INSPECT_NEXT_SPACE:
 
 RETURN_LEGAL_SPACE:
     LDA $4091
-    ORA A                          ; if INNER_LOOP == 0,
+    ORA A                          ; if INNER_LOOP == FALSE,
     JZ RETURN_CANDIDATE_MOVE
                                    ; else
 ; Store OPPONENT_MOVE in RAM    
@@ -928,7 +959,7 @@ RETURN_MOVE:
     MOV M,E                        ; RETURN_COL = COL_E
     INX H
     MOV M,D                        ; RETURN_ROW = ROW_D
-    MVI B, $00                     ; NO_CANDIDATE_MOVE = 0
+    MVI B, $00                     ; NO_CANDIDATE_MOVE = FALSE
     RET                            ; RETURN
 
 SKIP_OCCUPIED_SPACE:
@@ -966,7 +997,7 @@ TRY_CANDIDATE_MOVE:
 TRY_MOVE:
     MVI A, $01
     STA $4084                      ; BOARD_SELECTION_FOR_SCAN = 1 (ANALYSIS)
-    XCHG                           ; HL = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
+    XCHG                           ; HL = MOVE_ROW, MOVE_COL
     CALL SCAN_AND_FLIP_OUTFLANKED_PIECES
     RET                            ; RETURN
 
@@ -981,7 +1012,7 @@ SCAN_AND_FLIP_OUTFLANKED_PIECES:
 
 CONTINUE_SCAN_FOR_OUTFLANKED_PIECES:
     CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-    MVI E, $01                     ; FLIP_PIECES = 1
+    MVI E, $01                     ; FLIP_PIECES = TRUE
     CALL SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
 ; Upon exit, D holds the next DIRECTION to be scanned.
     MOV A,D
@@ -1041,14 +1072,14 @@ COPY_SPACE:
                                    ; else
     RET                            ; RETURN
 
-LOAD_CANDIDATE_MOVE_EVAL_SCORE:
+LOAD_ANALYSIS_BOARD_EVAL_SCORE:
 ; Output:
-;   BC = CANDIDATE_MOVE_EVAL_SCORE
+;   BC = ANALYSIS_BOARD_EVAL_SCORE
     PUSH H                         ; save HL
     LXI H, $4095
     MOV C,M
     INX H
-    MOV B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
+    MOV B,M                        ; BC = ANALYSIS_BOARD_EVAL_SCORE
     POP H                          ; restore HL
     RET                            ; RETURN
 
@@ -1165,24 +1196,24 @@ INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ;   D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
     XRA A
     MOV B,A                        ; NUM_OUTFLANKED_PIECES = 0
-    MOV E,A                        ; FLIP_PIECES = 0
+    MOV E,A                        ; FLIP_PIECES = FALSE
 
 SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
 ;   B = NUM_OUTFLANKED_PIECES
 ;   D = DIRECTION
-;   E = FLIP_PIECES (0/1)
-;     if 0, scans for outflanked pieces and returns with:
+;   E = FLIP_PIECES (TRUE/FALSE)
+;     if FALSE, scans for outflanked pieces and returns with:
 ;       B = NUM_OUTFLANKED_PIECES
 ;       D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
-;     if 1, flips outflanked pieces and returns with:
+;     if TRUE, flips outflanked pieces and returns with:
 ;       B = 0
 ;       D = DIRECTION_OUTFLANKED_PIECES++
     PUSH H                         ; save MOVE_ROW, MOVE_COL
 
 SCAN_FOR_OUTFLANKED_PIECES_CORE:
-; If FLIP_PIECES is 0, scan the current direction for outflanked pieces. An
+; If FLIP_PIECES is FALSE, scan the current direction for outflanked pieces. An
 ; empty space, board edge, or CURRENT_PIECE without first encountering any
 ; opponent pieces advances the scan to the next direction. Opponent pieces
 ; increment NUM_OUTFLANKED_PIECES and continue the scan in the same direction.
@@ -1190,7 +1221,7 @@ SCAN_FOR_OUTFLANKED_PIECES_CORE:
 ; outflanked pieces have been found and the count and direction of the pieces
 ; are returned to the caller.
 ;
-; If FLIP_PIECES is 1, then NUM_OUTFLANKED_PIECES is the number of pieces to
+; If FLIP_PIECES is TRUE, then NUM_OUTFLANKED_PIECES is the number of pieces to
 ; flip in the current direction. Flip the pieces one by one until all of the
 ; outflanked pieces have been handled. Return the next direction to scan to the
 ; caller.
@@ -1330,7 +1361,7 @@ OUTFLANK_COMPLETE:
 HANDLE_OPPONENT_PIECE:
 ; Flip or count piece depending on FLIP_PIECES setting.
     MOV A,E
-    CPI $01                        ; if FLIP_PIECES == 1,
+    CPI $01                        ; if FLIP_PIECES == TRUE,
     JZ FLIP_SQUARE
                                    ; else
     INR B                          ; NUM_OUTFLANKED_PIECES++
@@ -1371,88 +1402,90 @@ UPDATE_BEST_INNER_MOVE_EVAL_SCORE_IF_BETTER:
     LXI H, $408F                   ; Use BEST_INNER_MOVE_EVAL_SCORE
 UPDATE_BEST_MOVE_EVAL_SCORE_IF_BETTER_CORE:
 ; Input:
-;   BC = MOVE_EVAL_SCORE
+;   BC = ANALYSIS_BOARD_EVAL_SCORE
+;   HL = address of the stored best score
 ;
-; Compare MOVE_EVAL_SCORE against the stored BEST_MOVE_EVAL_SCORE. Scores are
-; signed 16-bit values. If the candidate score is greater than or equal to the
-; current best score, update BEST_MOVE_EVAL_SCORE and update MOVE_COL/MOVE_ROW
-; with the associated candidate move.
+; Compare ANALYSIS_BOARD_EVAL_SCORE against the selected stored best score.
+; Scores are signed 16-bit values. If the new score is greater than or equal to
+; the current best score, update the selected best score. In the outer search
+; loop, also record the associated candidate move.
 ;
-; Ties update the best move, so moves scanned later win.
+; Ties update the stored best score; in the outer loop, later moves therefore
+; win.
     MOV E,M
     INX H
-    MOV D,M                        ; DE = BEST_MOVE_EVAL_SCORE
-    XCHG                           ; HL = BEST_MOVE_EVAL_SCORE
+    MOV D,M                        ; DE = stored best score
+    XCHG                           ; HL = stored best score
     MOV A,H
-    RLC                            ; if BEST_MOVE_EVAL_SCORE < 0,
-    JC BEST_MOVE_EVAL_SCORE_IS_NEGATIVE
+    RLC                            ; if stored best score < 0,
+    JC BEST_SCORE_IS_NEGATIVE
                                    ; else
     MOV A,B
-    RLC                            ; if MOVE_EVAL_SCORE < 0,
+    RLC                            ; if ANALYSIS_BOARD_EVAL_SCORE < 0,
     RC                             ; RETURN_WITH_NO_UPDATE
                                    ; else
 SCORES_HAVE_SAME_SIGN:
     MOV A,H
-    CMP B                          ; if BEST_MOVE_EVAL_SCORE_HI == MOVE_EVAL_SCORE_HI,
+    CMP B                          ; if stored best score (hi) == ANALYSIS_BOARD_EVAL_SCORE_HI,
     JZ COMPARE_SCORE_LO_BYTES
-                                   ; else if BEST_MOVE_EVAL_SCORE < MOVE_EVAL_SCORE,
+                                   ; else if stored best score < ANALYSIS_BOARD_EVAL_SCORE,
     JM UPDATE_BEST_SCORE
                                    ; else,
     RET                            ; RETURN_WITH_NO_UPDATE
 
-BEST_MOVE_EVAL_SCORE_IS_NEGATIVE:
+BEST_SCORE_IS_NEGATIVE:
     MOV A,B
-    RLC                            ; if MOVE_EVAL_SCORE < 0,
+    RLC                            ; if ANALYSIS_BOARD_EVAL_SCORE < 0,
     JC SCORES_HAVE_SAME_SIGN
                                    ; else
     JMP UPDATE_BEST_SCORE
 
 COMPARE_SCORE_LO_BYTES:
     MOV A,L
-    CMP C                          ; if BEST_MOVE_EVAL_SCORE_LO == MOVE_EVAL_SCORE_LO,
+    CMP C                          ; if stored best score (lo) == ANALYSIS_BOARD_EVAL_SCORE_LO,
     JZ UPDATE_BEST_SCORE
-                                   ; else if BEST_MOVE_EVAL_SCORE_LO > MOVE_EVAL_SCORE_LO,
+                                   ; else if stored best score (lo) > ANALYSIS_BOARD_EVAL_SCORE_LO,
     RNC                            ; RETURN_WITH_NO_UPDATE
                                    ; else
 UPDATE_BEST_SCORE:
     LDA $4091
-    ORA A                          ; if INNER_LOOP == 0,
+    ORA A                          ; if INNER_LOOP == FALSE,
     JZ UPDATE_BEST_MOVE_EVAL_SCORE
                                    ; else
     LXI H, $408F
     MOV M,C
     INX H
-    MOV M,B                        ; BEST_INNER_MOVE_EVAL_SCORE = MOVE_EVAL_SCORE
+    MOV M,B                        ; BEST_INNER_MOVE_EVAL_SCORE = ANALYSIS_BOARD_EVAL_SCORE
     RET                            ; RETURN
 
 UPDATE_BEST_MOVE_EVAL_SCORE:
     LXI H, $408D
     MOV M,C
     INX H
-    MOV M,B                        ; BEST_MOVE_EVAL_SCORE = MOVE_EVAL_SCORE
+    MOV M,B                        ; BEST_MOVE_EVAL_SCORE = ANALYSIS_BOARD_EVAL_SCORE
     LDA $40A9
     STA $408B                      ; MOVE_COL = CANDIDATE_MOVE_COL
     LDA $40AA
     STA $408C                      ; MOVE_ROW = CANDIDATE_MOVE_ROW
     RET                            ; RETURN
 
-GENERATE_CANDIDATE_MOVE_EVAL_SCORE:
+GENERATE_ANALYSIS_BOARD_EVAL_SCORE:
 ; Output:
-;   BC = CANDIDATE_MOVE_EVAL_SCORE
+;   BC = ANALYSIS_BOARD_EVAL_SCORE
 ;
-; Scans all of the spaces of the ANALYSIS_BOARD after a candidate move has been
-; applied to it and generates a move evaluation score for that candidate. The
-; move evaluation score uses the values from the BOARD_SPACE_VALUE_TABLE.
-; Spaces occupied by the current player's pieces are added to the total. Spaces
-; occupied by their opponent's pieces are subtracted from the total. Unoccupied
-; spaces are not included.
+; Scans all spaces of the ANALYSIS_BOARD and generates a move evaluation score
+; from the perspective of CURRENT_PIECE. The evaluation uses the values from
+; the BOARD_SPACE_VALUE_TABLE.
 ;
-; The largest possible value is 2252 (#08CC), so the score must be stored in a
+; Spaces occupied by CURRENT_PIECE are added to the total. Spaces occupied by
+; the opponent are subtracted from the total. Unoccupied spaces are ignored.
+;
+; The largest possible value is 2252 (#08CC), so the result must be stored in a
 ; register pair rather than a single byte.
     LXI H, $4095
     MVI M, $00
     INX H
-    MVI M, $00                     ; CANDIDATE_MOVE_EVAL_SCORE = 0
+    MVI M, $00                     ; ANALYSIS_BOARD_EVAL_SCORE = 0
     LXI H, $4040                   ; HL = ANALYSIS_BOARD_POINTER
     MVI D, $00                     ; ROW_D = 0
 
@@ -1472,7 +1505,7 @@ GET_NEXT_EVAL_SPACE:
     JZ NEXT_EVAL_SPACE
                                    ; else
     CALL GET_SPACE_VALUE
-    CALL SUB_VALUE_FROM_MOVE_EVAL_SCORE
+    CALL SUB_VALUE_FROM_ANALYSIS_BOARD_EVAL_SCORE
 
 NEXT_EVAL_SPACE:
     POP D                          ; restore ROW_D
@@ -1490,12 +1523,12 @@ NEXT_EVAL_SPACE:
     LXI H, $4095
     MOV C,M
     INX H
-    MOV B,M                        ; BC = CANDIDATE_MOVE_EVAL_SCORE
+    MOV B,M                        ; BC = ANALYSIS_BOARD_EVAL_SCORE
     RET                            ; RETURN
 
 ADD_SPACE_VALUE:
     CALL GET_SPACE_VALUE
-    CALL ADD_VALUE_TO_MOVE_EVAL_SCORE
+    CALL ADD_VALUE_TO_ANALYSIS_BOARD_EVAL_SCORE
     JMP NEXT_EVAL_SPACE
 
 GET_SPACE_VALUE:
@@ -1557,41 +1590,41 @@ MODIFY_INDEX_BITS:
     MOV C,A                        ; BITS = 7 - ROW_D|COL_E
     RET                            ; RETURN
 
-ADD_VALUE_TO_MOVE_EVAL_SCORE:
-    CALL LOAD_CANDIDATE_MOVE_EVAL_SCORE
+ADD_VALUE_TO_ANALYSIS_BOARD_EVAL_SCORE:
+    CALL LOAD_ANALYSIS_BOARD_EVAL_SCORE
 
 ; Because a register pair is needed to store the score, the 8-bit
-; BOARD_SPACE_VALUE is added to or subtracted from MOVE_EVAL_SCORE by repeated
+; BOARD_SPACE_VALUE is added to or subtracted from an EVAL_SCORE by repeated
 ; increment/decrement of BC. The 8080 has 16-bit addition via DAD, but not a
 ; compact way to add or subtract an 8-bit value directly to/from a register
 ; pair.
 
-INCREMENT_MOVE_EVAL_SCORE:
-    INX B                          ; MOVE_EVAL_SCORE++
+INCREMENT_EVAL_SCORE:
+    INX B                          ; EVAL_SCORE++
     DCR A                          ; if --BOARD_SPACE_VALUE != 0,
-    JNZ INCREMENT_MOVE_EVAL_SCORE
+    JNZ INCREMENT_EVAL_SCORE
                                    ; else
-    CALL UPDATE_CANDIDATE_MOVE_EVAL_SCORE
+    CALL UPDATE_ANALYSIS_BOARD_EVAL_SCORE
     RET                            ; RETURN
 
-UPDATE_CANDIDATE_MOVE_EVAL_SCORE:
+UPDATE_ANALYSIS_BOARD_EVAL_SCORE:
     PUSH H                         ; save ANALYSIS_BOARD_POINTER
     LXI H, $4095
     MOV M,C
     INX H
-    MOV M,B                        ; CANDIDATE_MOVE_EVAL_SCORE = MOVE_EVAL_SCORE
+    MOV M,B                        ; ANALYSIS_BOARD_EVAL_SCORE = EVAL_SCORE
     POP H                          ; restore ANALYSIS_BOARD_POINTER
     RET                            ; RETURN
 
-SUB_VALUE_FROM_MOVE_EVAL_SCORE:
-    CALL LOAD_CANDIDATE_MOVE_EVAL_SCORE
+SUB_VALUE_FROM_ANALYSIS_BOARD_EVAL_SCORE:
+    CALL LOAD_ANALYSIS_BOARD_EVAL_SCORE
 
-DECREMENT_MOVE_EVAL_SCORE:
-    DCX B                          ; MOVE_EVAL_SCORE--
+DECREMENT_EVAL_SCORE:
+    DCX B                          ; EVAL_SCORE--
     DCR A                          ; if --BOARD_SPACE_VALUE != 0,
-    JNZ DECREMENT_MOVE_EVAL_SCORE
+    JNZ DECREMENT_EVAL_SCORE
                                    ; else
-    CALL UPDATE_CANDIDATE_MOVE_EVAL_SCORE
+    CALL UPDATE_ANALYSIS_BOARD_EVAL_SCORE
     RET                            ; RETURN
 
 CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT:
@@ -1885,7 +1918,7 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
 ;   H = H_ROW (0..7)
 ;   L = L_COL (0..7)
 ; Output:
-;   B = MOVE_LEGAL (0/1)
+;   B = MOVE_LEGAL (TRUE/FALSE)
 ;
 ; A move is legal only if the selected DISPLAY_BOARD space is empty and placing
 ; CURRENT_PIECE there would outflank at least one opponent piece.
@@ -1900,26 +1933,26 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
     MVI D, $01                     ; DIRECTION = 1
 ; Unlike when applying moves, this call does not flip pieces. It only checks
 ; whether the empty space would outflank pieces in any direction. If it would,
-; then MOVE_LEGAL is set to 1.
+; then MOVE_LEGAL is set to TRUE.
     CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
     MOV A,D
     CPI $09                        ; if DIRECTION == 9,
     JZ MOVE_ILLEGAL
                                    ; else
-    MVI B, $01                     ; MOVE_LEGAL = 1
+    MVI B, $01                     ; MOVE_LEGAL = TRUE
     RET                            ; RETURN
 
 MOVE_ILLEGAL:
-    MVI B, $00                     ; MOVE_LEGAL = 0
+    MVI B, $00                     ; MOVE_LEGAL = FALSE
     RET                            ; RETURN
 
 CHECK_IF_PLAYER_MUST_PASS:
 ; Output:
-;   B = PLAYER_MUST_PASS (0/1)
+;   B = PLAYER_MUST_PASS (TRUE/FALSE)
 ;
 ; Scans the entire board for a legal move for the current player. The search
 ; terminates immediately if one is found. If no legal move exists,
-; PLAYER_MUST_PASS is set to 1.
+; PLAYER_MUST_PASS is set to TRUE.
     MVI H, $07                     ; H_ROW = 7
 
 CHECK_NEXT_ROW:
@@ -1928,7 +1961,7 @@ CHECK_NEXT_ROW:
 CHECK_NEXT_SPACE:
     CALL CHECK_IF_SPACE_IS_LEGAL_MOVE
     MOV A,B
-    CPI $00                        ; if MOVE_LEGAL != 0,
+    CPI $00                        ; if MOVE_LEGAL == TRUE,
     JNZ PLAYER_HAS_LEGAL_MOVE
     DCR L                          ; if --L_COL >= 0,
     JP CHECK_NEXT_SPACE
@@ -1936,11 +1969,11 @@ CHECK_NEXT_SPACE:
     DCR H                          ; if --H_ROW >= 0,
     JP CHECK_NEXT_ROW
                                    ; else
-    MVI B, $01                     ; PLAYER_MUST_PASS = 1
+    MVI B, $01                     ; PLAYER_MUST_PASS = TRUE
     RET                            ; RETURN
 
 PLAYER_HAS_LEGAL_MOVE:
-    MVI B, $00                     ; PLAYER_MUST_PASS = 0
+    MVI B, $00                     ; PLAYER_MUST_PASS = FALSE
     RET                            ; RETURN
 
 HIGH_TONE_AND_DRAW_MOVE_CURSORS:
@@ -2027,7 +2060,7 @@ FLASH_BOARD:
     CALL DRAW_DISPLAY_BOARD
     CALL CORE_DELAY                ; [30ms]
     LDA $40FD
-    CPI $01                        ; if ATTRACT_MODE_SUPPRESS_SOUND == 0,
+    CPI $01                        ; if ATTRACT_MODE_SUPPRESS_SOUND == TRUE,
     JZ SWAP_BOARD
                                    ; else
     CALL LOW_TONE
