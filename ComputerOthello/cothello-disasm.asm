@@ -1,5 +1,11 @@
     ORG 0000H
 
+; Boolean convention:
+;   FALSE = 0
+;   TRUE  = 1
+;
+; Many game-state flags use this convention.
+
 RESET:
     DI
     JMP STARTUP
@@ -35,7 +41,7 @@ CPU_OPENING_MOVE_TABLE:
     DB $04, $05
 
 BOARD_SPACE_VALUE_TABLE:
-; Used by the CPU player to determine its next move
+; Used by the CPU player to determine its next move.
 ; FF 03 3C 28 28 3C 03 FF
 ; 03 01 0A 05 05 0A 01 03
 ; 3C 0A 1E 14 14 1E 0A 3C
@@ -117,7 +123,7 @@ STARTUP:
     MVI A, $02
     STA $408C                      ; MOVE_ROW = 2
     XRA A
-    STA $40FC                      ; GAME_SCORED_FLAG = 0
+    STA $40FC                      ; GAME_SCORED_FLAG = FALSE
     MVI A, $07                     ; ATTRACT_MOVE_COUNT = 7
 
 ; The coin selector logic is a bit of a black box, so the following are
@@ -178,7 +184,7 @@ CONTINUE_ATTRACT:
 ; also can't use FIRST_MOVE_CPU at all, since that is strictly for '■' going
 ; first. Instead, it simply finds the best move every turn. For the first move,
 ; since all four of the possible opening moves are equivalent, it uses the last
-; one scanned, which is (3,5).
+; one scanned, which is (4,5).
     CALL CPU_FIND_AND_PLAY_BEST_MOVE
     LDA $4088
     DCR A                          ; if --ATTRACT_MOVE_COUNT != 0,
@@ -188,11 +194,11 @@ CONTINUE_ATTRACT:
 
 SET_SERVICE_MODE_FLAGS:
 ; If Service B is enabled, set CPU_OPENING_MOVE_TABLE_INDEX = 4,
-; GAME_MODE = Service, and reenable sound. In this mode, both sides are
+; GAME_MODE = Service, and reenable sound. In service mode, both sides are
 ; controlled by the CPU and all input prompts are disabled.
     MVI B, $04                     ; B = 4
     XRA A
-    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = FALSE
     MVI A, $7F                     ; A = #7F
     JMP FIRST_MOVE_CPU
 
@@ -203,7 +209,7 @@ COIN_INSERTED:
     LXI SP, $40FA                  ; INIT_STACK <= $40F9
     CALL INIT_GAME
     XRA A
-    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = 0
+    STA $40FD                      ; ATTRACT_MODE_SUPPRESS_SOUND = FALSE
 
 RESET_PSEUDORANDOM_OPENING_MOVE:
     DI
@@ -221,7 +227,7 @@ PROMPT_SELECT_GAME:
 ; By the rules of Othello, black ('■') always moves first, but that is not the
 ; case here. 1P is always white ('+') and 2P (or the CPU) is always
 ; black ('■'). Sente and Gote are terms borrowed from Go. Here they indicate
-; which side moves first.
+; which side moves first. Sente means P1 will play first.
     CPI $FE                        ; 1P Sente:
     JZ FIRST_MOVE_WHITE
     CPI $FD                        ; 1P Gote:
@@ -386,7 +392,7 @@ PLAYER_INPUT_LOOP:
     XRA A
     STA $408C                      ; MOVE_ROW = 0
     XRA A
-    STA $4098                      ; PASS_REQUIRED_FLAG = 0
+    STA $4098                      ; PASS_REQUIRED_FLAG = FALSE
     CALL DRAW_MOVE_CURSORS
     CALL DRAW_GRID
     CALL CHECK_IF_PLAYER_MUST_PASS
@@ -396,13 +402,13 @@ PLAYER_INPUT_LOOP:
 ; normally, but since there are no legal moves they will be unable to set a
 ; piece anywhere.
     MOV A,B
-    CPI $00                        ; if PLAYER_MUST_PASS != 0,
+    CPI $00                        ; if PLAYER_MUST_PASS == TRUE,
     JNZ PASS_BUTTON_PROMPT
                                    ; else
 PLAYER_INPUT_LOOP_CORE:
     DI
     LDA $4098
-    CPI $01                        ; if PASS_REQUIRED_FLAG == 1,
+    CPI $01                        ; if PASS_REQUIRED_FLAG == TRUE,
     JZ PASS_BUTTON_PROMPT
                                    ; else
 PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT:
@@ -428,7 +434,7 @@ PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT:
 ; in practice, since control never returns to the player input loop after
 ; SCORE_GAME has begun.
     LDA $40FC
-    CPI $01                        ; if GAME_SCORED_FLAG != 1,
+    CPI $01                        ; if GAME_SCORED_FLAG == TRUE,
     JZ CHECK_FOR_RESET
                                    ; else
 ; The Judge and Reset buttons are immediate game-ending actions. There is no
@@ -463,7 +469,7 @@ PASS_BUTTON_PROMPT:
     DB $00, $59                    ; @addr MSG_PRESS_PASS
     CALL SHORT_DELAY               ; [0.37s]
     MVI A, $01
-    STA $4098                      ; PASS_REQUIRED_FLAG = 1
+    STA $4098                      ; PASS_REQUIRED_FLAG = TRUE
     JMP PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT
 
 PASS_PRESSED:
@@ -474,7 +480,7 @@ PASS_PRESSED:
 ; otherwise update the pass counter and end the player's turn.
     CALL CHECK_IF_PLAYER_MUST_PASS
     MOV A,B
-    CPI $00                        ; if PLAYER_MUST_PASS == 0,
+    CPI $00                        ; if PLAYER_MUST_PASS == FALSE,
     JZ PLAYER_INPUT_LOOP
                                    ; else
     LXI H, $4089
@@ -520,7 +526,7 @@ SET_PRESSED:
 ; the move and end the player's turn.
     CALL CHECK_IF_MOVE_IS_LEGAL
     MOV A,B
-    CPI $00                        ; if MOVE_LEGAL == 0,
+    CPI $00                        ; if MOVE_LEGAL == FALSE,
     JZ PLAYER_INPUT_LOOP
                                    ; else
     CALL PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
@@ -620,7 +626,7 @@ CHECK_COIN_SLOT_FOR_CONTINUE_COIN:
 ; Note: Once scoring has completed, entering the continue loop serves little
 ; practical purpose. The program could instead reset immediately.
     LDA $40FC
-    CPI $01                        ; if GAME_SCORED_FLAG == 1,
+    CPI $01                        ; if GAME_SCORED_FLAG == TRUE,
     JZ COIN_PROMPT
                                    ; else
     LDA $6000                      ; READ_INPUT
@@ -709,16 +715,17 @@ INNER_LOOP:
     RET                            ; RETURN
 
 CPU_FIND_AND_PLAY_BEST_MOVE:
-; Creates a MOVE_ASSESSMENT (a packed 16-byte representation of the board's
-; contents) of the current board status. On the first pass, it marks the
-; X-squares as illegal moves, so they won't be considered during move
-; evaluation. Each legal move is attempted on the ANALYSIS_BOARD and the
-; resulting position is scored using the BOARD_SPACE_VALUE_TABLE. The move that
-; leads to the best score is the one that is selected.
+; Creates a MOVE_ASSESSMENT, a packed 16-byte representation of the board's
+; current content. On the first pass, it marks the X-squares as illegal moves,
+; so they won't be considered during move evaluation.
+;
+; Each legal move is attempted on the ANALYSIS_BOARD and the resulting position
+; is scored using the BOARD_SPACE_VALUE_TABLE. The move that leads to the best
+; score is the one that is selected.
 ;
 ; If no legal moves are found on the first pass, a second pass is performed,
 ; this time with the X-squares under consideration.
-    MVI A, $01                     ; AI_FIRST_PASS_FLAG = 1
+    MVI A, $01                     ; AI_FIRST_PASS_FLAG = TRUE
 
 CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
     STA $4086
@@ -732,7 +739,7 @@ CPU_FIND_AND_PLAY_BEST_MOVE_CORE:
     STA $408F                      ; CPU_PERSPECTIVE_FLAG? = 1 (unused)
     CALL CREATE_DISPLAY_BOARD_MOVE_ASSESSMENT
     LDA $4086
-    CPI $01                        ; if AI_FIRST_PASS_FLAG != 1,
+    CPI $01                        ; if AI_FIRST_PASS_FLAG == FALSE,
     JNZ BEGIN_MOVE_SEARCH
                                    ; else
     CALL FIRST_PASS_REMOVE_HIGH_RISK_SQUARES
@@ -743,7 +750,7 @@ BEGIN_MOVE_SEARCH:
     LXI D, $0000                   ; ROW_D, COL_E = (0,0)
     CALL FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL
     MOV A,B
-    CPI $01                        ; if NO_CANDIDATE_MOVE == 1,
+    CPI $01                        ; if NO_CANDIDATE_MOVE == TRUE,
     JZ NO_LEGAL_MOVES
                                    ; else
     CALL TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
@@ -778,7 +785,7 @@ EVALUATE_CANDIDATE_AND_CONTINUE_MOVE_SEARCH:
 CONTINUE_MOVE_SEARCH:
     CALL FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL
     MOV A,B
-    CPI $01                        ; if NO_CANDIDATE_MOVE == 1,
+    CPI $01                        ; if NO_CANDIDATE_MOVE == TRUE,
     JZ PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES
                                    ; else
     CALL TRY_CANDIDATE_MOVE_ON_ANALYSIS_BOARD
@@ -786,15 +793,15 @@ CONTINUE_MOVE_SEARCH:
 
 NO_LEGAL_MOVES:
     LDA $4086
-    CPI $01                        ; if AI_FIRST_PASS_FLAG != 1,
+    CPI $01                        ; if AI_FIRST_PASS_FLAG == FALSE,
     JNZ STILL_NO_LEGAL_MOVES
                                    ; else
-    DCR A                          ; AI_FIRST_PASS_FLAG = 0
+    DCR A                          ; AI_FIRST_PASS_FLAG = FALSE
     JMP CPU_FIND_AND_PLAY_BEST_MOVE_CORE
 
 PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
-; A move (MOVE_COL, MOVE_ROW) has been previously selected by either the player
-; or the CPU. This adds it to the ANALYSIS_BOARD.
+; Add a move (MOVE_COL, MOVE_ROW) to the ANALYSIS_BOARD that has been
+; previously selected by either the player or the CPU.
 ;
 ; The new piece is flashed on the screen 3 times, followed by the newly
 ; outflanked pieces flashing 3 times. The DISPLAY_BOARD is then updated with
@@ -823,7 +830,7 @@ PLAY_MOVE_AND_FLIP_OUTFLANKED_PIECES:
     RET                            ; RETURN
 
 STILL_NO_LEGAL_MOVES:
-; If no legal moves are found on either pass, record a pass, display the
+; If no legal moves are found on either search pass, record a pass, display the
 ; 'CPU PASSES' message, and advance to the other player's turn.
     LXI H, $4089
     INR M                          ; CONSECUTIVE_PASS_COUNTER++
@@ -839,8 +846,8 @@ FIND_NEXT_CANDIDATE_MOVE_FROM_ROW_COL:
 ;   D = ROW_D (0..7)
 ;   E = COL_E (0..7)
 ; Output:
-;   B = NO_CANDIDATE_MOVE (0/1)
-;     if 0,
+;   B = NO_CANDIDATE_MOVE (TRUE/FALSE)
+;     if FALSE,
 ;       set CANDIDATE_MOVE_COL, CANDIDATE_MOVE_ROW
 ;
 ; Advances to (D,E) and then scans the MOVE_ASSESSMENT to find the next legal
@@ -872,7 +879,7 @@ FIND_COL_E_BITS:
     JNZ ADVANCE_POINTER_1_COL
                                    ; else
 ; MOVE_ASSESSMENT_POINTER is now set to (D,E), so begin scanning for a legal
-; move.
+; move from there.
     POP D                          ; restore ROW_D, COL_E
     JMP INSPECT_SPACE
 
@@ -902,7 +909,7 @@ ADVANCE_POINTER_TO_NEXT_SPACE:
     CPI $08                        ; if ROW_D != 8,
     JNZ GET_NEXT_POINTER_BYTE
                                    ; else
-    MVI B, $01                     ; NO_CANDIDATE_MOVE = 1
+    MVI B, $01                     ; NO_CANDIDATE_MOVE = TRUE
     POP PSW                        ; clear POINTER_BYTE from stack
     RET                            ; RETURN
 
@@ -916,7 +923,7 @@ RETURN_LEGAL_SPACE:
     MOV M,E                        ; CANDIDATE_MOVE_COL = COL_E
     INX H
     MOV M,D                        ; CANDIDATE_MOVE_ROW = ROW_D
-    MVI B, $00                     ; NO_CANDIDATE_MOVE = 0
+    MVI B, $00                     ; NO_CANDIDATE_MOVE = FALSE
     RET                            ; RETURN
 
 SKIP_OCCUPIED_SPACE:
@@ -964,14 +971,14 @@ SCAN_AND_FLIP_OUTFLANKED_PIECES:
 
 CONTINUE_SCAN_FOR_OUTFLANKED_PIECES:
     CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-    MVI E, $01                     ; FLIP_PIECES = 1
+    MVI E, $01                     ; FLIP_PIECES = TRUE
     CALL SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
-; Upon exit, D holds the next DIRECTION to be scanned
+; Upon exit, D holds the next DIRECTION to be scanned.
     MOV A,D
     CPI $09                        ; if DIRECTION != 9,
     JNZ CONTINUE_SCAN_FOR_OUTFLANKED_PIECES
                                    ; else
-; Finally, actually play the piece on the board
+; Finally, actually play the piece on the board.
     CALL GET_SPACE_ON_ANALYSIS_BOARD
     LDA $408A                      ; A = CURRENT_PIECE
     MOV M,A                        ; ANALYSIS_BOARD (MOVE_ROW,MOVE_COL) = CURRENT_PIECE
@@ -1156,24 +1163,24 @@ INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ;   D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
     XRA A
     MOV B,A                        ; NUM_OUTFLANKED_PIECES = 0
-    MOV E,A                        ; FLIP_PIECES = 0
+    MOV E,A                        ; FLIP_PIECES = FALSE
 
 SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION:
 ; Input:
 ;   HL = MOVE_ROW, MOVE_COL
 ;   B = NUM_OUTFLANKED_PIECES
 ;   D = DIRECTION
-;   E = FLIP_PIECES (0/1)
-;     if 0, scans for outflanked pieces and returns with:
+;   E = FLIP_PIECES (TRUE/FALSE)
+;     if FALSE, scans for outflanked pieces and returns with:
 ;       B = NUM_OUTFLANKED_PIECES
 ;       D = DIRECTION_OUTFLANKED_PIECES (9, if no outflanked pieces found)
-;     if 1, flips outflanked pieces and returns with:
+;     if TRUE, flips outflanked pieces and returns with:
 ;       B = 0
 ;       D = DIRECTION_OUTFLANKED_PIECES++
     PUSH H                         ; save MOVE_ROW, MOVE_COL
 
 SCAN_FOR_OUTFLANKED_PIECES_CORE:
-; If FLIP_PIECES is 0, scan the current direction for outflanked pieces. An
+; If FLIP_PIECES is FALSE, scan the current direction for outflanked pieces. An
 ; empty space, board edge, or CURRENT_PIECE without first encountering any
 ; opponent pieces advances the scan to the next direction. Opponent pieces
 ; increment NUM_OUTFLANKED_PIECES and continue the scan in the same direction.
@@ -1181,7 +1188,7 @@ SCAN_FOR_OUTFLANKED_PIECES_CORE:
 ; outflanked pieces have been found and the count and direction of the pieces
 ; are returned to the caller.
 ;
-; If FLIP_PIECES is 1, then NUM_OUTFLANKED_PIECES is the number of pieces to
+; If FLIP_PIECES is TRUE, then NUM_OUTFLANKED_PIECES is the number of pieces to
 ; flip in the current direction. Flip the pieces one by one until all of the
 ; outflanked pieces have been handled. Return the next direction to scan to the
 ; caller.
@@ -1325,7 +1332,7 @@ OUTFLANK_COMPLETE:
 HANDLE_OPPONENT_PIECE:
 ; Flip or count piece depending on FLIP_PIECES setting.
     MOV A,E
-    CPI $01                        ; if FLIP_PIECES == 1,
+    CPI $01                        ; if FLIP_PIECES == TRUE,
     JZ FLIP_SQUARE
                                    ; else
     INR B                          ; NUM_OUTFLANKED_PIECES++
@@ -1344,7 +1351,7 @@ GET_CANDIDATE_MOVE:
 ; Output:
 ;   DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
 ;
-; Retrieve stored CANDIDATE_MOVE
+; Retrieve stored CANDIDATE_MOVE.
     LHLD $40A9                     ; HL = stored CANDIDATE_MOVE
     XCHG                           ; DE = CANDIDATE_MOVE_ROW, CANDIDATE_MOVE_COL
     RET                            ; RETURN
@@ -1410,14 +1417,14 @@ GENERATE_CANDIDATE_MOVE_EVAL_SCORE:
 ; Output:
 ;   BC = CANDIDATE_MOVE_EVAL_SCORE
 ;
-; Scans all of the spaces of the ANALYSIS_BOARD after a candidate move has been
+; Scans all spaces of the ANALYSIS_BOARD after a candidate move has been
 ; applied to it and generates a move evaluation score for that candidate. The
 ; move evaluation score uses the values from the BOARD_SPACE_VALUE_TABLE.
-; Spaces occupied by the current player's pieces are added to the total. Spaces
-; occupied by their opponent's pieces are subtracted from the total. Unoccupied
-; spaces are not included.
 ;
-; The largest possible value is 2252 (#08CC), so the score must be stored in a
+; Spaces occupied by CURRENT_PIECE are added to the total. Spaces occupied by
+; the opponent are subtracted from the total. Unoccupied spaces are ignored.
+;
+; The largest possible value is 2252 (#08CC), so the result must be stored in a
 ; register pair rather than a single byte.
     LXI H, $4095
     MVI M, $00
@@ -1807,7 +1814,7 @@ GET_SPACE_ON_DISPLAY_BOARD:
 ;
 ; H_ROW and L_COL are 3-bit values, so the byte offset is:
 ;   00rrrccc
-; which exactly matches the DISPLAY_BOARD's memory map
+; which exactly matches the DISPLAY_BOARD's memory map.
     MOV A,H
     RLC
     RLC
@@ -1850,7 +1857,7 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
 ;   H = H_ROW (0..7)
 ;   L = L_COL (0..7)
 ; Output:
-;   B = MOVE_LEGAL (0/1)
+;   B = MOVE_LEGAL (TRUE/FALSE)
 ;
 ; A move is legal only if the selected DISPLAY_BOARD space is empty and placing
 ; CURRENT_PIECE there would outflank at least one opponent piece.
@@ -1865,26 +1872,26 @@ CHECK_IF_SPACE_IS_LEGAL_MOVE:
     MVI D, $01                     ; DIRECTION = 1
 ; Unlike when applying moves, this call does not flip pieces. It only checks
 ; whether the empty space would outflank pieces in any direction. If it would,
-; then MOVE_LEGAL is set to 1.
+; then MOVE_LEGAL is set to TRUE.
     CALL INIT_SCAN_CLOCKWISE_FOR_OUTFLANKED_PIECES_FROM_DIRECTION
     MOV A,D
     CPI $09                        ; if DIRECTION == 9,
     JZ MOVE_ILLEGAL
                                    ; else
-    MVI B, $01                     ; MOVE_LEGAL = 1
+    MVI B, $01                     ; MOVE_LEGAL = TRUE
     RET                            ; RETURN
 
 MOVE_ILLEGAL:
-    MVI B, $00                     ; MOVE_LEGAL = 0
+    MVI B, $00                     ; MOVE_LEGAL = FALSE
     RET                            ; RETURN
 
 CHECK_IF_PLAYER_MUST_PASS:
 ; Output:
-;   B = PLAYER_MUST_PASS (0/1)
+;   B = PLAYER_MUST_PASS (TRUE/FALSE)
 ;
 ; Scans the entire board for a legal move for the current player. The search
 ; terminates immediately if one is found. If no legal move exists,
-; PLAYER_MUST_PASS is set to 1.
+; PLAYER_MUST_PASS is set to TRUE.
     MVI H, $07                     ; H_ROW = 7
 
 CHECK_NEXT_ROW:
@@ -1893,7 +1900,7 @@ CHECK_NEXT_ROW:
 CHECK_NEXT_SPACE:
     CALL CHECK_IF_SPACE_IS_LEGAL_MOVE
     MOV A,B
-    CPI $00                        ; if MOVE_LEGAL != 0,
+    CPI $00                        ; if MOVE_LEGAL == TRUE,
     JNZ PLAYER_HAS_LEGAL_MOVE
     DCR L                          ; if --L_COL >= 0,
     JP CHECK_NEXT_SPACE
@@ -1901,11 +1908,11 @@ CHECK_NEXT_SPACE:
     DCR H                          ; if --H_ROW >= 0,
     JP CHECK_NEXT_ROW
                                    ; else
-    MVI B, $01                     ; PLAYER_MUST_PASS = 1
+    MVI B, $01                     ; PLAYER_MUST_PASS = TRUE
     RET                            ; RETURN
 
 PLAYER_HAS_LEGAL_MOVE:
-    MVI B, $00                     ; PLAYER_MUST_PASS = 0
+    MVI B, $00                     ; PLAYER_MUST_PASS = FALSE
     RET                            ; RETURN
 
 HIGH_TONE_AND_DRAW_MOVE_CURSORS:
@@ -1992,7 +1999,7 @@ FLASH_BOARD:
     CALL DRAW_DISPLAY_BOARD
     CALL CORE_DELAY                ; [30ms]
     LDA $40FD
-    CPI $01                        ; if ATTRACT_MODE_SUPPRESS_SOUND == 0,
+    CPI $01                        ; if ATTRACT_MODE_SUPPRESS_SOUND == TRUE,
     JZ SWAP_BOARD
                                    ; else
     CALL LOW_TONE
@@ -2409,18 +2416,18 @@ DIGIT_FONT_TABLE:
     DB $60                         ; --xxxx----
 
 SCORE_GAME:
-; Removes the move cursors and clears the ANALYSIS_BOARD before making a
-; three-pass scoring loop.
+; Clears the move cursors and the ANALYSIS_BOARD before making a three-pass
+; scoring loop.
 ;
-; Pass 1 scans the DISPLAY_BOARD for black pieces ('■'). Each black piece
+; Pass 1 scans the DISPLAY_BOARD for black pieces ('■'). Each such piece
 ; increments black's score and is copied into the ANALYSIS_BOARD, filling
 ; spaces from upper-left to lower-right.
 ;
 ; Pass 2 scans for blank spaces and copies them into the next available
 ; ANALYSIS_BOARD spaces.
 ;
-; Pass 3 scans for white pieces ('+'). Each white piece increments white's
-; score and is copied into the next available ANALYSIS_BOARD space.
+; Pass 3 scans for white pieces ('+'). Each such piece increments white's score
+; and is copied into the next available ANALYSIS_BOARD space.
 ;
 ; As a result, the ANALYSIS_BOARD ends up sorted into black pieces, then
 ; blanks, then white pieces.
@@ -2436,7 +2443,7 @@ SCORE_GAME:
     XRA A
     STA $4083                      ; +_COUNT = 0
     MVI A, $01
-    STA $40FC                      ; GAME_SCORED_FLAG = 1
+    STA $40FC                      ; GAME_SCORED_FLAG = TRUE
     LXI H, $4040                   ; ANALYSIS_BOARD_POINTER = $4040
     MVI B, $40                     ; SPACE_LOOP_COUNTER = 64
 

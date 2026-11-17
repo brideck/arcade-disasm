@@ -369,7 +369,7 @@ PLAYER_INPUT_LOOP:
 PLAYER_INPUT_LOOP_CORE:
     DI
     LDA $4098
-    CPI $01                        ; if PASS_REQUIRED_FLAG == 1,
+    CPI $01                        ; if PASS_REQUIRED_FLAG == TRUE,
     JZ PASS_BUTTON_PROMPT
                                    ; else
 PLAYER_INPUT_LOOP_SKIP_PASS_PROMPT:
@@ -426,7 +426,7 @@ PASS_PRESSED:
 ; before restarting the player's turn. Otherwise, update the pass counter and
 ; end the player's turn.
     LDA $4098
-    CPI $00                        ; if PASS_REQUIRED_FLAG == 0,
+    CPI $00                        ; if PASS_REQUIRED_FLAG == FALSE,
     JZ MUST_PLAY
                                    ; else
     LXI H, $4089
@@ -613,9 +613,9 @@ DOUBLE_DELAY:
 
 CORE_DELAY:
 ; 23,171 cycles
-; 30 ms delay that serves as the basis for all longer delays. Also used directly to flash the
-; board after a move is made and when adding pieces to the board during
-; SCORE_GAME.
+; 30 ms delay that serves as the basis for all longer delays. Also used
+; directly to flash the board after a move is made and when adding pieces to
+; the board during SCORE_GAME.
     PUSH H                         ; save HL
     LXI H, $0600                   ; OUTER_LOOP_COUNTER = 6, INNER_LOOP_COUNTER = 256/0
 
@@ -1369,7 +1369,7 @@ HANDLE_OPPONENT_PIECE:
 
 FLIP_SQUARE:
     CALL FLIP_SQUARE_ON_ANALYSIS_BOARD
-    DCR B	                       ; if --NUM_OUTFLANKED_PIECES != 0,
+    DCR B                          ; if --NUM_OUTFLANKED_PIECES != 0,
     JNZ SCAN_FOR_OUTFLANKED_PIECES_CORE
                                    ; else
     INR D                          ; DIRECTION++
@@ -2322,7 +2322,7 @@ CLEAR_NEXT_PIXEL:
     DCR C                          ; if --COL_COUNTER != 0,
     JNZ CLEAR_NEXT_PIXEL
                                    ; else
-    INR H	                       ; VRAM_POINTER_HI++
+    INR H                          ; VRAM_POINTER_HI++
     DCR B                          ; if --ROW_COUNTER != 0,
     JNZ CLEAR_NEXT_ROW
                                    ; else
